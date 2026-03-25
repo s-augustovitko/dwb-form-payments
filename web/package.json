@@ -1,0 +1,27 @@
+{
+  "name": "dwb-forms",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "solid-devtools": "^0.34.3",
+    "typescript": "^5.7.2",
+    "vite": "^7.1.4",
+    "vite-plugin-solid": "^2.11.8"
+  },
+  "dependencies": {
+    "@solidjs/router": "^0.15.4",
+    "daisyui": "^5.5.18",
+    "moment": "^2.30.1",
+    "solid-js": "^1.9.5",
+    "tailwindcss": "^4.1.18"
+  }
+}

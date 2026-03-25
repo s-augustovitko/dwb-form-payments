@@ -1,0 +1,13 @@
+services:
+  apache:
+    build: .
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ../dist:/var/www/html
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://apache/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

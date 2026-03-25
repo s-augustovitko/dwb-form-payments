@@ -1,0 +1,44 @@
+configs:
+  service-dwb-admin_config:
+    file: ./config/prod.json
+
+networks:
+  dwb:
+    driver: bridge
+
+services:
+  service-dwb-admin:
+    env_file: ../.env
+    build: ./
+    restart: always
+    configs:
+      - source: service-dwb-admin_config
+        target: /service/config/service.json
+    networks:
+      - dwb
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "service-dwb-admin:3000/api/v1/livez"]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    volumes:
+      - ./web/dist:/srv:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - dwb
+    ports:
+      - "3000:3000"
+
+  dozzle:
+    restart: always
+    image: amir20/dozzle:latest
+    environment:
+      DOZZLE_ENABLE_ACTION: true
+      DOZZLE_ENABLE_SHELL: true
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    networks:
+      - dwb
+    healthcheck:
+      test: ["CMD", "/dozzle", "healthcheck"]
