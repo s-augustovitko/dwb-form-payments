@@ -1,0 +1,9 @@
+# Enable rewriting
+RewriteEngine On
+
+# Route API calls to /api
+RewriteRule ^api(/.*)?$ api/$1 [L]
+
+# Everything else goes to the SPA
+RewriteRule ^$ web/index.html [L]
+RewriteRule ^(.*)$ web/$1 [L]
