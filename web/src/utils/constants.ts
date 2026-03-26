@@ -1,4 +1,5 @@
 export const BASE_URL = "/api"
+export const RETURN_URL = "https://app.caminodeldiamante.pe"
 
 export const PUBLIC_KEY = 'pk_live_wXC8RUNq7QLHKKwz';
 export const RSA_PUB_VAL = `-----BEGIN PUBLIC KEY-----

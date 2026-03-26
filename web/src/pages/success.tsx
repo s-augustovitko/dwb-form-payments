@@ -14,6 +14,8 @@ const Success: Component = () => {
 		window.print()
 	};
 
+	// TODO: Add just the form_id and get the rest of the data from new PHP endpoint
+	// TODO: Add view for unsuccessful payment
 	return (
 		<div class="grid grid-cols-1 gap-4">
 			<div role="alert" class="alert alert-success text-lg">

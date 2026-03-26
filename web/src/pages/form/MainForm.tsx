@@ -9,6 +9,7 @@ import {
   RSA_PUB_VAL,
   PUBLIC_KEY,
   notBeforeDate,
+  RETURN_URL,
 } from "../../utils";
 import {
   Input, SelectInput, Select, MultiSelect,
@@ -64,7 +65,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       await (window as any).Culqi?.close()
 
       const token = (window as any).Culqi?.token?.id;
-      const error = (window as any).Culqi.error;
+      const error = (window as any).Culqi?.error;
       if (!!error) {
         throw new Error(error.user_message || "No se pudo procesar el pago")
       }
@@ -115,7 +116,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       charge: {
         totalAmount: getTotal() * 100,
         currency: getCurrency(),
-        returnUrl: "https://app.caminodeldiamante.pe",
+        returnUrl: RETURN_URL,
       },
       card: {
         email,

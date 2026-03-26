@@ -26,12 +26,6 @@ func (s Server) updateActiveSettings(c *fiber.Ctx) error {
 		return models.ErrorBadData(c, err)
 	}
 
-	// Validate Data
-	err = models.ValidateData(data)
-	if err != nil {
-		return models.ErrorBadData(c, err)
-	}
-
 	// Create context
 	ctx, cancel := s.Cfg.WriteCtx()
 	defer cancel()

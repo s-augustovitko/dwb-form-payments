@@ -30,7 +30,7 @@ export function minWords(min: number): ValidationFn<string> {
 }
 
 
-const emailRegex = new RegExp(/^[a-zA-Z0-9\.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)
+const emailRegex = new RegExp(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/)
 export function emailValidate(): ValidationFn<string> {
   return (value: string = "") => {
     if (!value) return
@@ -97,7 +97,6 @@ export function required<T>(): ValidationFn<T> {
   return (value: T) => {
     if (
       value == null ||
-      value == undefined ||
       (typeof value === "string" && value.trim() === "") ||
       (Array.isArray(value) && value.length === 0)
     ) {

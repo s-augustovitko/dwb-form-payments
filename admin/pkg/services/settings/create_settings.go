@@ -82,7 +82,7 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 
 	var mealCount int64
 	for _, meal := range data.Meals {
-		_, err = qtx.CreateMeal(ctx, database.CreateMealParams{
+		res, err = qtx.CreateMeal(ctx, database.CreateMealParams{
 			ID:         uuid.New().String(),
 			SettingsID: settingsID,
 			Title:      meal.Title,
@@ -100,7 +100,7 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 
 	var sessionCount int64
 	for _, session := range data.Sessions {
-		_, err = qtx.CreateSession(ctx, database.CreateSessionParams{
+		res, err = qtx.CreateSession(ctx, database.CreateSessionParams{
 			ID:          uuid.New().String(),
 			SettingsID:  settingsID,
 			Title:       session.Title,
