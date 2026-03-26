@@ -8,6 +8,7 @@ import {
   RSA_PUB_ID,
   RSA_PUB_VAL,
   PUBLIC_KEY,
+  notBeforeDate,
 } from "../../utils";
 import {
   Input, SelectInput, Select, MultiSelect,
@@ -239,6 +240,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
           type="date"
           title="Fecha de Regreso (Opcional)"
           field={courseForm.fields.departure_date}
+          validate={() => notBeforeDate(courseForm.fields.arrival_date.get())}
           disabled={loading}
         />
 
