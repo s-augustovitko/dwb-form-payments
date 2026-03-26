@@ -31,8 +31,7 @@ async function getSettingsList(limit: number, skip: number): Promise<SettingsLis
 		)
 		return res
 	} catch (err) {
-		notificationStore.error("No se pudo obtener los ajustes");
-		return { items: [], total: 0 }
+		throw err
 	}
 }
 
@@ -102,7 +101,7 @@ const Settings: Component = () => {
 							<p class="text-center p-4">No hay ajustes...</p>
 						</div>
 					</Show>
-					
+
 					<Show when={settings()?.items?.length}>
 						<div class="overflow-x-auto">
 							<table class="table">

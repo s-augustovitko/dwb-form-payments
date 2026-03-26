@@ -19,9 +19,13 @@ func (s Server) delete(c *fiber.Ctx) error {
 	defer cancel()
 
 	db := database.New(s.DB)
-	_, err = db.DeleteSettings(ctx, settingsID.String())
+	res, err := db.DeleteSettings(ctx, settingsID.String())
 	if err != nil {
 		return models.ErrorUnexpected(c, err)
+	}
+
+	if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+		return models.ErrorNotFound(c, err)
 	}
 
 	return models.Success(c, map[string]string{"deleted_id": settingsID.String()})

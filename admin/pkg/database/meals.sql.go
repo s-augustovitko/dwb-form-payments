@@ -16,17 +16,18 @@ INSERT INTO meals (
     settings_id,
     title
 ) VALUES (
-   UUID(), ?, ?
+   ?, ?, ?
 )
 `
 
 type CreateMealParams struct {
+	ID         string `json:"id"`
 	SettingsID string `json:"settings_id"`
 	Title      string `json:"title"`
 }
 
 func (q *Queries) CreateMeal(ctx context.Context, arg CreateMealParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createMeal, arg.SettingsID, arg.Title)
+	return q.db.ExecContext(ctx, createMeal, arg.ID, arg.SettingsID, arg.Title)
 }
 
 const deleteMeal = `-- name: DeleteMeal :execresult

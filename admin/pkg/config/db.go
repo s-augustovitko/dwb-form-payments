@@ -5,16 +5,19 @@ import (
 	"fmt"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 )
 
 func InitDb(cfg *Config) (*sql.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true",
-		cfg.Db.User,
-		cfg.Db.Pass,
-		cfg.Db.Host,
-		cfg.Db.Name,
-	)
+	dsn := (&mysql.Config{
+		User:                 cfg.Db.User,
+		Passwd:               cfg.Db.Pass,
+		Net:                  "tcp",
+		Addr:                 cfg.Db.Host,
+		DBName:               cfg.Db.Name,
+		ParseTime:            true,
+		AllowNativePasswords: true,
+	}).FormatDSN()
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {

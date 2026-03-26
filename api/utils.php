@@ -24,7 +24,10 @@ function set_secure_headers(): void
 ------------------------------*/
 function handle_cors(): void
 {
-    $allowedOrigins = [getenv("ALLOWED_ORIGINS")];
+    $allowedOrigins = array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) getenv('ALLOWED_ORIGINS'))
+    )));
 
     if (!empty($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowedOrigins, true)) {
         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);

@@ -28,7 +28,9 @@ func (s Server) create(c *fiber.Ctx) error {
 	ctx, cancel := s.Cfg.WriteCtx()
 	defer cancel()
 
-	session, err := database.New(s.DB).CreateSession(ctx, database.CreateSessionParams{
+	id := uuid.New()
+	res, err := database.New(s.DB).CreateSession(ctx, database.CreateSessionParams{
+		ID:          id.String(),
 		SettingsID:  settingsID.String(),
 		Title:       data.Title,
 		SessionTime: data.SessionTime,
@@ -37,5 +39,9 @@ func (s Server) create(c *fiber.Ctx) error {
 		return models.ErrorUnexpected(c, err)
 	}
 
-	return models.Success(c, session)
+	if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+		return models.ErrorNotFound(c, err)
+	}
+
+	return models.Success(c, map[string]string{"created_id": id.String()})
 }

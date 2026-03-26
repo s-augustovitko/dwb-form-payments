@@ -18,18 +18,24 @@ INSERT INTO sessions (
     title,
 	session_time
 ) VALUES (
-   UUID(), ?, ?, ?
+   ?, ?, ?, ?
 )
 `
 
 type CreateSessionParams struct {
+	ID          string    `json:"id"`
 	SettingsID  string    `json:"settings_id"`
 	Title       string    `json:"title"`
 	SessionTime time.Time `json:"session_time"`
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createSession, arg.SettingsID, arg.Title, arg.SessionTime)
+	return q.db.ExecContext(ctx, createSession,
+		arg.ID,
+		arg.SettingsID,
+		arg.Title,
+		arg.SessionTime,
+	)
 }
 
 const deleteSession = `-- name: DeleteSession :execresult

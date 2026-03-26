@@ -34,7 +34,7 @@ func (s Server) update(c *fiber.Ctx) error {
 	defer cancel()
 
 	db := database.New(s.DB)
-	updatedSession, err := db.UpdateSession(ctx, database.UpdateSessionParams{
+	res, err := db.UpdateSession(ctx, database.UpdateSessionParams{
 		ID:          sessionID.String(),
 		SettingsID:  settingsID.String(),
 		Title:       data.Title,
@@ -44,5 +44,9 @@ func (s Server) update(c *fiber.Ctx) error {
 		return models.ErrorUnexpected(c, err)
 	}
 
-	return models.Success(c, updatedSession)
+	if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+		return models.ErrorNotFound(c, err)
+	}
+
+	return models.Success(c, map[string]string{"updated_id": sessionID.String()})
 }

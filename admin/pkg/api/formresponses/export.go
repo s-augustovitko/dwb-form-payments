@@ -56,7 +56,7 @@ func (s Server) export(c *fiber.Ctx) error {
 	db := database.New(s.DB)
 	settings, err := db.GetSettingsByID(ctx, settingsID.String())
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return models.ErrorNotFound(c, err)
 	}
 
 	var formResponses []database.FormResponse
@@ -66,7 +66,7 @@ func (s Server) export(c *fiber.Ctx) error {
 		formResponses, err = db.ListAllFormResponses(ctx, settingsID.String())
 	}
 	if err != nil {
-		return models.ErrorUnexpected(c, err)
+		return models.ErrorNotFound(c, err)
 	}
 
 	var buffer bytes.Buffer

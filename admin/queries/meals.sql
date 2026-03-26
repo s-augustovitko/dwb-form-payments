@@ -4,7 +4,7 @@ INSERT INTO meals (
     settings_id,
     title
 ) VALUES (
-   UUID(), ?, ?
+   ?, ?, ?
 );
 
 -- name: UpdateMeal :execresult

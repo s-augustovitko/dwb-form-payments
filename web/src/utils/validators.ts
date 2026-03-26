@@ -23,7 +23,8 @@ export function maxLength<T>(max: number): ValidationFn<string | T[]> {
 export function minWords(min: number): ValidationFn<string> {
   return (value: string = "") => {
     if (!value) return
-    if (value?.trim()?.split(" ")?.length < min) {
+    const words = value.trim().split(/\s+/).filter(Boolean)
+    if (words.length < min) {
       return `Debe tener al menos ${min} palabras`
     }
   }
@@ -126,8 +127,15 @@ export function eventSessionsValidate(event_type: string): ValidationFn<string[]
 }
 
 export function required<T>(): ValidationFn<T> {
-  return (value: any) => {
-    if (!value) return "Campo es requerido"
+  return (value: T) => {
+    if (
+      value == null ||
+      value == undefined ||
+      (typeof value === "string" && value.trim() === "") ||
+      (Array.isArray(value) && value.length === 0)
+    ) {
+      return "Campo es requerido"
+    }
   }
 }
 

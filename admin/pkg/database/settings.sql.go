@@ -94,7 +94,6 @@ SELECT
     active
 FROM settings
 WHERE
-    end_date > NOW() AND
     id = ?
 `
 
@@ -155,7 +154,7 @@ LEFT JOIN (
     GROUP BY settings_id
 ) s ON sett.id = s.settings_id
 WHERE sett.end_date > NOW()
-ORDER BY sett.start_date
+ORDER BY sett.start_date, sett.id
 LIMIT ?
 OFFSET ?
 `

@@ -81,5 +81,5 @@ try {
     ]);
 } catch (Throwable $e) {
     error_log($e->getMessage());
-    respond_error($e->getMessage(), 404);
+    respond_error($e->getMessage(), 500);
 }

@@ -28,7 +28,9 @@ func (s Server) create(c *fiber.Ctx) error {
 	ctx, cancel := s.Cfg.WriteCtx()
 	defer cancel()
 
-	meal, err := database.New(s.DB).CreateMeal(ctx, database.CreateMealParams{
+	id := uuid.New()
+	res, err := database.New(s.DB).CreateMeal(ctx, database.CreateMealParams{
+		ID:         id.String(),
 		SettingsID: settingsID.String(),
 		Title:      data.Title,
 	})
@@ -36,5 +38,9 @@ func (s Server) create(c *fiber.Ctx) error {
 		return models.ErrorUnexpected(c, err)
 	}
 
-	return models.Success(c, meal)
+	if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+		return models.ErrorNotFound(c, err)
+	}
+
+	return models.Success(c, map[string]string{"created_id": id.String()})
 }

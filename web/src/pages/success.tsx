@@ -30,7 +30,7 @@ const Success: Component = () => {
 
 			<p>Hola {searchParams.full_name}, tu inscripción fue correctamente completada.</p>
 
-			<p>Por favor descarga tu comprobante y muestralo en el curso, te esperamos!</p>
+			<p>Por favor descarga tu comprobante y muéstralo en el curso, te esperamos!</p>
 
 			<button onclick={handleScreenshot} class="btn btn-info">Descarga tu comprobante</button>
 		</div>

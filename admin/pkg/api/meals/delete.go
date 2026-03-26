@@ -25,12 +25,15 @@ func (s Server) delete(c *fiber.Ctx) error {
 
 	db := database.New(s.DB)
 
-	_, err = db.DeleteMeal(ctx, database.DeleteMealParams{
+	res, err := db.DeleteMeal(ctx, database.DeleteMealParams{
 		ID:         mealID.String(),
 		SettingsID: settingsID.String(),
 	})
 	if err != nil {
 		return models.ErrorUnexpected(c, err)
+	}
+	if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+		return models.ErrorNotFound(c, err)
 	}
 
 	return models.Success(c, map[string]string{"deleted_id": mealID.String()})

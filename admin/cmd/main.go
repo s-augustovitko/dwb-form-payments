@@ -36,7 +36,7 @@ func main() {
 	db, err := config.InitDb(cfg)
 	if err != nil {
 		slog.Error("could not init db", slog.String("error", err.Error()))
-		errChan <- err
+		os.Exit(1)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {

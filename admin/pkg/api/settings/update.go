@@ -49,11 +49,13 @@ func (s Server) update(c *fiber.Ctx) error {
 
 	// Update in database
 	db := database.New(s.DB)
-	_, err = db.UpdateSettings(ctx, settingsData)
+	res, err := db.UpdateSettings(ctx, settingsData)
 	if err != nil {
 		return models.ErrorUnexpected(c, err)
 	}
+	if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+		return models.ErrorNotFound(c, err)
+	}
 
-	// Return
-	return models.Success(c, settingsData)
+	return models.Success(c, map[string]string{"updated_id": settingsID.String()})
 }

@@ -3,6 +3,7 @@ package settingsservice
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"strconv"
 
@@ -70,15 +71,19 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 		SessionPriceUsd: NormalizePrice(data.SessionPriceUsd),
 	}
 
-	_, err = qtx.CreateSettings(ctx, settingsData)
+	res, err := qtx.CreateSettings(ctx, settingsData)
 	if err != nil {
 		logger.Error("create settings failed", slog.String("error", err.Error()))
 		return database.ListSettingsPagedRow{}, err
+	}
+	if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+		return database.ListSettingsPagedRow{}, fmt.Errorf("could not create settings: %s", err.Error())
 	}
 
 	var mealCount int64
 	for _, meal := range data.Meals {
 		_, err = qtx.CreateMeal(ctx, database.CreateMealParams{
+			ID:         uuid.New().String(),
 			SettingsID: settingsID,
 			Title:      meal.Title,
 		})
@@ -86,12 +91,17 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 			logger.Error("create meal failed", slog.String("error", err.Error()))
 			return database.ListSettingsPagedRow{}, err
 		}
+		if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+			return database.ListSettingsPagedRow{}, fmt.Errorf("could not create meal: %s", err.Error())
+		}
+
 		mealCount++
 	}
 
 	var sessionCount int64
 	for _, session := range data.Sessions {
 		_, err = qtx.CreateSession(ctx, database.CreateSessionParams{
+			ID:          uuid.New().String(),
 			SettingsID:  settingsID,
 			Title:       session.Title,
 			SessionTime: session.SessionTime,
@@ -100,6 +110,10 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 			logger.Error("create session failed", slog.String("error", err.Error()))
 			return database.ListSettingsPagedRow{}, err
 		}
+		if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+			return database.ListSettingsPagedRow{}, fmt.Errorf("could not create session: %s", err.Error())
+		}
+
 		sessionCount++
 	}
 

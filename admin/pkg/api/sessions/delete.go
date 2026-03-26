@@ -24,12 +24,16 @@ func (s Server) delete(c *fiber.Ctx) error {
 	defer cancel()
 
 	db := database.New(s.DB)
-	_, err = db.DeleteSession(ctx, database.DeleteSessionParams{
+	res, err := db.DeleteSession(ctx, database.DeleteSessionParams{
 		ID:         sessionID.String(),
 		SettingsID: settingsID.String(),
 	})
 	if err != nil {
 		return models.ErrorUnexpected(c, err)
+	}
+
+	if rows, err := res.RowsAffected(); err != nil || rows != 1 {
+		return models.ErrorNotFound(c, err)
 	}
 
 	return models.Success(c, map[string]string{"deleted_id": sessionID.String()})

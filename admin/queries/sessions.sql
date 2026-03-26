@@ -5,7 +5,7 @@ INSERT INTO sessions (
     title,
 	session_time
 ) VALUES (
-   UUID(), ?, ?, ?
+   ?, ?, ?, ?
 );
 
 -- name: UpdateSession :execresult
