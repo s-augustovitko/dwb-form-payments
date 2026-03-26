@@ -13,7 +13,7 @@ handle_cors();
 rate_limit(60, 60);
 
 /* Basic DoS protection */
-if (($_SERVER['CONTENT_LENGTH'] ?? 0) > 1_000_000) {
+if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 1_000_000) {
     respond_error('Payload too large', 413);
 }
 

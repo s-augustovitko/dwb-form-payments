@@ -1,11 +1,11 @@
+import { BASE_URL } from "./constants"
+
 export enum Method {
   GET = "GET",
   POST = "POST",
   PUT = "PUT",
   DELETE = "DELETE",
 }
-
-const BASE_URL = "http://localhost:3000/api/v1"
 
 interface ApiRes<T> {
   data: T;
@@ -40,7 +40,8 @@ export async function request<T>(path: string, method: Method, query?: Record<st
   }
 
   // Perform the HTTP request and get resposne
-  const url = `${BASE_URL}/${path}?${new URLSearchParams(query).toString()}`
+  const queryString = query ? `?${new URLSearchParams(query).toString()}` : "";
+  const url = `${BASE_URL}/${path}${queryString}`;
   const response: Response = await fetch(url, options);
   const data: ApiRes<T> = await response.json();
 

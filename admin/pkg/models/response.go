@@ -13,8 +13,12 @@ type Response[T any] struct {
 	Data    T      `json:"data"`
 }
 
-func ErrorBadData(c *fiber.Ctx, message error) error {
-	return c.Status(fiber.ErrBadRequest.Code).JSON(Response[any]{Success: false, Message: message.Error()})
+func ErrorBadData(c *fiber.Ctx, err error) error {
+	if err != nil {
+		config.GetLogger(c).Error("bad data error", slog.String("error", err.Error()))
+	}
+
+	return c.Status(fiber.ErrBadRequest.Code).JSON(Response[any]{Success: false, Message: "Invalid Payload"})
 }
 
 func ErrorUnexpected(c *fiber.Ctx, err error) error {

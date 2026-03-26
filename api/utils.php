@@ -24,9 +24,7 @@ function set_secure_headers(): void
 ------------------------------*/
 function handle_cors(): void
 {
-    $allowedOrigins = [
-        getenv("ALLOWED_ORIGINS") ?? "https://app.caminodeldiamante.pe"
-    ];
+    $allowedOrigins = [getenv("ALLOWED_ORIGINS")];
 
     if (!empty($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowedOrigins, true)) {
         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
@@ -53,7 +51,9 @@ function load_env(string $path): void
         $line = trim($line);
         if ($line === '' || str_starts_with($line, '#')) continue;
 
-        [$key, $value] = array_map('trim', explode('=', $line, 2));
+        $parts = explode('=', $line, 2);
+        if (count($parts) !== 2) continue;
+        [$key, $value] = array_map('trim', $parts);
         $value = trim($value, "\"'");
 
         if (!getenv($key)) {
@@ -101,8 +101,6 @@ function db(): PDO
         );
     }
 
-    $pdo->exec("SET time_zone = '+00:00'");
-
     return $pdo;
 }
 
@@ -133,7 +131,7 @@ function respond_error(string $message, int $status = 400): void
 }
 
 /* -----------------------------
-   SQLite rate limiting
+   MySQL rate limiting
 ------------------------------*/
 function rate_limit(int $maxRequests, int $seconds): void
 {
@@ -183,6 +181,7 @@ function rate_limit(int $maxRequests, int $seconds): void
         }
     } catch (Throwable $e) {
         error_log('Rate limiter failure: ' . $e->getMessage());
+        respond_error('Service temporarily unavailable', 503);
     }
 }
 
@@ -267,4 +266,40 @@ function createCulqiCharge(array $data)
     }
 
     return $decoded;
+}
+
+function getTotalPrice(array $input)
+{
+    $settings_prep = db()->prepare(
+        '
+        SELECT
+            meal_price_pen,
+            meal_price_usd,
+            session_price_pen,
+            session_price_usd
+        FROM settings
+        WHERE
+            active = TRUE AND
+            end_date > NOW()
+        ORDER BY
+            start_date ASC
+        LIMIT 1
+        '
+    );
+    $settings_prep->execute();
+    $settings = $settings_prep->fetch();
+    if (!$settings) {
+        throw new Exception("No hay formularios activos");
+    }
+
+    $sessionPrice = (float)($input['currency'] === 'USD' ? $settings['session_price_usd'] : $settings['session_price_pen']);
+    $mealPrice = (float)($input['currency'] === 'USD' ? $settings['meal_price_usd'] : $settings['meal_price_pen']);
+    $expectedPayment = ((int)($input['sessions_count']) * $sessionPrice) + ((int)($input['meals_count']) * $mealPrice);
+
+    return [
+        'payment_amount' => $expectedPayment,
+        'currency' => $input['currency'],
+        'meal_price' => $mealPrice,
+        'session_price' => $sessionPrice,
+    ];
 }

@@ -1,7 +1,7 @@
 import { Toast } from "./components";
-import { type Component, Suspense } from "solid-js";
+import { type ParentComponent, Suspense } from "solid-js";
 
-const App: Component<{ children: Element }> = (props) => {
+const App: ParentComponent = (props) => {
 	return (
 		<main>
 			<div class="max-w-xl p-4 mx-auto">

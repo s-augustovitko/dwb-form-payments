@@ -47,7 +47,18 @@ WHERE end_date > NOW();
 
 -- name: GetSettingsByID :one
 SELECT
-    *
+    id,
+    title,
+    description,
+    form_type,
+    start_date,
+    end_date,
+    meal_price_pen,
+    meal_price_usd,
+    session_price_pen,
+    session_price_usd,
+    disclaimer,
+    active
 FROM settings
 WHERE
     end_date > NOW() AND

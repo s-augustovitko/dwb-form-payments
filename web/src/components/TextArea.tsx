@@ -37,6 +37,7 @@ export const TextArea: Component<Props> = (props) => {
         onchange={(e) => applyValue(e.currentTarget.value?.trim())}
         class="textarea validator w-full"
         placeholder={props.title}
+        inputmode={props.inputmode || "text"}
         aria-invalid={!!props.field.error()}
         value={props.field.get()}
         disabled={props.disabled?.()}

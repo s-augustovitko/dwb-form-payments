@@ -44,6 +44,12 @@ try {
     if (!$form) {
         throw new Exception("Formulario inválido");
     }
+    if ($form['payment_status'] === 'SUCCESS') {
+        respond([
+            'payment_id' => $form['payment_id'],
+            'payment_status' => 'SUCCESS',
+        ]);
+    }
 
     // =========================
     // PREPARE CHARGE DATA
@@ -63,6 +69,10 @@ try {
     ];
 
     $charge = createCulqiCharge($charge_data);
+    if (!isset($charge['id']) || !isset($charge['outcome']['type'])) {
+        throw new Exception("Respuesta de pago inválida");
+    }
+
     $outcome_type = trim(strtolower($charge['outcome']['type'] ?? ''));
     $success_codes = ['successful_charge', 'venta_exitosa'];
     $payment_status = in_array($outcome_type, $success_codes, true) ? 'SUCCESS' : 'DECLINED';

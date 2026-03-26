@@ -24,6 +24,7 @@ export const Select: Component<Props> = (props) => {
       <label for={id} class="label">{props.title}</label>
 
       <select
+        id={id}
         name={props.field.name}
         oninput={(e) => applyValue(e.currentTarget.value)}
         class="select w-full"
@@ -44,6 +45,6 @@ export const Select: Component<Props> = (props) => {
       <Show when={!!props.field.error()}>
         <p class="text-xs text-error mt-2">{props.field.error()}</p>
       </Show>
-    </fieldset >
+    </fieldset>
   )
 }

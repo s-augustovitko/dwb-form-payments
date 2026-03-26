@@ -4,7 +4,6 @@ import (
 	"dwb-admin/pkg/api"
 	"dwb-admin/pkg/database"
 	"dwb-admin/pkg/models"
-	"log/slog"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -23,13 +22,11 @@ func (s Server) list(c *fiber.Ctx) error {
 		Offset: paging.Skip,
 	})
 	if err != nil {
-		slog.Info("settings list")
 		return models.ErrorUnexpected(c, err)
 	}
 
 	settingsCount, err := db.CountSettings(ctx)
 	if err != nil {
-		slog.Info("settings count")
 		return models.ErrorUnexpected(c, err)
 	}
 

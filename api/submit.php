@@ -84,31 +84,8 @@ try {
         throw new Exception('numero de sesiones debe ser al menos 1');
     }
 
-    if (!isset($input['session_price']) || !is_numeric($input['session_price']) || $input['session_price'] < 0) {
-        throw new Exception('precio de sesiones es invalido');
-    }
-
     if (isset($input['meals_count']) && (!is_numeric($input['meals_count']) || $input['meals_count'] < 0)) {
         throw new Exception('numero de comidas no puede ser negativo');
-    }
-
-    if (!isset($input['meal_price']) || !is_numeric($input['meal_price']) || $input['meal_price'] < 0) {
-        throw new Exception('precio de comidas es invalido');
-    }
-    if (!isset($input['payment_amount']) || !is_numeric($input['payment_amount']) || $input['payment_amount'] < 0) {
-        throw new Exception('precio pagado es invalido');
-    }
-
-    // Determine session and meal counts safely
-    $sessionsCount = isset($input['sessions_count']) ? (int)$input['sessions_count'] : 1;
-    $mealsCount = isset($input['meals_count']) ? (int)$input['meals_count'] : 0;
-
-    // Calculate expected total
-    $expectedPayment = $sessionsCount * (float)$input['session_price'] + $mealsCount * (float)$input['meal_price'];
-
-    // Validate payment_amount
-    if ((float)$input['payment_amount'] !== $expectedPayment) {
-        throw new Exception('el monto pagado no coincide con el total calculado');
     }
 
     // =========================
@@ -161,6 +138,7 @@ try {
     }
 
     $form_id = $input['form_id'] ?? guidv4();
+    $pricing = getTotalPrice($input);
 
     // =========================
     // PREPARE INSERT
@@ -235,7 +213,6 @@ try {
             :payment_status
         )
         ON DUPLICATE KEY UPDATE
-            settings_id = VALUES(settings_id),
             first_name = VALUES(first_name),
             last_name = VALUES(last_name),
             email = VALUES(email),
@@ -257,8 +234,7 @@ try {
             emergency_contact_phone = VALUES(emergency_contact_phone),
             emergency_contact_email = VALUES(emergency_contact_email),
             currency = VALUES(currency),
-            payment_amount = VALUES(payment_amount),
-            payment_status = VALUES(payment_status);
+            payment_amount = VALUES(payment_amount);
         '
     );
 
@@ -276,11 +252,11 @@ try {
 
         ':meal_type' => $input['meal_type'] ?? null,
         ':meals_count' => $input['meals_count'] ?? 0,
-        ':meal_price' => $input['meal_price'] ?? 0,
+        ':meal_price' => $pricing['meal_price'] ?? 0, # pricing
 
         ':event_type' => $input['event_type'] ?? null,
         ':sessions_count' => $input['sessions_count'] ?? 0,
-        ':session_price' => $input['session_price'] ?? 0,
+        ':session_price' => $pricing['session_price'] ?? 0, # pricing
 
         ':arrival_date' => $input['arrival_date'] ?? null,
         ':departure_date' => $input['departure_date'] ?? null,
@@ -292,10 +268,10 @@ try {
         ':emergency_contact_phone' => $input['emergency_contact_phone'] ?? null,
         ':emergency_contact_email' => $input['emergency_contact_email'] ?? null,
 
-        ':currency' => $input['currency'] ?? 'PEN',
-        ':payment_amount' => $input['payment_amount'] ?? 0,
+        ':currency' => $pricing['currency'] ?? 'PEN', # pricing
+        ':payment_amount' => $pricing['payment_amount'] ?? 0.0, # pricing
 
-        ':payment_status' => ((float) $input['payment_amount'] === 0.0) ? 'NOT_NEEDED' : 'PENDING',
+        ':payment_status' => ((float) $pricing['payment_amount'] === 0.0) ? 'NOT_NEEDED' : 'PENDING', # pricing
     ]);
 
     respond([

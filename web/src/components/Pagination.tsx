@@ -8,6 +8,8 @@ interface Props {
 
 export const Pagination: Component<Props> = (props) => {
   function getPagination(current: number, total: number) {
+    if (total <= 0) return []
+
     const delta = 2;
     const range: (number | string)[] = [];
 

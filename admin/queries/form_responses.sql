@@ -4,6 +4,7 @@ SELECT
 FROM form_responses
 WHERE
     settings_id = ?
+ORDER BY created_at
 LIMIT ?
 OFFSET ?;
 
@@ -12,7 +13,8 @@ SELECT
     *
 FROM form_responses
 WHERE
-    settings_id = ?;
+    settings_id = ?
+ORDER BY created_at;
 
 -- name: ListSuccessFormResponses :many
 SELECT
@@ -20,4 +22,5 @@ SELECT
 FROM form_responses
 WHERE
     settings_id = ? AND
-    payment_status IN ('NOT_NEEDED', 'SUCCESS');
+    payment_status IN ('NOT_NEEDED', 'SUCCESS')
+ORDER BY created_at;

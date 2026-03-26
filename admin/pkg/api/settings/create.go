@@ -5,6 +5,7 @@ import (
 	"dwb-admin/pkg/config"
 	"dwb-admin/pkg/models"
 	settingsservice "dwb-admin/pkg/services/settings"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,7 +27,7 @@ func (s Server) create(c *fiber.Ctx) error {
 	// Get db connection pool
 	db, ok := s.DB.(*sql.DB)
 	if !ok {
-		return models.ErrorUnexpected(c, nil)
+		return models.ErrorUnexpected(c, fmt.Errorf("expected *sql.DB, got %T", s.DB))
 	}
 
 	// Create in db

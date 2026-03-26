@@ -72,7 +72,7 @@ func Load() (*Config, error) {
 			Host:        getEnvString("HOST", "0.0.0.0"),
 			Port:        getEnvString("PORT", "3000"),
 
-			AllowMethods: getEnvString("ALLOW_METODS", "GET,POST,PUT,DELETE"),
+			AllowMethods: getEnvString("ALLOW_METHODS", "GET,POST,PUT,DELETE"),
 			AllowOrigins: getEnvString("ALLOW_ORIGINS", ""),
 		},
 		Db: Db{
@@ -185,7 +185,7 @@ func checkZeroFields(value reflect.Value, path string, missing []string) []strin
 				childPath = path + "." + typ.Name
 			}
 
-			missing = append(missing, checkZeroFields(value.Field(i), childPath, missing)...)
+			missing = checkZeroFields(value.Field(i), childPath, missing)
 		}
 	}
 

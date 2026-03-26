@@ -90,6 +90,6 @@ export const SelectInput: Component<Props> = (props) => {
       <Show when={!!error()}>
         <p class="text-xs text-error mt-2">{error()}</p>
       </Show>
-    </fieldset >
+    </fieldset>
   )
 }

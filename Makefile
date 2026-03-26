@@ -11,6 +11,7 @@ FTP_ENV_FILE = ./.ftp.env
 COMPOSE="./docker/compose.yaml"
 DOCKER="podman"
 
+.PHONY: all
 all: run
 
 .PHONY: run

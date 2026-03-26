@@ -18,7 +18,7 @@ func (s Server) list(c *fiber.Ctx) error {
 		return models.ErrorBadData(c, err)
 	}
 
-	ctx, cancel := s.Cfg.WriteCtx()
+	ctx, cancel := s.Cfg.ReadCtx()
 	defer cancel()
 
 	db := database.New(s.DB)

@@ -33,9 +33,9 @@ set +a
 
 lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "\
 set ssl:check-hostname no; \
-mirror -R -e --parallel=4 \"${DIST_DIR}\" \"${FTP_TARGET_DIR}\" \
+mirror -R -e --parallel=4 \"${DIST_DIR}\" \"${FTP_TARGET_DIR}\"; \
 set ssl:check-hostname yes; \
-exit" || {
+bye" || {
     echo "FTP deploy failed"
     exit 1
 }

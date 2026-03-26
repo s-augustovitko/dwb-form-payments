@@ -11,7 +11,7 @@ export interface Meal {
 
 export interface Session {
   id: string;
-  session_time: Date;
+  session_time: string;
   title: string;
 }
 
@@ -21,8 +21,8 @@ export interface Settings {
   description: string;
 
   form_type: FormType;
-  start_date: Date;
-  end_date: Date;
+  start_date: string;
+  end_date: string;
 
   meal_price_pen: number;
   meal_price_usd: number;

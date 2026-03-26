@@ -20,11 +20,11 @@ func (s Server) getByID(c *fiber.Ctx) error {
 	ctx, cancel := s.Cfg.ReadCtx()
 	defer cancel()
 
-	settingsList, err := database.New(s.DB).GetSettingsByID(ctx, settingsID.String())
+	setting, err := database.New(s.DB).GetSettingsByID(ctx, settingsID.String())
 	if err != nil {
 		return models.ErrorUnexpected(c, err)
 	}
 
 	// Return
-	return models.Success(c, settingsList)
+	return models.Success(c, setting)
 }

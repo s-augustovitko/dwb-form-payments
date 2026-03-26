@@ -13,6 +13,8 @@ import (
 )
 
 func main() {
+	errChan := make(chan error, 1)
+
 	// Config setup
 	cfg, err := config.Load()
 	if err != nil {
@@ -34,7 +36,7 @@ func main() {
 	db, err := config.InitDb(cfg)
 	if err != nil {
 		slog.Error("could not init db", slog.String("error", err.Error()))
-		os.Exit(1)
+		errChan <- err
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
@@ -67,7 +69,7 @@ func main() {
 		slog.Info("Starting server")
 		if err := app.Listen(cfg.Service.Host + ":" + cfg.Service.Port); err != nil {
 			slog.Error("server listen error", slog.String("error", err.Error()))
-			os.Exit(1)
+			errChan <- err
 		}
 	}()
 
@@ -75,7 +77,13 @@ func main() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	signal.Notify(sig, os.Interrupt)
-	<-sig
+
+	select {
+	case <-sig:
+		slog.Info("shutting down server")
+	case err := <-errChan:
+		slog.Error("server failed", slog.String("error", err.Error()))
+	}
 
 	slog.Info("shutting down server")
 }

@@ -39,7 +39,6 @@ func ValidateData(data any) error {
 	if data == nil {
 		return fmt.Errorf("validation data cannot be nil")
 	}
-	validationErrors := ErrorResponses{}
 
 	errs := validate.Struct(data)
 	if errs == nil {
@@ -50,6 +49,8 @@ func ValidateData(data any) error {
 	if !ok {
 		return errs
 	}
+
+	validationErrors := make(ErrorResponses, 0, len(validErrs))
 	for _, err := range validErrs {
 		var elem ErrorResponse
 

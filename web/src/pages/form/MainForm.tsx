@@ -5,6 +5,9 @@ import {
   createForm,
   getDateTimeForBackEnd,
   getDateDisplay,
+  RSA_PUB_ID,
+  RSA_PUB_VAL,
+  PUBLIC_KEY,
 } from "../../utils";
 import {
   Input, SelectInput, Select, MultiSelect,
@@ -15,18 +18,8 @@ import { Summary } from "./Summary";
 import { getDaysFromSessions, getDaysList, getMealsList, getSessionList } from "./utils";
 import { getSchema } from "./schemas";
 import { FormRequestSchema, submitFormRequest, updatePaymentInfo } from "./requests";
-import moment from "moment";
+import dayjs from "dayjs";
 import { useNavigate } from "@solidjs/router";
-
-
-const publicKey = 'pk_live_wXC8RUNq7QLHKKwz';
-const rsaVal = `-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDedqkKMOcoOgrzpdUIQ8LzJCpx
-VLgA+BG6zF/U8esrrTM1H7sbMo6yaZUXTEg1zg1HyZsemVrfJx5IgWrD9bNVbLQl
-KS17yqtqXsjKP18NtfLlPTDxmgo6rY7pHinXF65aexAZnuJIxJiVvHrrh5bPjPsW
-D0rKl9ewM94F/fZEQwIDAQAB
------END PUBLIC KEY-----`;
-const rsaId = "cb7a8afd-d041-4674-92ff-9e7db810248d";
 
 const CourseForm: Component<FormDataResponse> = (props) => {
   const [loading, setLoading] = createSignal<boolean>(false)
@@ -74,6 +67,10 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       if (!!error) {
         throw new Error(error.user_message || "No se pudo procesar el pago")
       }
+      if (!token) {
+        notificationStore.error("El pago fue cancelado o no generó token")
+        return
+      }
 
       const values = courseForm.values()
       const { payment_id, payment_status } = await updatePaymentInfo({
@@ -101,8 +98,8 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       title: props.settings?.title || "Curso " + getDateDisplay(),
       currency: getCurrency(),
       amount: getTotal() * 100,
-      xculqirsaid: rsaId,
-      rsapublickey: rsaVal,
+      xculqirsaid: RSA_PUB_ID,
+      rsapublickey: RSA_PUB_VAL,
     }
     const client = {
       email,
@@ -112,7 +109,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       client,
     };
 
-    (window as any).Culqi3DS.publicKey = publicKey;
+    (window as any).Culqi3DS.publicKey = PUBLIC_KEY;
     (window as any).Culqi3DS.settings = {
       charge: {
         totalAmount: getTotal() * 100,
@@ -124,7 +121,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       },
     };
 
-    (window as any).Culqi = new (window as any).CulqiCheckout(publicKey, config);
+    (window as any).Culqi = new (window as any).CulqiCheckout(PUBLIC_KEY, config);
     (window as any).Culqi.culqi = handleCulqiAction;
 
     await ((window as any).Culqi.open() as Promise<any>)
@@ -151,14 +148,12 @@ const CourseForm: Component<FormDataResponse> = (props) => {
 
         meal_type: values.meal_type,
         meals_count: getEventMeals().length,
-        meal_price: getMealPrice(),
 
         event_type: values.event_type,
         sessions_count: getEventSessions().length,
-        session_price: getSessionPrice(),
 
-        arrival_date: values.arrival_date ? getDateTimeForBackEnd(moment(values.arrival_date).startOf('d')) : undefined,
-        departure_date: values.departure_date ? getDateTimeForBackEnd(moment(values.departure_date).endOf('d')) : undefined,
+        arrival_date: values.arrival_date ? getDateTimeForBackEnd(dayjs(values.arrival_date).startOf('d')) : undefined,
+        departure_date: values.departure_date ? getDateTimeForBackEnd(dayjs(values.departure_date).endOf('d')) : undefined,
 
         medical_insurance: values.medical_insurance,
 
@@ -168,7 +163,6 @@ const CourseForm: Component<FormDataResponse> = (props) => {
         emergency_contact_email: values.emergency_contact_email,
 
         currency: getCurrency(),
-        payment_amount: getTotal()
       }
 
       const { form_id } = await submitFormRequest(data)
@@ -352,7 +346,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       >
         {loading() ? "Confirmando Informacion..." : "Confirmar"}
       </button>
-    </form >
+    </form>
   );
 }
 

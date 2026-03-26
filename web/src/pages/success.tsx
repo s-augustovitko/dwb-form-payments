@@ -1,7 +1,7 @@
 import { useSearchParams } from "@solidjs/router";
 import { Show, type Component } from "solid-js";
 
-const Form: Component = () => {
+const Success: Component = () => {
 	const [searchParams, _] = useSearchParams<{
 		full_name?: string,
 		email?: string,
@@ -10,7 +10,7 @@ const Form: Component = () => {
 		form_id?: string
 	}>();
 
-	const handleScreenshot = async () => {
+	const handleScreenshot = () => {
 		window.print()
 	};
 
@@ -28,14 +28,13 @@ const Form: Component = () => {
 				<p><strong>Correo:</strong> {searchParams.email}</p>
 			</div>
 
-
-			<p>Hola {searchParams.full_name}, tu inscripcion fue correctamente completada.</p>
+			<p>Hola {searchParams.full_name}, tu inscripción fue correctamente completada.</p>
 
 			<p>Por favor descarga tu comprobante y muestralo en el curso, te esperamos!</p>
 
 			<button onclick={handleScreenshot} class="btn btn-info">Descarga tu comprobante</button>
-		</div >
+		</div>
 	);
 };
 
-export default Form;
+export default Success;

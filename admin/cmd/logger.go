@@ -26,7 +26,7 @@ func slogLogger(c *fiber.Ctx) error {
 		slog.Duration("latency", latency),
 	)
 
-	isErr := err != nil || statusCode < 200 || statusCode >= 300
+	isErr := err != nil || statusCode < 200 || statusCode >= 400
 	if isErr {
 		errMsg := ""
 		if err != nil {

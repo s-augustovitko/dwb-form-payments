@@ -1,9 +1,9 @@
 import { FiMenu } from "solid-icons/fi";
 import { Toast } from "./components";
-import { type Component, Suspense } from "solid-js";
+import { type Component, Suspense, ParentComponent } from "solid-js";
 import { A } from "@solidjs/router";
 
-const App: Component<{ children: Element }> = (props) => {
+const App: ParentComponent = (props) => {
 	return (
 		<main>
 			<Toast />
@@ -15,7 +15,7 @@ const App: Component<{ children: Element }> = (props) => {
 							<FiMenu />
 						</button>
 						<ul
-							tabIndex="-1"
+							tabIndex={-1}
 							class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
 							<li><A href="/">Inicio</A></li>
 							<li><A href="/settings">Ajustes</A></li>

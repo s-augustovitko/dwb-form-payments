@@ -13,14 +13,14 @@ export const routes: RouteDefinition[] = [
 	{
 		path: "/settings",
 		children: [{
-			path: "",
+			path: "/",
 			component: Settings,
 		},
 		{
 			path: "/create",
 			component: CreateSettings
 			// {
-			// 	path: "/:id",
+			// 	path: ":id",
 			// 	component: UpdateSettings
 		}]
 	},

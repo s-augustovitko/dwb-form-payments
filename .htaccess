@@ -1,9 +1,24 @@
-# Enable rewriting
+# Enable rewrite engine
 RewriteEngine On
 
-# Route API calls to /api
-RewriteRule ^api(/.*)?$ api/$1 [L]
+# Route /api requests to /api (pass through)
+RewriteRule ^api(?:/(.*))?$ api/$1 [L,END]
 
-# Everything else goes to the SPA
-RewriteRule ^$ web/index.html [L]
-RewriteRule ^(.*)$ web/$1 [L]
+# Allow direct access to /web files (no rewrite)
+RewriteRule ^web/ - [L,END]
+
+# Root "/" → SPA entry
+RewriteRule ^$ web/index.html [L,END]
+
+# If file exists in /web
+RewriteCond %{DOCUMENT_ROOT}/web/$1 -f [OR]
+
+# Or directory exists in /web
+RewriteCond %{DOCUMENT_ROOT}/web/$1 -d
+
+# Serve existing file/dir from /web
+RewriteRule ^(.*)$ web/$1 [L,END]
+
+# Fallback → SPA (client-side routing)
+RewriteRule ^.*$ web/index.html [L,END]
+

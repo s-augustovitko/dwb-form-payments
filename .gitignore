@@ -16,3 +16,4 @@
 # Environment / secrets
 **/.env
 **/*.env
+**/.env.*

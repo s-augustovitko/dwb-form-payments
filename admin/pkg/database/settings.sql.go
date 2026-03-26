@@ -80,16 +80,42 @@ func (q *Queries) DeleteSettings(ctx context.Context, id string) (sql.Result, er
 
 const getSettingsByID = `-- name: GetSettingsByID :one
 SELECT
-    id, title, description, form_type, start_date, end_date, meal_price_pen, meal_price_usd, session_price_pen, session_price_usd, disclaimer, active, created_at, updated_at
+    id,
+    title,
+    description,
+    form_type,
+    start_date,
+    end_date,
+    meal_price_pen,
+    meal_price_usd,
+    session_price_pen,
+    session_price_usd,
+    disclaimer,
+    active
 FROM settings
 WHERE
     end_date > NOW() AND
     id = ?
 `
 
-func (q *Queries) GetSettingsByID(ctx context.Context, id string) (Setting, error) {
+type GetSettingsByIDRow struct {
+	ID              string         `json:"id"`
+	Title           string         `json:"title"`
+	Description     string         `json:"description"`
+	FormType        string         `json:"form_type"`
+	StartDate       time.Time      `json:"start_date"`
+	EndDate         time.Time      `json:"end_date"`
+	MealPricePen    string         `json:"meal_price_pen"`
+	MealPriceUsd    string         `json:"meal_price_usd"`
+	SessionPricePen string         `json:"session_price_pen"`
+	SessionPriceUsd string         `json:"session_price_usd"`
+	Disclaimer      sql.NullString `json:"disclaimer"`
+	Active          bool           `json:"active"`
+}
+
+func (q *Queries) GetSettingsByID(ctx context.Context, id string) (GetSettingsByIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getSettingsByID, id)
-	var i Setting
+	var i GetSettingsByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
@@ -103,8 +129,6 @@ func (q *Queries) GetSettingsByID(ctx context.Context, id string) (Setting, erro
 		&i.SessionPriceUsd,
 		&i.Disclaimer,
 		&i.Active,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }

@@ -1,3 +1,4 @@
+.PHONY: all
 all: run
 
 COMPOSE="./compose.yaml"

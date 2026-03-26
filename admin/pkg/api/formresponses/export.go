@@ -15,6 +15,19 @@ import (
 	"github.com/google/uuid"
 )
 
+func sanitizeCSVCell(value string) string {
+	if value == "" {
+		return value
+	}
+
+	switch value[0] {
+	case '=', '+', '-', '@':
+		return "'" + value
+	default:
+		return value
+	}
+}
+
 func strOrDefault(val string, def string) string {
 	if val == "" {
 		return def
@@ -52,7 +65,7 @@ func (s Server) export(c *fiber.Ctx) error {
 	} else {
 		formResponses, err = db.ListAllFormResponses(ctx, settingsID.String())
 	}
-	if err != nil || formResponses == nil {
+	if err != nil {
 		return models.ErrorUnexpected(c, err)
 	}
 
@@ -137,6 +150,10 @@ func (s Server) export(c *fiber.Ctx) error {
 			}...)
 		}
 		row = append(row, item.PaymentID.String)
+
+		for i := range row {
+			row[i] = sanitizeCSVCell(row[i])
+		}
 
 		if err := writer.Write(row); err != nil {
 			return models.ErrorUnexpected(c, err)

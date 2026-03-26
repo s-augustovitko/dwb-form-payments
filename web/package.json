@@ -20,7 +20,7 @@
   "dependencies": {
     "@solidjs/router": "^0.15.4",
     "daisyui": "^5.5.18",
-    "moment": "^2.30.1",
+    "dayjs": "^1.11.20",
     "solid-js": "^1.9.5",
     "tailwindcss": "^4.1.18"
   }

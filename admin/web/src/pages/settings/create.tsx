@@ -4,7 +4,7 @@ import { Input, notificationStore, Select, TextArea } from "../../components";
 import { settingsDataSchema, settingsTypes } from "./schema";
 import { FaSolidAdd, FaSolidChevronLeft, FaSolidTrash } from "solid-icons/fa";
 import { A, useNavigate } from "@solidjs/router";
-import moment from "moment";
+import dayjs from "dayjs";
 
 const CreateSettings: Component = () => {
 	const [loading, setLoading] = createSignal<boolean>(false);
@@ -30,8 +30,8 @@ const CreateSettings: Component = () => {
 				session_price_usd: Number.parseFloat(values.session_price_usd as any),
 				meal_price_pen: Number.parseFloat(values.meal_price_pen as any),
 				meal_price_usd: Number.parseFloat(values.meal_price_usd as any),
-				start_date: getDateTimeForBackEnd(moment(values.start_date).startOf("d")),
-				end_date: getDateTimeForBackEnd(moment(values.end_date).endOf("d")),
+				start_date: getDateTimeForBackEnd(dayjs(values.start_date).startOf("d")),
+				end_date: getDateTimeForBackEnd(dayjs(values.end_date).endOf("d")),
 				sessions: values.sessions.map(item => ({ ...item, session_time: getDateTimeForBackEnd(item.session_time) }))
 			}
 
@@ -185,7 +185,7 @@ const CreateSettings: Component = () => {
 			>
 				{loading() ? "Guardando..." : "Guardar Configuración"}
 			</button>
-		</form >
+		</form>
 	);
 };
 

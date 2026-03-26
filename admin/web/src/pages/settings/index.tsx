@@ -9,8 +9,8 @@ interface SettingsListItem {
 	id: string;
 	form_type: string;
 	title: string;
-	start_date: Date;
-	end_date: Date;
+	start_date: string;
+	end_date: string;
 	session_count: number;
 	meal_count: number;
 	active: boolean;
@@ -95,14 +95,14 @@ const Settings: Component = () => {
 					</div>
 				)}
 			>
-				<Show when={!settings()?.items?.length}>
-					<div>
-						<hr />
-						<p class="text-center p-4">No hay ajustes...</p>
-					</div>
-				</Show>
-
 				<Suspense fallback={<Loading />}>
+					<Show when={settings() && !settings()?.items?.length}>
+						<div>
+							<hr />
+							<p class="text-center p-4">No hay ajustes...</p>
+						</div>
+					</Show>
+					
 					<Show when={settings()?.items?.length}>
 						<div class="overflow-x-auto">
 							<table class="table">

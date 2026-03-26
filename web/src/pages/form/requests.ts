@@ -14,11 +14,9 @@ export interface FormRequestSchema {
 
   meal_type: string;
   meals_count: number;
-  meal_price: number;
 
   event_type: string;
   sessions_count: number;
-  session_price: number;
 
   arrival_date?: string;
   departure_date?: string;
@@ -33,12 +31,16 @@ export interface FormRequestSchema {
 
   // Payment
   currency: string;
-  payment_amount: number;
 }
 
-export async function submitFormRequest(data: FormRequestSchema): Promise<{ order_id: string, form_id: string }> {
+type FormResponseSchema = {
+  order_id: string;
+  form_id: string;
+}
+
+export async function submitFormRequest(data: FormRequestSchema): Promise<FormResponseSchema> {
   try {
-    const res = await request<{ form_id: string, order_id: string }>("submit", Method.POST, undefined, data)
+    const res = await request<FormResponseSchema>("submit", Method.POST, undefined, data)
     return res
   } catch (err) {
     throw err

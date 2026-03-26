@@ -1,7 +1,7 @@
 # --------
 # Builder
 # --------
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o main ./cmd/...
 # --------
 # Runtime
 # --------
-FROM alpine:latest
+FROM alpine:3
 
 WORKDIR /service
 

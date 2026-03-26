@@ -17,8 +17,8 @@ export type SchemaValues = {
   event_sessions?: string[],
   event_days?: string[]
 
-  arrival_date?: Date
-  departure_date?: Date
+  arrival_date?: string
+  departure_date?: string
 
   medical_insurance?: string
 
@@ -142,5 +142,7 @@ export function getSchema(typ: FormType) {
       return courseSchema;
     case FormType.SPECIAL:
       return specialSchema;
+    default:
+      return talkSchema;
   }
 }

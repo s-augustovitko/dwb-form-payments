@@ -38,7 +38,7 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 
 	settingsID := uuid.New().String()
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return database.ListSettingsPagedRow{}, err
 	}

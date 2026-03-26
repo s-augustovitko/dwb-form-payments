@@ -1,6 +1,6 @@
 configs:
   service-dwb-admin_config:
-    file: ./config/prod.json
+    file: ./config/local.json
 
 networks:
   dwb:
@@ -17,7 +17,8 @@ services:
     networks:
       - dwb
     healthcheck:
-      test: ["CMD", "wget", "--spider", "--quiet", "service-dwb-admin:3000/api/v1/livez"]
+      test: ["CMD", "wget", "--spider", "--quiet", "http://service-dwb-admin:3000/api/v1/readyz"]
+      start_period: 10s
 
   caddy:
     image: caddy:2-alpine
@@ -33,12 +34,13 @@ services:
   dozzle:
     restart: always
     image: amir20/dozzle:latest
-    environment:
-      DOZZLE_ENABLE_ACTION: true
-      DOZZLE_ENABLE_SHELL: true
+    # environment:
+    #   DOZZLE_ENABLE_ACTION: true
+    #   DOZZLE_ENABLE_SHELL: true
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - ${XDG_RUNTIME_DIR:-/run/user/1000}/podman/podman.sock:/var/run/docker.sock:ro
     networks:
       - dwb
     healthcheck:
       test: ["CMD", "/dozzle", "healthcheck"]
+      start_period: 30s

@@ -3,10 +3,6 @@ http://dozzle.localhost:3000 {
 }
 
 http://*:3000 {
-    handle /dozzle {
-        reverse_proxy dozzle:8080
-    }
-
     handle /api/v1* {
         reverse_proxy service-dwb-admin:3000
     }

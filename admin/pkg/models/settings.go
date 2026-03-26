@@ -22,7 +22,7 @@ type SettingsData struct {
 }
 
 func (s *SettingsData) Normalize() {
-	s.Title = strings.TrimSpace(strings.ToTitle(s.Title))
+	s.Title = strings.TrimSpace(s.Title)
 	s.Description = strings.TrimSpace(s.Description)
 
 	s.StartDate = s.StartDate.UTC()
@@ -35,7 +35,7 @@ type SessionData struct {
 }
 
 func (s *SessionData) Normalize() {
-	s.Title = strings.TrimSpace(strings.ToTitle(s.Title))
+	s.Title = strings.TrimSpace(s.Title)
 	s.SessionTime = s.SessionTime.UTC()
 }
 
@@ -44,5 +44,5 @@ type MealData struct {
 }
 
 func (s *MealData) Normalize() {
-	s.Title = strings.TrimSpace(strings.ToTitle(s.Title))
+	s.Title = strings.TrimSpace(s.Title)
 }
