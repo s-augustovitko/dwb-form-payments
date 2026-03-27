@@ -15,7 +15,7 @@ const Form: Component = () => {
 		<ErrorBoundary
 			fallback={(_) => (
 				<div role="alert" class="alert alert-error text-lg">
-					<p><strong>404</strong> - Formulario invalido</p>
+					<p><strong>404</strong> - No hay cursos activos en este momento.</p>
 				</div>
 			)}
 		>
