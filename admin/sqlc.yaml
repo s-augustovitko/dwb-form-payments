@@ -1,0 +1,14 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries/*.sql"
+    schema: "migrations/0001_init.up.sql"
+    gen:
+      go:
+        package: "database"
+        out: "pkg/database"
+        sql_package: "database/sql"
+        sql_driver: "github.com/go-sql-driver/mysql"
+        emit_empty_slices: true
+        emit_enum_valid_method: true
+        emit_json_tags: true

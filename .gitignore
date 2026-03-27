@@ -1,0 +1,19 @@
+# Node.js / SolidJS build artifacts
+**/node_modules
+
+# Build output
+**/dist
+
+# OS / Editor / IDE files
+**/.DS_Store
+**/Thumbs.db
+**/*.swp
+**/*.swo
+**/*.idea
+**/*.vscode
+**/*.log
+
+# Environment / secrets
+**/.env
+**/*.env
+**/.env.*
