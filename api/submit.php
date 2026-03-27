@@ -45,6 +45,7 @@ try {
     if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
         throw new Exception('correo invalido');
     }
+    $input['email'] = strtolower($input['email']);
 
     if (!preg_match('/^\+\d+$/', $input['country_code'])) {
         throw new Exception('codigo de pais invalido');
