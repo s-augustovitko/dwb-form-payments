@@ -1,4 +1,4 @@
-import { emailValidate, fields, maxLength, minLength, notAfterDate, notBeforeDate, phoneValidate, required } from "../../utils";
+import { emailValidate, fields, maxLength, minLength, notAfterDate, notBeforeDate, phoneValidate, required, wordChars } from "../../utils";
 import { Currency, FormType } from "./types";
 
 export type SchemaValues = {
@@ -67,8 +67,8 @@ const fullEvents = {
 
 
 const talkSchema = {
-  first_name: fields.string([required(), maxLength(250)], ""),
-  last_name: fields.string([required(), maxLength(250)], ""),
+  first_name: fields.string([required(), maxLength(250), wordChars()], ""),
+  last_name: fields.string([required(), maxLength(250), wordChars()], ""),
 
   email: fields.string([required(), emailValidate(), maxLength(500)], ""),
 

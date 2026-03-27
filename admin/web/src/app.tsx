@@ -1,6 +1,6 @@
 import { FiMenu } from "solid-icons/fi";
 import { Toast } from "./components";
-import { type Component, Suspense, ParentComponent } from "solid-js";
+import { Suspense, type ParentComponent } from "solid-js";
 import { A } from "@solidjs/router";
 
 const App: ParentComponent = (props) => {

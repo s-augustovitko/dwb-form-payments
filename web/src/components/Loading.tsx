@@ -21,3 +21,12 @@ export const Loading: Component = () => {
     </div>
   )
 }
+
+export const LoadingRes: Component = () => {
+  return (
+    <div class="flex flex-col w-full gap-4">
+      <div class="skeleton h-32 w-full"></div>
+    </div>
+  )
+}
+

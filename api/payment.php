@@ -92,6 +92,11 @@ try {
         ":form_id" => $input['form_id'],
     ]);
 
+    if ($payment_status === 'DECLINED') {
+        $user_message = $charge["user_message"] ?? "Intente de nuevo o use otro metodo de pago";
+        throw new Exception("El pago no se pudo procesar: " . $user_message);
+    }
+
     respond([
         'payment_id' => $charge['id'],
         'payment_status' => $payment_status,

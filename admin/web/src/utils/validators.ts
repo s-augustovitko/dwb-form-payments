@@ -29,8 +29,15 @@ export function minWords(min: number): ValidationFn<string> {
   }
 }
 
+const wordCharsRegex = new RegExp(/^[\p{L}\s\-'.]+$/u)
+export function wordChars(): ValidationFn<string> {
+  return (value: string = "") => {
+    if (!value) return
+    return wordCharsRegex.test(value) ? undefined : "El campo tiene caracteres invalidos"
+  }
+}
 
-const emailRegex = new RegExp(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/)
+const emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
 export function emailValidate(): ValidationFn<string> {
   return (value: string = "") => {
     if (!value) return

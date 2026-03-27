@@ -45,6 +45,7 @@ try {
     if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
         throw new Exception('correo invalido');
     }
+    $input['email'] = strtolower($input['email']);
 
     if (!preg_match('/^\+\d+$/', $input['country_code'])) {
         throw new Exception('codigo de pais invalido');
@@ -271,7 +272,7 @@ try {
         ':currency' => $pricing['currency'] ?? 'PEN', # pricing
         ':payment_amount' => $pricing['payment_amount'] ?? 0.0, # pricing
 
-        ':payment_status' => ((float) $pricing['payment_amount'] === 0.0) ? 'NOT_NEEDED' : 'PENDING', # pricing
+        ':payment_status' => ((float) $pricing['payment_amount'] <= 0.0) ? 'NOT_NEEDED' : 'PENDING', # pricing
     ]);
 
     respond([

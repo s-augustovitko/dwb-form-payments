@@ -23,16 +23,11 @@ interface SettingsListResponse {
 }
 
 async function getSettingsList(limit: number, skip: number): Promise<SettingsListResponse> {
-	try {
-		const res = await request<SettingsListResponse>(
-			"settings",
-			Method.GET,
-			{ limit: limit.toString(), skip: skip.toString() }
-		)
-		return res
-	} catch (err) {
-		throw err
-	}
+	return request<SettingsListResponse>(
+		"settings",
+		Method.GET,
+		{ limit: limit.toString(), skip: skip.toString() }
+	)
 }
 
 const Settings: Component = () => {
