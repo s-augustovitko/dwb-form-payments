@@ -93,7 +93,8 @@ try {
     ]);
 
     if ($payment_status === 'DECLINED') {
-        throw new Exception("El pago no se pudo procesar: " . $charge["user_message"]);
+        $user_message = $charge["user_message"] ?? "Intente de nuevo o use otro metodo de pago";
+        throw new Exception("El pago no se pudo procesar: " . $user_message);
     }
 
     respond([

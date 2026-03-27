@@ -5,12 +5,7 @@ import { FormDataResponse } from "./types";
 import { Method, request } from "../../utils/api";
 
 async function getFormData(): Promise<FormDataResponse> {
-	try {
-		const res = await request<FormDataResponse>("form_info", Method.GET)
-		return res
-	} catch (err) {
-		throw err
-	}
+	return request<FormDataResponse>("form_info", Method.GET)
 }
 
 const Form: Component = () => {
