@@ -40,7 +40,7 @@ func (s Server) create(c *fiber.Ctx) error {
 	}
 
 	if rows, err := res.RowsAffected(); err != nil || rows != 1 {
-		return models.ErrorNotFound(c, err)
+		return models.ErrorUnexpected(c, err)
 	}
 
 	return models.Success(c, map[string]string{"created_id": id.String()})

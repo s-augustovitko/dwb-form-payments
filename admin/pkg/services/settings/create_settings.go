@@ -16,8 +16,8 @@ import (
 type CreateSettingsData struct {
 	models.SettingsData
 
-	Meals    []models.MealData    `json:"meals,omitempty"`
-	Sessions []models.SessionData `json:"sessions" validate:"required,gte=1"`
+	Meals    []models.MealData    `json:"meals,omitempty" validate:"dive"`
+	Sessions []models.SessionData `json:"sessions" validate:"required,gte=1,dive"`
 }
 
 func handleTx(tx *sql.Tx, commited *bool, logger *slog.Logger) {
