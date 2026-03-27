@@ -30,7 +30,7 @@ export function minWords(min: number): ValidationFn<string> {
   }
 }
 
-const wordCharsRegex = new RegExp(/^[\p{L}\s]+$/u)
+const wordCharsRegex = new RegExp(/^[\p{L}\s\-'.]+$/u)
 export function wordChars(): ValidationFn<string> {
   return (value: string = "") => {
     if (!value) return
