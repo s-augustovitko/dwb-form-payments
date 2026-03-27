@@ -92,6 +92,10 @@ try {
         ":form_id" => $input['form_id'],
     ]);
 
+    if ($payment_status === 'DECLINED') {
+        throw new Exception("El pago no se pudo procesar: " . $charge["user_message"]);
+    }
+
     respond([
         'payment_id' => $charge['id'],
         'payment_status' => $payment_status,

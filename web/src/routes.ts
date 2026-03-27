@@ -2,7 +2,7 @@ import type { RouteDefinition } from "@solidjs/router";
 import { lazy } from "solid-js";
 
 import Form from "./pages/form";
-import Success from "./pages/success";
+import Result from "./pages/result";
 
 export const routes: RouteDefinition[] = [
 	{
@@ -10,8 +10,8 @@ export const routes: RouteDefinition[] = [
 		component: Form,
 	},
 	{
-		path: "/success",
-		component: Success,
+		path: "/result",
+		component: Result,
 	},
 	{
 		path: "**",

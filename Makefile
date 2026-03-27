@@ -64,11 +64,11 @@ deploy: build
 
 .PHONY: dev
 dev: run
-	@echo "Watching API files and configs for changes..."
+	@echo "Watching files and configs for changes..."
 	@command -v inotifywait >/dev/null 2>&1 || { echo "Error: inotifywait not installed"; exit 1; }; \
 	trap "echo 'Stopping dev watcher'; exit 0" INT; \
 	while true; do \
-		inotifywait -r -e modify,create,delete --exclude 'dist|node_modules' ${API_DIR} ${WEB_DIR} .htaccess .env; \
+		inotifywait -r -e modify,create,delete ${API_DIR} ${WEB_DIR}/src ${WEB_DIR}/.htaccess .env; \
 		echo "Changes detected. Rebuilding dist/..."; \
 		$(MAKE) build; \
 	done
@@ -77,8 +77,6 @@ dev: run
 clean: clean_dist
 	@echo "Stopping and pruning docker resources (no images)"
 	@${DOCKER} compose -f ${COMPOSE} down --volumes --remove-orphans
-	@${DOCKER} container prune -f
-	@${DOCKER} volume prune -f
 
 .PHONY: clean_all
 clean_all: clean_dist

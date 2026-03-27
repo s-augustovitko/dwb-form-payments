@@ -271,7 +271,7 @@ try {
         ':currency' => $pricing['currency'] ?? 'PEN', # pricing
         ':payment_amount' => $pricing['payment_amount'] ?? 0.0, # pricing
 
-        ':payment_status' => ((float) $pricing['payment_amount'] === 0.0) ? 'NOT_NEEDED' : 'PENDING', # pricing
+        ':payment_status' => ((float) $pricing['payment_amount'] <= 0.0) ? 'NOT_NEEDED' : 'PENDING', # pricing
     ]);
 
     respond([

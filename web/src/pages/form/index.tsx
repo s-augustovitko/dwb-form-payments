@@ -1,5 +1,5 @@
 import { type Component, createResource, Suspense, ErrorBoundary, Show } from "solid-js";
-import { Loading, notificationStore } from "../../components";
+import { Loading } from "../../components";
 import MainForm from "./MainForm";
 import { FormDataResponse } from "./types";
 import { Method, request } from "../../utils/api";
@@ -9,7 +9,6 @@ async function getFormData(): Promise<FormDataResponse> {
 		const res = await request<FormDataResponse>("form_info", Method.GET)
 		return res
 	} catch (err) {
-		notificationStore.error((err as any).message)
 		throw err
 	}
 }
@@ -20,10 +19,9 @@ const Form: Component = () => {
 	return (
 		<ErrorBoundary
 			fallback={(_) => (
-				<article class="mb-4">
-					<h2 class="text-lg font-bold mb-2">404</h2>
-					<p>No hay cursos activos en este momento, por favor intente en otro momento.</p>
-				</article>
+				<div role="alert" class="alert alert-error text-lg">
+					<p><strong>404</strong> - Formulario invalido</p>
+				</div>
 			)}
 		>
 			<Suspense fallback={<Loading />}>

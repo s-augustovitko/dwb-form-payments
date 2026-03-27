@@ -74,16 +74,11 @@ const CourseForm: Component<FormDataResponse> = (props) => {
         return
       }
 
-      const values = courseForm.values()
-      const { payment_id, payment_status } = await updatePaymentInfo({
+      await updatePaymentInfo({
         form_id: formId(),
         token
       })
-      navigate("/success?" + new URLSearchParams({
-        full_name: values.first_name + " " + values.last_name,
-        email: values.email?.toLowerCase(),
-        payment_id,
-        payment_status,
+      navigate("/result?" + new URLSearchParams({
         form_id: formId()
       }).toString())
       return
@@ -170,9 +165,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       const { form_id } = await submitFormRequest(data)
       setFormId(form_id)
       if (getTotal() === 0) {
-        navigate("/success?" + new URLSearchParams({
-          full_name: values.first_name + " " + values.last_name,
-          email: values.email?.toLowerCase(),
+        navigate("/result?" + new URLSearchParams({
           form_id: formId()
         }).toString())
         return

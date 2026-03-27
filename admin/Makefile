@@ -26,7 +26,14 @@ run:
 
 .PHONY: dev
 dev: run
-	cd web && npm run dev
+	@echo "Watching files and configs for changes..."
+	@command -v inotifywait >/dev/null 2>&1 || { echo "Error: inotifywait not installed"; exit 1; }; \
+	trap "echo 'Stopping dev watcher'; exit 0" INT; \
+	while true; do \
+		inotifywait -r -e modify,create,delete cmd pkg config web/src; \
+		echo "Changes detected. Rebuilding..."; \
+		$(MAKE) run; \
+	done
 
 .PHONY: run_migrations
 run_migrations:
@@ -41,8 +48,6 @@ stop:
 clean:
 	@echo "Stopping and pruning docker resources (no images)"
 	${DOCKER} compose -f ${COMPOSE} -f ${MIGRATIONS_COMPOSE} --env-file ${ENV_FILE} down --volumes --remove-orphans
-	${DOCKER} container prune -f
-	${DOCKER} volume prune -f
 
 .PHONY: clean_all
 clean_all:
