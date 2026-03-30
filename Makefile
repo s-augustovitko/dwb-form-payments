@@ -1,6 +1,12 @@
-# -------------------------
-# Configuration
-# -------------------------
+include docker.mk
+
+.PHONY: all
+all: run
+
+COMPOSE="./docker/compose.yaml"
+DOCKER="podman"
+ENV_FILE=".env"
+
 API_DIR = api
 WEB_DIR = web
 DIST_DIR = dist
@@ -8,21 +14,8 @@ WEB_DIST_DIR := ${WEB_DIR}/dist
 
 FTP_ENV_FILE = ./.ftp.env
 
-COMPOSE="./docker/compose.yaml"
-DOCKER="podman"
-
-.PHONY: all
-all: run
-
-.PHONY: run
-run: build
-	${DOCKER} compose -f ${COMPOSE} up --build -d $(SERVICE)
-
-# -------------------------
-# Build project
-# -------------------------
 .PHONY: build
-build: clean_dist
+build: clean_dist ## Builds the project
 	@echo "Building project into ${DIST_DIR}..."
 	@set -e; \
 	# Check npm installed
@@ -54,16 +47,13 @@ build: clean_dist
 	cp .env ${DIST_DIR}/; \
 	echo "Build completed successfully"
 
-# -------------------------
-# Deployment via FTP
-# -------------------------
 .PHONY: deploy
-deploy: build
+deploy: build ## Deploy service via FTP - needs .ftp.env to be created
 	@echo "Calling deploy.sh..."
 	@./scripts/deploy.sh
 
 .PHONY: dev
-dev: run
+dev: run ## Runs the project and watches for any changes
 	@echo "Watching files and configs for changes..."
 	@command -v inotifywait >/dev/null 2>&1 || { echo "Error: inotifywait not installed"; exit 1; }; \
 	trap "echo 'Stopping dev watcher'; exit 0" INT; \
@@ -72,55 +62,4 @@ dev: run
 		echo "Changes detected. Rebuilding dist/..."; \
 		$(MAKE) build; \
 	done
-
-.PHONY: clean
-clean: clean_dist
-	@echo "Stopping and pruning docker resources (no images)"
-	@${DOCKER} compose -f ${COMPOSE} down --volumes --remove-orphans
-
-.PHONY: clean_all
-clean_all: clean_dist
-	@echo "Stopping and pruning docker resources (with images)"
-	@${DOCKER} compose -f ${COMPOSE} down --rmi all --volumes --remove-orphans
-	@${DOCKER} container prune -f
-	@${DOCKER} system prune -a -f
-	@${DOCKER} image prune -a -f
-	@${DOCKER} volume prune -f
-
-.PHONY: clean_dist
-clean_dist:
-	@echo "Removing ${DIST_DIR} folder..."
-	@rm -rf ${DIST_DIR}/* ${DIST_DIR}/**
-
-# Tails an docker services logs.
-.PHONY: logs
-logs:
-ifdef SERVICE
-		${DOCKER} compose -f ${COMPOSE} logs -f --tail=400 $(SERVICE)
-else
-		@echo "Please define SERVICE environment/make variable. Example:"
-		@echo
-		@echo "SERVICE=web make logs"
-		@echo
-		@echo "-- or --"
-		@echo
-		@echo "make logs SERVICE=web"
-		@echo
-endif
-
-# Execs into running container.
-.PHONY: exec
-exec:
-ifdef SERVICE
-		${DOCKER} compose -f ${COMPOSE} exec $(SERVICE) /bin/sh
-else
-		@echo "Please define SERVICE environment/make variable. Example:"
-		@echo
-		@echo "SERVICE=web make exec"
-		@echo
-		@echo "-- or --"
-		@echo
-		@echo "make exec SERVICE=web"
-		@echo
-endif
 
