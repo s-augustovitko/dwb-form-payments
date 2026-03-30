@@ -28,7 +28,7 @@ clean_all: clean_dist ## Cleans everything $DOCKER related, not only this projec
 .PHONY: clean_dist
 clean_dist: ## Remove all dist folders (with preview)
 	@find . -type d -name "dist" -print
-	@find . -type d -name "dist" -exec rm -rf {}
+	@find . -type d -name "dist" -exec rm -rf {} +
 
 .PHONY: logs
 logs: ## Tails the docker $SERVICE logs
