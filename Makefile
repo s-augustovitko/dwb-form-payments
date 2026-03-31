@@ -14,6 +14,11 @@ WEB_DIST_DIR := ${WEB_DIR}/dist
 
 FTP_ENV_FILE = ./.ftp.env
 
+.PHONY: deps
+deps:
+	@cd web && npm i
+	$(MAKE) -C admin deps
+
 .PHONY: build
 build: clean_dist ## Builds the project
 	@echo "Building project into ${DIST_DIR}..."
