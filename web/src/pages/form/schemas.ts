@@ -115,24 +115,34 @@ const specialSchema = v.pipe(
 
     arrival_date: v.optional(v.pipe(
       v.string(),
-      v.check((val) => dayjs(val).isValid(), 'Fecha invalida'),
       v.check((val) => {
+        if (!val) return true
+        return dayjs(val).isValid()
+      }, 'Fecha invalida'),
+      v.check((val) => {
+        if (!val) return true
         const min = dayjs().subtract(3, 'month').startOf('d');
         return !dayjs(val).isBefore(min);
       }, 'La fecha no puede ser anterior a hace 3 meses'),
       v.check((val) => {
+        if (!val) return true
         const max = dayjs().add(3, 'month').endOf('d');
         return !dayjs(val).isAfter(max);
       }, 'La fecha no puede ser posterior a 3 meses')
     )),
     departure_date: v.optional(v.pipe(
       v.string(),
-      v.check((val) => dayjs(val).isValid(), 'Fecha invalida'),
       v.check((val) => {
+        if (!val) return true
+        return dayjs(val).isValid()
+      }, 'Fecha invalida'),
+      v.check((val) => {
+        if (!val) return true
         const min = dayjs().startOf('d');
         return !dayjs(val).isBefore(min);
       }, 'La fecha no puede ser anterior a hoy'),
       v.check((val) => {
+        if (!val) return true
         const max = dayjs().add(3, 'month').endOf('d');
         return !dayjs(val).isAfter(max);
       }, 'La fecha no puede ser posterior a 3 meses')

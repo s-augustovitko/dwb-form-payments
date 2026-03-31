@@ -16,7 +16,7 @@ FTP_ENV_FILE = ./.ftp.env
 
 .PHONY: deps
 deps:
-	@cd web && npm i
+	@cd ${WEB_DIR} && npm i
 	$(MAKE) -C admin deps
 
 .PHONY: build

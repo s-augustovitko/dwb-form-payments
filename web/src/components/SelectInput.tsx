@@ -56,6 +56,8 @@ type Props = {
 }
 
 export const SelectInput: Component<Props> = (props) => {
+  const errorId = `${props.input.name}-error`
+
   return (
     <fieldset class="fieldset">
       <label for={props.input.name} class="label">
@@ -69,7 +71,7 @@ export const SelectInput: Component<Props> = (props) => {
           value={props.select.value ?? ""}
           id={props.select.name}
           aria-invalid={!!props.error}
-          aria-errormessage={`${props.select.name}-error`}
+          aria-errormessage={errorId}
           class="select w-1/3 join-item"
           required={props.required}
           disabled={props.disabled}
@@ -91,14 +93,14 @@ export const SelectInput: Component<Props> = (props) => {
           id={props.input.name}
           placeholder={props.label}
           aria-invalid={!!props.error}
-          aria-errormessage={`${props.input.name}-error`}
+          aria-errormessage={errorId}
           class="input validator w-full join-item"
           required={props.required}
           disabled={props.disabled}
         />
       </div>
 
-      {props.error && <div id={`${props.input.name}-error`} class="text-xs text-error mt-2">{props.error}</div>}
+      {props.error && <div id={errorId} class="text-xs text-error mt-2">{props.error}</div>}
     </fieldset >
   )
 }
