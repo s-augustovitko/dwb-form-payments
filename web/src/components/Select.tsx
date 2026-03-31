@@ -1,37 +1,38 @@
-import { Component, createUniqueId, For, Show } from "solid-js"
-import { Field, ValidationFn } from "../utils"
+import { Component, For, JSX, splitProps } from "solid-js"
 import { SelectItem } from "./SelectInput"
 
-interface Props {
-  class?: string
+type Props = {
+  name: string;
+  required?: boolean;
+  value?: string;
 
-  title: string
-  field: Field<string>
+  label?: string;
+  error: string;
   items: SelectItem[]
-  validate?: () => ValidationFn<string>
-  disabled?: () => boolean
-}
+
+  disabled?: boolean;
+
+  ref: (element: HTMLSelectElement) => void;
+  onInput: JSX.EventHandler<HTMLSelectElement, InputEvent>;
+  onChange: JSX.EventHandler<HTMLSelectElement, Event>;
+  onBlur: JSX.EventHandler<HTMLSelectElement, FocusEvent>;
+};
 
 export const Select: Component<Props> = (props) => {
-  const id = createUniqueId()
-
-  const applyValue = (val: string = "") => {
-    props.field.set(val)
-    props.field.setError(props.validate?.()(val) || props.field.validate?.())
-  }
+  const [, inputProps] = splitProps(props, ['label', 'error', 'items']);
 
   return (
-    <fieldset class={`fieldset ${props.class}`}>
-      <label for={id} class="label">{props.title}</label>
+    <fieldset class="fieldset">
+      <label for={props.name} class="label">
+        {props.label} {props.required ? <span>*</span> : <span>(Opcional)</span>}
+      </label>
 
       <select
-        id={id}
-        name={props.field.name}
-        oninput={(e) => applyValue(e.currentTarget.value)}
-        class="select w-full"
-        aria-invalid={!!props.field.error()}
-        value={props.field.get()}
-        disabled={props.disabled?.()}
+        {...inputProps}
+        id={props.name}
+        aria-invalid={!!props.error}
+        aria-errormessage={`${props.name}-error`}
+        class="select validator w-full"
       >
         <For each={props.items}>
           {(item) => (
@@ -44,9 +45,7 @@ export const Select: Component<Props> = (props) => {
         </For>
       </select>
 
-      <Show when={!!props.field.error()}>
-        <p class="text-xs text-error mt-2">{props.field.error()}</p>
-      </Show>
+      {props.error && <div id={`${props.name}-error`} class="text-xs text-error mt-2">{props.error}</div>}
     </fieldset>
   )
 }

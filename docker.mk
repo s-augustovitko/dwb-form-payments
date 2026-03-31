@@ -26,7 +26,7 @@ clean_all: clean_dist ## Cleans everything $DOCKER related, not only this projec
 	@${DOCKER} volume prune -f
 
 .PHONY: clean_dist
-clean_dist: ## Remove all dist folders (with preview)
+clean_dist: ## Remove known dist folders
 	@rm -rf dist web/dist
 
 .PHONY: logs

@@ -1,148 +1,242 @@
-import { emailValidate, fields, maxLength, minLength, notAfterDate, notBeforeDate, phoneValidate, required, wordChars } from "../../utils";
-import { Currency, FormType } from "./types";
-
-export type SchemaValues = {
-  first_name: string;
-  last_name: string;
-  email: string;
-  country_code: string;
-  phone: string;
-  id_type: string;
-  id_value: string;
-
-  meal_type?: string
-  event_meals?: string[]
-
-  event_type?: string,
-  event_sessions?: string[],
-  event_days?: string[]
-
-  arrival_date?: string
-  departure_date?: string
-
-  medical_insurance?: string
-
-  emergency_contact_name?: string
-  emergency_contact_country_code?: string
-  emergency_contact_phone?: string
-  emergency_contact_email?: string
-
-  currency?: string
-}
+import * as v from 'valibot';
+import dayjs from 'dayjs';
+import { EventType } from './types';
 
 const emptyEvents = {
-  meal_type: fields.string([], "REGULAR"),
-  event_meals: fields.stringArray([]),
-  event_type: fields.string([], "FULL"),
-  event_sessions: fields.stringArray([]),
-  event_days: fields.stringArray([]),
-}
+  meal_type: v.optional(v.string(), "REGULAR"),
+  event_meals: v.optional(v.array(v.string()), []),
+  event_type: v.optional(v.string(), "FULL"),
+  event_sessions: v.optional(v.array(v.string()), []),
+  event_days: v.optional(v.array(v.string()), []),
+};
 
 const emptySpecial = {
-  arrival_date: fields.string([]),
-  departure_date: fields.string([]),
-  medical_insurance: fields.string([]),
-  emergency_contact_name: fields.string([]),
-  emergency_contact_country_code: fields.string([], "+51"),
-  emergency_contact_phone: fields.string([]),
-  emergency_contact_email: fields.string([]),
-  currency: fields.string([], Currency.PEN.toString())
-}
+  arrival_date: v.optional(v.string(), ""),
+  departure_date: v.optional(v.string(), ""),
+  medical_insurance: v.optional(v.string(), ""),
+  emergency_contact_name: v.optional(v.string(), ""),
+  emergency_contact_country_code: v.optional(v.string(), "+51"),
+  emergency_contact_phone: v.optional(v.string(), ""),
+  emergency_contact_email: v.optional(v.string(), ""),
+  currency: v.optional(v.string(), "PEN"),
+};
 
 const fullEvents = {
-  meal_type: fields.string([
-    required(),
-    maxLength(10)
-  ], "REGULAR"),
-  event_meals: fields.stringArray([maxLength(64)]),
+  meal_type: v.pipe(
+    v.string(),
+    v.nonEmpty('Campo es requerido'),
+    v.maxLength(10, 'Debe tener menos de 10 caracteres'),
+  ),
+  event_meals: v.optional(v.array(v.pipe(
+    v.string(),
+    v.maxLength(64, 'Debe tener menos de 64 caracteres'),
+  )), []),
+  event_type: v.pipe(
+    v.string(),
+    v.nonEmpty('Campo es requerido'),
+    v.maxLength(10, 'Debe tener menos de 10 caracteres'),
+  ),
+  event_sessions: v.optional(v.array(v.pipe(
+    v.string(),
+    v.maxLength(64, 'Debe tener menos de 64 caracteres')
+  )), []),
+  event_days: v.optional(v.array(v.pipe(
+    v.string(),
+    v.maxLength(64, 'Debe tener menos de 64 caracteres'),
+  )), []),
+};
 
-  event_type: fields.string([
-    required(),
-    maxLength(10)
-  ], "FULL"),
-
-  event_sessions: fields.stringArray([maxLength(64)]),
-  event_days: fields.stringArray([maxLength(64)]),
+const baseInputs = {
+  first_name: v.pipe(
+    v.string(),
+    v.nonEmpty('Campo es requerido'),
+    v.maxLength(250, 'Debe tener menos de 250 caracteres'),
+    v.regex(/^[\p{L}\s\-'.]+$/u, 'El campo tiene caracteres invalidos')
+  ),
+  last_name: v.pipe(
+    v.string(),
+    v.nonEmpty('Campo es requerido'),
+    v.maxLength(250, 'Debe tener menos de 250 caracteres'),
+    v.regex(/^[\p{L}\s\-'.]+$/u, 'El campo tiene caracteres invalidos')
+  ),
+  email: v.pipe(
+    v.string(),
+    v.nonEmpty('Campo es requerido'),
+    v.email('Correo invalido'),
+    v.maxLength(500, 'Debe tener menos de 500 caracteres')
+  ),
+  country_code: v.pipe(
+    v.string(),
+    v.nonEmpty('Campo es requerido'),
+    v.maxLength(64),
+  ),
+  phone: v.pipe(
+    v.string(),
+    v.nonEmpty('Campo es requerido'),
+    v.regex(/^[0-9]+$/, 'Telefono solo debe contener numeros'),
+    v.minLength(3, 'Debe tener al menos 3 caracteres'),
+    v.maxLength(17, 'Debe tener menos de 17 caracteres')
+  ),
+  id_type: v.pipe(
+    v.string(),
+    v.nonEmpty('Campo es requerido'),
+    v.maxLength(10),
+  ),
+  id_value: v.pipe(
+    v.string(),
+    v.nonEmpty('Campo es requerido'),
+    v.minLength(3, 'Debe tener al menos 3 caracteres'),
+    v.maxLength(12, 'Debe tener menos de 12 caracteres')
+  )
 }
 
+// 1. TALK SCHEMA
+const talkSchema = v.pipe(
+  v.object({
+    ...baseInputs,
+    ...emptySpecial,
+    ...emptyEvents,
+  }),
 
-const talkSchema = {
-  first_name: fields.string([required(), maxLength(250), wordChars()], ""),
-  last_name: fields.string([required(), maxLength(250), wordChars()], ""),
+  v.forward(
+    v.check((input) => {
+      if (input.id_type === 'DNI') return /^[0-9]{8}$/.test(input.id_value);
+      return /^[a-zA-Z0-9]{6,12}$/.test(input.id_value);
+    }, (_) => 'Documento invalido'),
+    ['id_value']
+  ),
+);
 
-  email: fields.string([required(), emailValidate(), maxLength(500)], ""),
+// 2. SPECIAL SCHEMA
+const specialSchema = v.pipe(
+  v.object({
+    ...baseInputs,
+    ...fullEvents,
 
-  country_code: fields.string([required(), maxLength(64)], "+51"),
-  phone: fields.string([required(), phoneValidate(), minLength(3), maxLength(17)], ""),
+    arrival_date: v.optional(v.pipe(
+      v.string(),
+      v.check((val) => dayjs(val).isValid(), 'Fecha invalida'),
+      v.check((val) => {
+        const min = dayjs().subtract(3, 'month').startOf('d');
+        return !dayjs(val).isBefore(min);
+      }, 'La fecha no puede ser anterior a hace 3 meses'),
+      v.check((val) => {
+        const max = dayjs().add(3, 'month').endOf('d');
+        return !dayjs(val).isAfter(max);
+      }, 'La fecha no puede ser posterior a 3 meses')
+    )),
+    departure_date: v.optional(v.pipe(
+      v.string(),
+      v.check((val) => dayjs(val).isValid(), 'Fecha invalida'),
+      v.check((val) => {
+        const min = dayjs().startOf('d');
+        return !dayjs(val).isBefore(min);
+      }, 'La fecha no puede ser anterior a hoy'),
+      v.check((val) => {
+        const max = dayjs().add(3, 'month').endOf('d');
+        return !dayjs(val).isAfter(max);
+      }, 'La fecha no puede ser posterior a 3 meses')
+    )),
+    medical_insurance: v.optional(v.pipe(v.string(), v.maxLength(64, 'Debe tener menos de 64 caracteres'))),
+    emergency_contact_name: v.pipe(v.string(), v.nonEmpty('Campo es requerido'), v.maxLength(500)),
+    emergency_contact_country_code: v.pipe(v.string(), v.nonEmpty('Campo es requerido'), v.maxLength(5)),
+    emergency_contact_phone: v.pipe(
+      v.string(),
+      v.nonEmpty('Campo es requerido'),
+      v.regex(/^[0-9]+$/, 'Telefono solo debe contener numeros'),
+      v.minLength(3, 'Debe tener al menos 3 caracteres'),
+      v.maxLength(17, 'Debe tener menos de 17 caracteres')
+    ),
+    emergency_contact_email: v.pipe(v.string(), v.email('Correo invalido'), v.maxLength(500)),
+    currency: v.pipe(v.string(), v.nonEmpty('Campo es requerido'), v.maxLength(5)),
+  }),
 
-  id_type: fields.string([required(), maxLength(10)], "DNI"),
-  id_value: fields.string([required(), minLength(3), maxLength(12)], ""),
+  v.forward(
+    v.check((input) => {
+      if (input.id_type === 'DNI') return /^[0-9]{8}$/.test(input.id_value);
+      return /^[a-zA-Z0-9]{6,12}$/.test(input.id_value);
+    }, (_) => 'Documento invalido'),
+    ['id_value']
+  ),
 
-  ...emptyEvents,
-  ...emptySpecial
-}
+  v.forward(
+    v.check((input) => {
+      if (!input.arrival_date || !input.departure_date) {
+        return true
+      }
 
-const courseSchema = {
-  ...talkSchema,
-  ...fullEvents,
-  ...emptySpecial
-}
+      return dayjs(input.arrival_date).isBefore(input.departure_date)
+    }, (_) => "Fecha de regreso debe ser posterior a la fecha de llegada"),
+    ['departure_date']
+  ),
 
-const specialSchema = {
-  ...talkSchema,
-  ...fullEvents,
 
-  arrival_date: fields.string([
-    notBeforeDate(new Date(new Date().setMonth(new Date().getMonth() - 3))),
-    notAfterDate(new Date(new Date().setMonth(new Date().getMonth() + 3)))
-  ]),
 
-  departure_date: fields.string([
-    notBeforeDate(new Date()),
-    notAfterDate(new Date(new Date().setMonth(new Date().getMonth() + 3)))
-  ]),
+  v.forward(
+    v.check((input) => {
+      if (input.event_type === EventType.DAYS.toString()) {
+        return input.event_days.length > 0
+      }
+      return true
+    }, (_) => "Debe seleccionar al menos un dia"),
+    ['event_days']
+  ),
 
-  medical_insurance: fields.string([
-    maxLength(64)
-  ]),
+  v.forward(
+    v.check((input) => {
+      if (input.event_type === EventType.SESSIONS.toString()) {
+        return input.event_sessions.length > 0
+      }
+      return true
+    }, (_) => "Debe seleccionar al menos un dia"),
+    ['event_sessions']
+  )
+);
 
-  emergency_contact_name: fields.string([
-    required(),
-    maxLength(500)
-  ]),
+// 3. COURSE SCHEMA
+const courseSchema = v.pipe(
+  v.object({
+    ...baseInputs,
+    ...fullEvents,
+    ...emptySpecial,
+  }),
 
-  emergency_contact_country_code: fields.string([
-    required(),
-    maxLength(5)
-  ], "+51"),
+  v.forward(
+    v.check((input) => {
+      if (input.id_type === 'DNI') return /^[0-9]{8}$/.test(input.id_value);
+      return /^[a-zA-Z0-9]{6,12}$/.test(input.id_value);
+    }, (_) => 'Documento invalido'),
+    ['id_value']
+  ),
 
-  emergency_contact_phone: fields.string([
-    required(),
-    phoneValidate(),
-    minLength(3),
-    maxLength(17)
-  ]),
+  v.forward(
+    v.check((input) => {
+      if (input.event_type === EventType.DAYS.toString()) {
+        return input.event_days.length > 0
+      }
+      return true
+    }, (_) => "Debe seleccionar al menos un dia"),
+    ['event_days']
+  ),
 
-  emergency_contact_email: fields.string([
-    emailValidate(),
-    maxLength(500)
-  ]),
+  v.forward(
+    v.check((input) => {
+      if (input.event_type === EventType.SESSIONS.toString()) {
+        return input.event_sessions.length > 0
+      }
+      return true
+    }, (_) => "Debe seleccionar al menos un dia"),
+    ['event_sessions']
+  )
+);
 
-  currency: fields.string([
-    required(),
-    maxLength(5)
-  ], Currency.PEN.toString())
-}
-
-export function getSchema(typ: FormType) {
+export function getSchema(typ: string) {
   switch (typ) {
-    case FormType.TALK:
-      return talkSchema;
-    case FormType.COURSE:
-      return courseSchema;
-    case FormType.SPECIAL:
-      return specialSchema;
-    default:
-      return talkSchema;
+    case 'TALK': return talkSchema;
+    case 'COURSE': return courseSchema;
+    case 'SPECIAL': return specialSchema;
+    default: return talkSchema;
   }
 }
+
+export type FormSchema = v.InferInput<ReturnType<typeof getSchema>>;

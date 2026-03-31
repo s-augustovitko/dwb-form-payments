@@ -1,14 +1,12 @@
 import { Component, createSignal, Show } from "solid-js"
-import { countryCodesList, currencyTypesList, EventDays, EventType, eventTypesList, FormDataResponse, idTypesList, mealTypesList, FormType, Currency } from "./types";
+import { countryCodesList, currencyTypesList, EventDays, EventType, eventTypesList, FormDataResponse, idTypesList, mealTypesList, FormType, Currency, IdType, MealType } from "./types";
 import {
-  idValidate, getMoneyDisplay, eventDaysValidate, eventSessionsValidate,
-  createForm,
+  getMoneyDisplay,
   getDateTimeForBackEnd,
   getDateDisplay,
   RSA_PUB_ID,
   RSA_PUB_VAL,
   PUBLIC_KEY,
-  notBeforeDate,
   RETURN_URL,
 } from "../../utils";
 import {
@@ -18,18 +16,36 @@ import {
 } from "../../components"
 import { Summary } from "./Summary";
 import { getDaysFromSessions, getDaysList, getMealsList, getSessionList } from "./utils";
-import { getSchema } from "./schemas";
+import { FormSchema, getSchema } from "./schemas";
 import { FormRequestSchema, submitFormRequest, updatePaymentInfo } from "./requests";
 import dayjs from "dayjs";
 import { useNavigate } from "@solidjs/router";
+import { createForm, getValue, SubmitHandler, valiForm } from "@modular-forms/solid";
 
 const CourseForm: Component<FormDataResponse> = (props) => {
   const [loading, setLoading] = createSignal<boolean>(false)
   const [formId, setFormId] = createSignal<string>('')
-  const courseForm = createForm(getSchema(props.settings?.form_type || FormType.TALK))
+
   const navigate = useNavigate()
 
-  const getCurrency = (): string => courseForm.fields.currency?.get() || Currency.PEN
+  const [formDataStore, { Form, Field }] = createForm<FormSchema>({
+    validate: valiForm(getSchema(props.settings?.form_type || 'TALK')),
+    initialValues: {
+      id_type: IdType.DNI.toString(),
+      country_code: "+51",
+      emergency_contact_country_code: "+51",
+      event_type: EventType.FULL.toString(),
+      meal_type: MealType.REGULAR.toString(),
+      currency: Currency.PEN.toString(),
+      event_meals: [],
+      event_days: [],
+      event_sessions: [],
+    },
+    validateOn: 'input',
+  });
+
+  const getEventType = (): string => getValue(formDataStore, 'event_type') as string || EventType.FULL.toString()
+  const getCurrency = (): string => getValue(formDataStore, 'currency') as string || Currency.PEN.toString()
   const getSessionPrice = (): number => (getCurrency() === Currency.USD ? props.settings?.session_price_usd : props.settings?.session_price_pen) || 0
   const getMealPrice = (): number => (getCurrency() === Currency.USD ? props.settings?.meal_price_usd : props.settings?.meal_price_pen) || 0
 
@@ -42,22 +58,26 @@ const CourseForm: Component<FormDataResponse> = (props) => {
   // const mealMap = (): Record<string, string> => convertListToMapping(meals())
   // const sessionMap = (): Record<string, string> => convertListToMapping(sessions())
 
-  const getEventMeals = (): string[] => courseForm.fields.event_meals?.get() || []
+  const getEventMeals = (): string[] => getValue(formDataStore, 'event_meals') as string[] || []
+
   const getEventSessions = (): string[] => {
-    switch (courseForm.fields.event_type?.get() || EventType.FULL.toString()) {
+    const eventDays = getValue(formDataStore, 'event_days') as string[] || []
+    const eventSessions = getValue(formDataStore, 'event_sessions') as string[] || []
+
+    switch (getEventType()) {
       case EventType.FULL.toString():
         return sessions().map(item => item.value)
       case EventType.DAYS.toString():
-        return courseForm.fields.event_days?.get()?.reduce((acc: string[], newVal: string) => {
+        return eventDays.reduce((acc: string[], newVal: string) => {
           return [...acc, ...dayMap()[newVal]?.sessions]
         }, [])
       case EventType.SESSIONS.toString():
-        return courseForm.fields.event_sessions?.get() || []
+        return eventSessions || []
     }
 
     return []
   }
-  const getTotal = () => (getEventSessions().length || 0) * getSessionPrice() + getEventMeals().length * getMealPrice()
+  const getTotal = () => getEventSessions().length * getSessionPrice() + getEventMeals().length * getMealPrice()
 
   const handleCulqiAction = async () => {
     setLoading(true)
@@ -90,7 +110,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
   }
 
   const openCulqi = async () => {
-    const email = (courseForm.fields.email?.get() || "")?.trim().toLowerCase()
+    const email = (getValue(formDataStore, 'email') as string || "")?.trim().toLowerCase()
     const settings = {
       title: props.settings?.title || "Curso " + getDateDisplay(),
       currency: getCurrency(),
@@ -124,13 +144,9 @@ const CourseForm: Component<FormDataResponse> = (props) => {
     await ((window as any).Culqi.open() as Promise<any>)
   }
 
-  const submit = async (e: Event) => {
-    e.preventDefault();
-    if (!courseForm.validate()) return
-
+  const handleSubmit: SubmitHandler<FormSchema> = async (values, _) => {
     setLoading(true)
     try {
-      const values = courseForm.values()
       const data: FormRequestSchema = {
         form_id: formId() || undefined,
         settings_id: props.settings?.id || "",
@@ -138,15 +154,15 @@ const CourseForm: Component<FormDataResponse> = (props) => {
         first_name: values.first_name,
         last_name: values.last_name,
         email: values.email,
-        country_code: values.country_code,
+        country_code: values.country_code || "+51",
         phone: values.phone,
         id_type: values.id_type || "DNI",
         id_value: values.id_value,
 
-        meal_type: values.meal_type,
+        meal_type: values.meal_type || "REGULAR",
         meals_count: getEventMeals().length,
 
-        event_type: values.event_type,
+        event_type: values.event_type || "FULL",
         sessions_count: getEventSessions().length,
 
         arrival_date: values.arrival_date ? getDateTimeForBackEnd(dayjs(values.arrival_date).startOf('d')) : undefined,
@@ -155,7 +171,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
         medical_insurance: values.medical_insurance,
 
         emergency_contact_name: values.emergency_contact_name,
-        emergency_contact_country_code: values.emergency_contact_country_code,
+        emergency_contact_country_code: values.emergency_contact_country_code || "+51",
         emergency_contact_phone: values.emergency_contact_phone,
         emergency_contact_email: values.emergency_contact_email,
 
@@ -177,151 +193,265 @@ const CourseForm: Component<FormDataResponse> = (props) => {
     } finally {
       setLoading(false)
     }
-  }
+  };
 
   return (
-    <form onsubmit={submit}>
+    <Form onSubmit={handleSubmit}>
       <legend class="fieldset-legend">Datos Personales</legend>
 
-      <Input
-        title="Nombre(s) *"
-        field={courseForm.fields.first_name}
-        disabled={loading}
-      />
+      <Field name="first_name">
+        {(field, props) => (
+          <Input
+            {...props}
+            value={field.value}
+            error={field.error}
+            required
+            label="Nombre(s)"
+            disabled={loading()}
+          />
+        )}
+      </Field>
 
-      <Input
-        title="Apellido(s) *"
-        field={courseForm.fields.last_name}
-        disabled={loading}
-      />
+      <Field name="last_name">
+        {(field, props) => (
+          <Input
+            {...props}
+            value={field.value}
+            error={field.error}
+            required
+            disabled={loading()}
+            label="Apellido(s)"
+          />
+        )}
+      </Field>
 
-      <Input
-        type="email"
-        inputmode="email"
-        title="Email *"
-        field={courseForm.fields.email}
-        disabled={loading}
-      />
+      <Field name="email">
+        {(field, props) => (
+          <Input
+            {...props}
+            value={field.value}
+            error={field.error}
+            required
+            disabled={loading()}
+            label="Email"
+            type="email"
+            inputmode="email"
+          />
+        )}
+      </Field>
 
-      <SelectInput
-        type="tel"
-        inputmode="tel"
-        title={"Telefono *"}
-        fieldInput={courseForm.fields.phone}
-        fieldSelect={courseForm.fields.country_code}
-        itemsSelect={countryCodesList}
-        disabled={loading}
-      />
+      <Field name="country_code">
+        {(selectField, selectProps) => (
+          <Field name="phone">
+            {(inputField, inputProps) => (
+              <SelectInput
+                input={{ ...inputProps, value: inputField.value, type: 'tel', inputmode: 'tel' }}
+                select={{ ...selectProps, value: selectField.value }}
+                error={inputField.error || selectField.error}
+                disabled={loading()}
+                items={countryCodesList}
+                required
+                label="Telefono"
+              />
+            )}
+          </Field>
+        )}
+      </Field>
 
-      <SelectInput
-        title={"Documento de Identidad *"}
-        fieldInput={courseForm.fields.id_value}
-        fieldSelect={courseForm.fields.id_type}
-        itemsSelect={idTypesList}
-        validateInput={() => idValidate(courseForm.fields.id_type.get())}
-        disabled={loading}
-      />
-
+      <Field name="id_type">
+        {(selectField, selectProps) => (
+          <Field name="id_value">
+            {(inputField, inputProps) => (
+              <SelectInput
+                input={{ ...inputProps, value: inputField.value }}
+                select={{ ...selectProps, value: selectField.value }}
+                error={inputField.error || selectField.error}
+                disabled={loading()}
+                items={idTypesList}
+                required
+                label="Documento de Identidad"
+              />
+            )}
+          </Field>
+        )}
+      </Field>
       <Show when={props.settings?.form_type === FormType.SPECIAL}>
-        <Input
-          type="date"
-          title="Fecha de Llegada (Opcional)"
-          field={courseForm.fields.arrival_date}
-          disabled={loading}
-        />
+        <Field name="arrival_date">
+          {(field, props) => (
+            <Input
+              {...props}
+              value={field.value}
+              error={field.error}
+              label="Fecha de Llegada"
+              disabled={loading()}
+              type="date"
+            />
+          )}
+        </Field>
 
-        <Input
-          type="date"
-          title="Fecha de Regreso (Opcional)"
-          field={courseForm.fields.departure_date}
-          validate={() => notBeforeDate(courseForm.fields.arrival_date.get())}
-          disabled={loading}
-        />
+        <Field name="departure_date">
+          {(field, props) => (
+            <Input
+              {...props}
+              value={field.value}
+              error={field.error}
+              label="Fecha de Regreso"
+              disabled={loading()}
+              type="date"
+            />
+          )}
+        </Field>
 
-        <Input
-          title="Seguro Medico (Opcional)"
-          field={courseForm.fields.medical_insurance}
-          disabled={loading}
-        />
+        <Field name="medical_insurance">
+          {(field, props) => (
+            <Input
+              {...props}
+              value={field.value}
+              error={field.error}
+              label="Seguro Medico"
+              disabled={loading()}
+            />
+          )}
+        </Field>
 
         <legend class="fieldset-legend mt-4">Contacto de Emergencia</legend>
 
-        <Input
-          title="Contacto de Emergencia: Nombre y Apellido *"
-          field={courseForm.fields.emergency_contact_name}
-          disabled={loading}
-        />
+        <Field name="emergency_contact_name">
+          {(field, props) => (
+            <Input
+              {...props}
+              value={field.value}
+              error={field.error}
+              label="Contacto de Emergencia: Nombre y Apellido"
+              required
+              disabled={loading()}
+            />
+          )}
+        </Field>
 
-        <SelectInput
-          title={"Telefono *"}
-          type="tel"
-          inputmode="tel"
-          fieldInput={courseForm.fields.emergency_contact_phone}
-          fieldSelect={courseForm.fields.emergency_contact_country_code}
-          itemsSelect={countryCodesList}
-          disabled={loading}
-        />
+        <Field name="emergency_contact_country_code">
+          {(selectField, selectProps) => (
+            <Field name="emergency_contact_phone">
+              {(inputField, inputProps) => (
+                <SelectInput
+                  input={{ ...inputProps, value: inputField.value, type: 'tel', inputmode: 'tel' }}
+                  select={{ ...selectProps, value: selectField.value }}
+                  error={inputField.error || selectField.error}
+                  disabled={loading()}
+                  items={countryCodesList}
+                  required
+                  label="Contacto de Emergencia: Telefono"
+                />
+              )}
+            </Field>
+          )}
+        </Field>
 
-        <Input
-          type="email"
-          inputmode="email"
-          title="Contacto de Emergencia: Email (Opcional)"
-          field={courseForm.fields.emergency_contact_email}
-          disabled={loading}
-        />
+
+        <Field name="emergency_contact_email">
+          {(field, props) => (
+            <Input
+              {...props}
+              value={field.value}
+              error={field.error}
+              required
+              disabled={loading()}
+              label="Contacto de Emergencia: Email"
+              type="email"
+              inputmode="email"
+            />
+          )}
+        </Field>
       </Show>
 
       <Show when={props.settings?.form_type === FormType.SPECIAL || props.settings?.form_type === FormType.COURSE}>
         <legend class="fieldset-legend mt-4">Evento</legend>
 
-        <Select
-          title={"Moneda *"}
-          field={courseForm.fields.currency}
-          items={currencyTypesList}
-          disabled={loading}
-        />
+        <Field name="currency">
+          {(field, props) => (
+            <Select
+              {...props}
+              value={field.value}
+              error={field.error}
+              required
+              disabled={loading()}
+              items={currencyTypesList}
+              label="Moneda"
+            />
+          )}
+        </Field>
 
-        <Select
-          title={"Tipo de Comida *"}
-          field={courseForm.fields.meal_type}
-          items={mealTypesList}
-          disabled={loading}
-        />
+        <Field name="meal_type">
+          {(field, props) => (
+            <Select
+              {...props}
+              value={field.value}
+              error={field.error}
+              required
+              disabled={loading()}
+              items={mealTypesList}
+              label="Tipo de Comida"
+            />
+          )}
+        </Field>
 
         <Show when={!!props.meals?.length}>
-          <MultiSelect
-            title={"Seleccion de Almuerzos *"}
-            field={courseForm.fields.event_meals}
-            items={meals}
-            disabled={loading}
-          />
+          <Field name="event_meals" type="string[]">
+            {(field, props) => (
+              <MultiSelect
+                {...props}
+                value={field.value ?? []}
+                error={field.error}
+                disabled={loading()}
+                label="Seleccion de Almuerzos"
+                items={meals()}
+              />
+            )}
+          </Field>
         </Show>
 
-        <Select
-          title={"Eventos *"}
-          field={courseForm.fields.event_type}
-          items={eventTypesList}
-          disabled={loading}
-        />
+        <Field name="event_type">
+          {(field, props) => (
+            <Select
+              {...props}
+              value={field.value}
+              error={field.error}
+              required
+              disabled={loading()}
+              items={eventTypesList}
+              label="Eventos"
+            />
+          )}
+        </Field>
 
-        <Show when={courseForm.fields.event_type.get() === EventType.SESSIONS}>
-          <MultiSelect
-            title={`Seleccion de Sesiones ${getMoneyDisplay(getCurrency(), getSessionPrice())} C/U *`}
-            field={courseForm.fields.event_sessions}
-            items={sessions}
-            validate={() => eventSessionsValidate((courseForm.fields.event_type).get())}
-            disabled={loading}
-          />
+        <Show when={getEventType() === EventType.SESSIONS}>
+          <Field name="event_sessions" type="string[]">
+            {(field, props) => (
+              <MultiSelect
+                {...props}
+                value={field.value ?? []}
+                error={field.error}
+                disabled={loading()}
+                label={`Seleccion de Sesiones ${getMoneyDisplay(getCurrency(), getSessionPrice())} C/U`}
+                items={sessions()}
+              />
+            )}
+          </Field>
         </Show>
 
-        <Show when={courseForm.fields.event_type.get() === EventType.DAYS}>
-          <MultiSelect
-            title={"Seleccion de Dias *"}
-            field={courseForm.fields.event_days}
-            items={days}
-            validate={() => eventDaysValidate((courseForm.fields.event_type).get())}
-            disabled={loading}
-          />
+        <Show when={getEventType() === EventType.DAYS}>
+          <Field name="event_days" type="string[]">
+            {(field, props) => (
+              <MultiSelect
+                {...props}
+                value={field.value ?? []}
+                error={field.error}
+                disabled={loading()}
+                label="Seleccion de Dias"
+                items={days()}
+              />
+            )}
+          </Field>
         </Show>
       </Show>
 
@@ -342,7 +472,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       >
         {loading() ? "Confirmando Informacion..." : "Confirmar"}
       </button>
-    </form>
+    </Form>
   );
 }
 
