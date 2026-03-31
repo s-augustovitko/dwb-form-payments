@@ -5,7 +5,7 @@ import { ValidationFn } from "./form"
 export function minLength<T>(min: number): ValidationFn<string | T[]> {
   return (value: string | T[] = "") => {
     if (value?.length < min) {
-      return `Debe tener al menos ${min} caracteres`
+      return `Should be at least ${min} characters`
     }
   }
 }
@@ -14,7 +14,7 @@ export function maxLength<T>(max: number): ValidationFn<string | T[]> {
   return (value: string | T[] = "") => {
     if (!value) return
     if (value?.length > max) {
-      return `Debe tener menos de ${max} caracteres`
+      return `Should be at most ${max} characters`
     }
   }
 }
@@ -24,7 +24,7 @@ export function minWords(min: number): ValidationFn<string> {
     if (!value) return
     const words = value.trim().split(/\s+/).filter(Boolean)
     if (words.length < min) {
-      return `Debe tener al menos ${min} palabras`
+      return `Should be at least ${min} words`
     }
   }
 }
@@ -33,7 +33,7 @@ const wordCharsRegex = new RegExp(/^[\p{L}\s\-'.]+$/u)
 export function wordChars(): ValidationFn<string> {
   return (value: string = "") => {
     if (!value) return
-    return wordCharsRegex.test(value) ? undefined : "El campo tiene caracteres invalidos"
+    return wordCharsRegex.test(value) ? undefined : "Field has invalid characters"
   }
 }
 
@@ -42,7 +42,7 @@ export function emailValidate(): ValidationFn<string> {
   return (value: string = "") => {
     if (!value) return
     if (!emailRegex.test(value)) {
-      return "Correo invalido"
+      return "Invalid email"
     }
   }
 }
@@ -52,7 +52,7 @@ export function phoneValidate(): ValidationFn<string> {
   return (value: string = "") => {
     if (!value) return
     if (!phoneRegex.test(value)) {
-      return "Telefono solo debe contener numeros"
+      return "Phone must only contain numbers"
     }
   }
 }
@@ -74,11 +74,11 @@ export function notBeforeDate(minDate: Date | string): ValidationFn<Date | strin
 
     try {
       if (dayjs(value).isBefore(min)) {
-        return `La fecha no puede ser anterior a ${getDateDisplay(min)}`;
+        return `Date should not be before ${getDateDisplay(min)}`;
       }
       return undefined
     } catch (_) {
-      return "Fecha invalida"
+      return "Invalid date"
     }
   }
 }
@@ -91,11 +91,11 @@ export function notAfterDate(maxDate: Date | string): ValidationFn<Date | string
 
     try {
       if (dayjs(value).isAfter(max)) {
-        return `La fecha no puede ser posterior a ${getDateDisplay(max)}`;
+        return `Date should not be after ${getDateDisplay(max)}`;
       }
       return undefined
     } catch (_) {
-      return "Fecha invalida"
+      return "Invalid date"
     }
   }
 }
@@ -107,7 +107,7 @@ export function required<T>(): ValidationFn<T> {
       (typeof value === "string" && value.trim() === "") ||
       (Array.isArray(value) && value.length === 0)
     ) {
-      return "Campo es requerido"
+      return "Required field"
     }
   }
 }
@@ -115,7 +115,7 @@ export function required<T>(): ValidationFn<T> {
 export function minValue(min: number): ValidationFn<number> {
   return (value: number) => {
     if (value < min) {
-      return `Debe ser mayor o igual a ${min}`
+      return `Should be greater or equal to ${min}`
     }
   }
 }

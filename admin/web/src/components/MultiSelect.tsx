@@ -13,6 +13,7 @@ interface Props {
   field: Field<string[]>
   items: () => MultiSelectItem[]
   validate?: () => ValidationFn<string[]>
+  disabled?: () => boolean
 }
 
 export const MultiSelect: Component<Props> = (props) => {
@@ -25,7 +26,7 @@ export const MultiSelect: Component<Props> = (props) => {
 
     props.field.set(next)
     props.field.setError(
-      props.validate?.()(next) || props.field.validate?.(next)
+      props.validate?.()(next) || props.field.validate?.()
     )
   }
 
@@ -51,6 +52,7 @@ export const MultiSelect: Component<Props> = (props) => {
                   toggleValue(value, e.currentTarget.checked)
                 }
                 aria-invalid={!!props.field.error()}
+                disabled={props.disabled?.()}
               />
 
               <div>

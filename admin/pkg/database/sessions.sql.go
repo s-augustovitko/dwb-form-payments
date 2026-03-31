@@ -52,6 +52,45 @@ func (q *Queries) DeleteSession(ctx context.Context, arg DeleteSessionParams) (s
 	return q.db.ExecContext(ctx, deleteSession, arg.ID, arg.SettingsID)
 }
 
+const listSessionsBySettingsId = `-- name: ListSessionsBySettingsId :many
+SELECT
+    id,
+    title,
+    session_time
+FROM sessions
+WHERE settings_id = ?
+ORDER BY id
+`
+
+type ListSessionsBySettingsIdRow struct {
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	SessionTime time.Time `json:"session_time"`
+}
+
+func (q *Queries) ListSessionsBySettingsId(ctx context.Context, settingsID string) ([]ListSessionsBySettingsIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, listSessionsBySettingsId, settingsID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListSessionsBySettingsIdRow{}
+	for rows.Next() {
+		var i ListSessionsBySettingsIdRow
+		if err := rows.Scan(&i.ID, &i.Title, &i.SessionTime); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateSession = `-- name: UpdateSession :execresult
 UPDATE sessions
 SET

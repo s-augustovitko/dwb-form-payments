@@ -1,9 +1,10 @@
 import { type Component, createResource, Suspense, For, ErrorBoundary, Show, createSignal } from "solid-js";
 import { Loading, notificationStore } from "../../components";
-import { getDateDisplay, Method, request } from "../../utils";
-import { FaSolidPencil } from 'solid-icons/fa'
+import { BASE_URL, getDateDisplay, Method, request } from "../../utils";
+import { FaSolidFileExport, FaSolidPencil } from 'solid-icons/fa'
 import { A } from "@solidjs/router";
 import { Pagination } from "../../components/Pagination";
+import dayjs from "dayjs";
 
 interface SettingsListItem {
 	id: string;
@@ -11,10 +12,7 @@ interface SettingsListItem {
 	title: string;
 	start_date: string;
 	end_date: string;
-	session_count: number;
-	meal_count: number;
 	active: boolean;
-	count: number;
 }
 
 interface SettingsListResponse {
@@ -77,15 +75,15 @@ const Settings: Component = () => {
 	return (
 		<div>
 			<div class="flex items-center justify-between mb-4">
-				<h2 class="text-lg font-bold">Lista de Ajustes</h2>
-				<A href="create" class="btn btn-primary">Crear Ajuste</A>
+				<h2 class="text-lg font-bold">Settings List</h2>
+				<A href="create" class="btn btn-primary">Create Setting</A>
 			</div>
 
 			<ErrorBoundary
 				fallback={(_) => (
 					<div>
 						<hr />
-						<p class="text-center p-4">Error obteniendo ajustes</p>
+						<p class="text-center p-4">Error getting settings</p>
 					</div>
 				)}
 			>
@@ -93,7 +91,10 @@ const Settings: Component = () => {
 					<Show when={settings() && !settings()?.items?.length}>
 						<div>
 							<hr />
-							<p class="text-center p-4">No hay ajustes...</p>
+							<div class="p-4 grid grid-cols-1 gap-4">
+								<p class="text-center">No settings found...</p>
+								<A href="create" class="btn btn-primary">Create Settings</A>
+							</div>
 						</div>
 					</Show>
 
@@ -102,14 +103,12 @@ const Settings: Component = () => {
 							<table class="table">
 								<thead>
 									<tr>
-										<th>Titulo</th>
-										<th>Tipo</th>
-										<th>Estado</th>
-										<th># Sessiones</th>
-										<th># Comidas</th>
-										<th>Inicio</th>
-										<th>Final</th>
-										<th>Acciones</th>
+										<th>Title</th>
+										<th>Type</th>
+										<th>Status</th>
+										<th>Start</th>
+										<th>End</th>
+										<th>Actions</th>
 									</tr>
 								</thead>
 
@@ -117,7 +116,10 @@ const Settings: Component = () => {
 									<For each={settings()?.items}>
 										{(item, _) => (
 											<tr>
-												<td class="w-32 truncate">{item.title}</td>
+												<td class="max-w-xs truncate">
+													{dayjs(item.end_date).isBefore(new Date()) ? <span class="badge badge-error mr-2">PAST</span> : ""}
+													{item.title}
+												</td>
 												<td>
 													<span
 														class="badge"
@@ -140,15 +142,20 @@ const Settings: Component = () => {
 														</button>
 													</div>
 												</td>
-												<td>{item.session_count}</td>
-												<td>{item.meal_count}</td>
 												<td>{getDateDisplay(item.start_date)}</td>
 												<td>{getDateDisplay(item.end_date)}</td>
 												<td class="h-full">
-													<div class="flex items-center gap-4">
-														<A href={`${item.id}`} class="btn btn-ghost btn-circle btn-info">
-															<FaSolidPencil />
-														</A>
+													<div class="flex items-center">
+														<div class="tooltip" data-tip="edit">
+															<A href={`${item.id}`} class="btn btn-ghost btn-circle btn-info">
+																<FaSolidPencil />
+															</A>
+														</div>
+														<div class="tooltip" data-tip="export">
+															<a href={`${BASE_URL}/form_responses/${item.id}/export`} target="_blank" class="btn btn-ghost btn-circle btn-info">
+																<FaSolidFileExport />
+															</a>
+														</div>
 													</div>
 												</td>
 											</tr>

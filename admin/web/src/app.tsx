@@ -17,12 +17,12 @@ const App: ParentComponent = (props) => {
 						<ul
 							tabIndex={-1}
 							class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-							<li><A href="/">Inicio</A></li>
-							<li><A href="/settings">Ajustes</A></li>
+							<li><A href="/">Home</A></li>
+							<li><A href="/settings">Settings</A></li>
 						</ul>
 					</div>
 
-					<A href="/" class="btn btn-ghost text-xl">Administrador DWB</A>
+					<A href="/" class="btn btn-ghost text-xl">DWB Admin</A>
 				</div>
 			</div>
 

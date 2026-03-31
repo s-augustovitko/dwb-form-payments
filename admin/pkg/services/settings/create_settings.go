@@ -80,7 +80,6 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 		return database.ListSettingsPagedRow{}, fmt.Errorf("could not create settings: %s", err.Error())
 	}
 
-	var mealCount int64
 	for _, meal := range data.Meals {
 		res, err = qtx.CreateMeal(ctx, database.CreateMealParams{
 			ID:         uuid.New().String(),
@@ -94,11 +93,8 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 		if rows, err := res.RowsAffected(); err != nil || rows != 1 {
 			return database.ListSettingsPagedRow{}, fmt.Errorf("could not create meal: %s", err.Error())
 		}
-
-		mealCount++
 	}
 
-	var sessionCount int64
 	for _, session := range data.Sessions {
 		res, err = qtx.CreateSession(ctx, database.CreateSessionParams{
 			ID:          uuid.New().String(),
@@ -113,8 +109,6 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 		if rows, err := res.RowsAffected(); err != nil || rows != 1 {
 			return database.ListSettingsPagedRow{}, fmt.Errorf("could not create session: %s", err.Error())
 		}
-
-		sessionCount++
 	}
 
 	if err = tx.Commit(); err != nil {
@@ -123,13 +117,11 @@ func CreateSettings(ctx context.Context, db *sql.DB, data CreateSettingsData, lo
 	committed = true
 
 	return database.ListSettingsPagedRow{
-		ID:           settingsID,
-		FormType:     data.FormType,
-		Title:        data.Title,
-		StartDate:    data.StartDate,
-		EndDate:      data.EndDate,
-		MealCount:    mealCount,
-		SessionCount: sessionCount,
-		Active:       true,
+		ID:        settingsID,
+		FormType:  data.FormType,
+		Title:     data.Title,
+		StartDate: data.StartDate,
+		EndDate:   data.EndDate,
+		Active:    true,
 	}, nil
 }

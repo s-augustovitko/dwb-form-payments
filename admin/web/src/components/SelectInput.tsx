@@ -34,6 +34,7 @@ interface Props {
 
   validateInput?: () => ValidationFn<string>
   validateSelect?: () => ValidationFn<string>
+  disabled?: () => boolean
 }
 
 export const SelectInput: Component<Props> = (props) => {
@@ -58,6 +59,7 @@ export const SelectInput: Component<Props> = (props) => {
           class="select w-1/3 join-item"
           aria-invalid={!!props.fieldSelect.error()}
           value={props.fieldSelect.get()}
+          disabled={props.disabled?.()}
         >
           <For each={props.itemsSelect}>
             {(item) => (
@@ -81,6 +83,7 @@ export const SelectInput: Component<Props> = (props) => {
           aria-invalid={!!props.fieldInput.error()}
           value={props.fieldInput.get()}
           inputmode={props.inputmode || "text"}
+          disabled={props.disabled?.()}
         />
       </div>
 

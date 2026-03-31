@@ -15,6 +15,7 @@ interface Props {
   title: string
   field: Field<any>
   validate?: () => ValidationFn<string>
+  disabled?: () => boolean
 }
 
 export const TextArea: Component<Props> = (props) => {
@@ -39,6 +40,7 @@ export const TextArea: Component<Props> = (props) => {
         inputmode={props.inputmode || "text"}
         aria-invalid={!!props.field.error()}
         value={props.field.get()}
+        disabled={props.disabled?.()}
       />
 
       <Show when={!!props.field.error()}>
