@@ -47,7 +47,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
   const getEventType = (): string => getValue(formDataStore, 'event_type') as string || EventType.FULL.toString()
   const getMealType = (): string => getValue(formDataStore, 'meal_type') as string || MealType.REGULAR.toString()
   const getCurrency = (): string => {
-    return props.settings?.meal_price_usd === 0 && props.settings.meal_price_usd === 0
+    return props.settings?.session_price_usd === 0 && props.settings?.meal_price_usd === 0
       ? Currency.PEN.toString()
       : (getValue(formDataStore, 'currency') as string || Currency.PEN.toString())
   }
