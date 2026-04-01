@@ -24,11 +24,11 @@ export interface Settings {
   start_date: string;
   end_date: string;
 
-  meal_price_pen: number;
-  meal_price_usd: number;
+  meal_price_pen: string;
+  meal_price_usd: string;
 
-  session_price_pen: number;
-  session_price_usd: number;
+  session_price_pen: string;
+  session_price_usd: string;
 
   active: boolean;
 }
