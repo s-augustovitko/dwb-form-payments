@@ -1,4 +1,4 @@
-import { type Component, createResource, Suspense, ErrorBoundary, Show } from "solid-js";
+import { type Component, createResource, Suspense, Show, ErrorBoundary } from "solid-js";
 import { Loading } from "../../components";
 import MainForm from "./MainForm";
 import { FormDataResponse } from "./types";

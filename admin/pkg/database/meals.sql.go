@@ -44,6 +44,43 @@ func (q *Queries) DeleteMeal(ctx context.Context, arg DeleteMealParams) (sql.Res
 	return q.db.ExecContext(ctx, deleteMeal, arg.ID, arg.SettingsID)
 }
 
+const listMealsBySettingsId = `-- name: ListMealsBySettingsId :many
+SELECT
+    id,
+    title
+FROM meals
+WHERE settings_id = ?
+ORDER BY id
+`
+
+type ListMealsBySettingsIdRow struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
+func (q *Queries) ListMealsBySettingsId(ctx context.Context, settingsID string) ([]ListMealsBySettingsIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, listMealsBySettingsId, settingsID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListMealsBySettingsIdRow{}
+	for rows.Next() {
+		var i ListMealsBySettingsIdRow
+		if err := rows.Scan(&i.ID, &i.Title); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateMeal = `-- name: UpdateMeal :execresult
 UPDATE meals
 SET

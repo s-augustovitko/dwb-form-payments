@@ -1,7 +1,14 @@
-import { Component, createUniqueId, Show } from "solid-js"
-import { Field, ValidationFn } from "../utils"
+import { Component, JSX, splitProps } from "solid-js";
 
-interface Props {
+type Props = {
+  type?: "date"
+  | "datetime-local"
+  | "email"
+  | "number"
+  | "password"
+  | "tel"
+  | "text"
+  | "time"
   inputmode?: "decimal"
   | "email"
   | "none"
@@ -10,42 +17,44 @@ interface Props {
   | "tel"
   | "text"
   | "url"
-  class?: string
 
-  title: string
-  field: Field<any>
-  validate?: () => ValidationFn<string>
-  disabled?: () => boolean
-}
+  name: string;
+  required?: boolean;
+  value?: string;
+
+  label?: string;
+  error: string;
+
+  disabled?: boolean;
+
+  ref: (element: HTMLTextAreaElement) => void;
+  onInput: JSX.EventHandler<HTMLTextAreaElement, InputEvent>;
+  onChange: JSX.EventHandler<HTMLTextAreaElement, Event>;
+  onBlur: JSX.EventHandler<HTMLTextAreaElement, FocusEvent>;
+};
+
 
 export const TextArea: Component<Props> = (props) => {
-  const id = createUniqueId()
-
-  const applyValue = (val: string = "") => {
-    props.field.set(val)
-    props.field.setError(props.validate?.()(val) || props.field.validate?.())
-  }
+  const [, inputProps] = splitProps(props, ['label', 'error']);
 
   return (
-    <fieldset class={`fieldset ${props.class}`}>
-      <label for={id} class="label">{props.title}</label>
+    <fieldset class="fieldset">
+      <label for={props.name} class="label">
+        {props.label} {props.required ? <span>*</span> : <span>(Opcional)</span>}
+      </label>
 
       <textarea
-        id={id}
-        name={props.field.name}
-        oninput={(e) => applyValue(e.currentTarget.value)}
-        onchange={(e) => applyValue(e.currentTarget.value?.trim())}
+        {...inputProps}
+        value={props.value ?? ""}
+        id={props.name}
+        placeholder={props.label}
+        aria-invalid={!!props.error}
+        aria-errormessage={`${props.name}-error`}
         class="textarea validator w-full"
-        placeholder={props.title}
-        inputmode={props.inputmode || "text"}
-        aria-invalid={!!props.field.error()}
-        value={props.field.get()}
-        disabled={props.disabled?.()}
       />
 
-      <Show when={!!props.field.error()}>
-        <p class="text-xs text-error mt-2">{props.field.error()}</p>
-      </Show>
+      {props.error && <div id={`${props.name}-error`} class="text-xs text-error mt-2">{props.error}</div>}
     </fieldset>
-  )
+  );
 }
+

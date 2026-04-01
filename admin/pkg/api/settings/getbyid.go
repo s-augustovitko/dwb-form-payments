@@ -1,8 +1,8 @@
 package settings
 
 import (
-	"dwb-admin/pkg/database"
 	"dwb-admin/pkg/models"
+	settingsservice "dwb-admin/pkg/services/settings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
@@ -20,11 +20,11 @@ func (s Server) getByID(c *fiber.Ctx) error {
 	ctx, cancel := s.Cfg.ReadCtx()
 	defer cancel()
 
-	setting, err := database.New(s.DB).GetSettingsByID(ctx, settingsID.String())
+	settings, err := settingsservice.GetPopulatedSettingsByID(ctx, s.DB, settingsID.String())
 	if err != nil {
-		return models.ErrorUnexpected(c, err)
+		return models.ErrorNotFound(c, err)
 	}
 
 	// Return
-	return models.Success(c, setting)
+	return models.Success(c, settings)
 }

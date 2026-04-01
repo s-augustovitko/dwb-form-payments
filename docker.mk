@@ -20,15 +20,11 @@ clean: clean_dist ## cleans dist directories and stops the current $COMPOSE serv
 clean_all: clean_dist ## Cleans everything $DOCKER related, not only this project
 	@echo "Stopping and pruning docker resources (with images)"
 	@${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} down --rmi all --volumes --remove-orphans
-	@${DOCKER} container prune -f
-	@${DOCKER} system prune -a -f
-	@${DOCKER} image prune -a -f
-	@${DOCKER} volume prune -f
+	@${DOCKER} system prune -a -f --volumes
 
 .PHONY: clean_dist
-clean_dist: ## Remove all dist folders (with preview)
-	@find . -type d -name "dist" -print
-	@find . -type d -name "dist" -exec rm -rf {} +
+clean_dist: ## Remove known dist folders
+	@rm -rf dist web/dist
 
 .PHONY: logs
 logs: ## Tails the docker $SERVICE logs

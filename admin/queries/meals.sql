@@ -1,3 +1,11 @@
+-- name: ListMealsBySettingsId :many
+SELECT
+    id,
+    title
+FROM meals
+WHERE settings_id = ?
+ORDER BY id;
+
 -- name: CreateMeal :execresult
 INSERT INTO meals (
     id,

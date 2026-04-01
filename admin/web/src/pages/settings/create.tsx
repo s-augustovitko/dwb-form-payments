@@ -66,26 +66,26 @@ const CreateSettings: Component = () => {
 				<A href="/settings" class="btn btn-ghost btn-circle text-lg text-primary">
 					<FaSolidChevronLeft />
 				</A>
-				<h2 class="text-lg font-bold">Crea Configuracion</h2>
+				<h2 class="text-lg font-bold">Create Config</h2>
 			</div>
 
 			{/* Basic fields */}
 			<Select
 				items={settingsTypes}
-				title="Tipo de Formulario *"
+				title="Form Type *"
 				field={settingsForm.fields.form_type}
 			/>
-			<Input title="Título *" field={settingsForm.fields.title} />
-			<TextArea title="Descripción" field={settingsForm.fields.description} />
+			<Input title="Title *" field={settingsForm.fields.title} />
+			<TextArea title="Description" field={settingsForm.fields.description} />
 
-			<Input type="date" title="Fecha de Inicio *" field={settingsForm.fields.start_date} />
-			<Input type="date" title="Fecha de Fin *" field={settingsForm.fields.end_date} validate={() => notBeforeDate(settingsForm.fields.start_date.get())} />
+			<Input type="date" title="Start Date *" field={settingsForm.fields.start_date} />
+			<Input type="date" title="End Date *" field={settingsForm.fields.end_date} validate={() => notBeforeDate(settingsForm.fields.start_date.get())} />
 
-			<legend class="fieldset-legend mt-4">Sesiones</legend>
+			<legend class="fieldset-legend mt-4">Sessions</legend>
 
 			<div class="grid grid-cols-2 gap-4 mb-4">
-				<Input type="number" title="Precio Sesión (PEN) *" field={settingsForm.fields.session_price_pen} />
-				<Input type="number" title="Precio Sesión (USD) *" field={settingsForm.fields.session_price_usd} />
+				<Input type="number" title="Session Price (PEN) *" field={settingsForm.fields.session_price_pen} />
+				<Input type="number" title="Session Price (USD) *" field={settingsForm.fields.session_price_usd} />
 			</div>
 
 			<Show when={settingsForm.fields.sessions.forms().length}>
@@ -94,14 +94,14 @@ const CreateSettings: Component = () => {
 						{(item, index) => (
 							<div class="inline-flex gap-4 p-4 border border-base-300 join-item">
 								<Input
-									title="Nombre de Sesion *"
+									title="Session Name *"
 									field={item.fields.title as Field<string>}
 									class="w-full"
 								/>
 
 								<Input
 									type="datetime-local"
-									title="Fecha/Hora de Sesion *"
+									title="Session Start DateTime *"
 									field={item.fields.session_time as Field<string>}
 									class="w-full"
 									validate={() => validateArrReduce([
@@ -111,7 +111,7 @@ const CreateSettings: Component = () => {
 								/>
 
 								<div class="w-min">
-									<label class="text-xs label mb-1">Eliminar</label>
+									<label class="text-xs label mb-1">Delete</label>
 
 									<button
 										type="button"
@@ -132,14 +132,14 @@ const CreateSettings: Component = () => {
 				class="w-full btn btn-info"
 				onclick={() => addSession()}
 			>
-				<FaSolidAdd /> Agregar Sesion
+				<FaSolidAdd /> Add Session
 			</button>
 
-			<legend class="fieldset-legend mt-4">Comidas</legend>
+			<legend class="fieldset-legend mt-4">Meals</legend>
 
 			<div class="grid grid-cols-2 gap-4 mb-4">
-				<Input type="number" title="Precio Comida (PEN) *" field={settingsForm.fields.meal_price_pen} />
-				<Input type="number" title="Precio Comida (USD) *" field={settingsForm.fields.meal_price_usd} />
+				<Input type="number" title="Meal Price (PEN) *" field={settingsForm.fields.meal_price_pen} />
+				<Input type="number" title="Meal Price (USD) *" field={settingsForm.fields.meal_price_usd} />
 			</div>
 
 			<Show when={settingsForm.fields.meals.forms().length}>
@@ -148,13 +148,13 @@ const CreateSettings: Component = () => {
 						{(item, index) => (
 							<div class="inline-flex gap-4 p-4 border border-base-300 join-item">
 								<Input
-									title="Nombre de Comida *"
+									title="Meal Name *"
 									field={item.fields.title as Field<string>}
 									class="w-full"
 								/>
 
 								<div class="w-min">
-									<label class="text-xs label mb-1">Eliminar</label>
+									<label class="text-xs label mb-1">Delete</label>
 
 									<button
 										type="button"
@@ -175,7 +175,7 @@ const CreateSettings: Component = () => {
 				class="w-full btn btn-info"
 				onclick={() => addMeal()}
 			>
-				<FaSolidAdd /> Agregar Comida
+				<FaSolidAdd /> Add Meal
 			</button>
 
 			<button
@@ -183,7 +183,7 @@ const CreateSettings: Component = () => {
 				class="w-full btn btn-primary mt-4"
 				disabled={loading()}
 			>
-				{loading() ? "Guardando..." : "Guardar Configuración"}
+				{loading() ? "Saving..." : "Save Configuration"}
 			</button>
 		</form>
 	);

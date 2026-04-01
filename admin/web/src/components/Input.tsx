@@ -23,6 +23,7 @@ interface Props {
   title: string
   field: Field<any>
   validate?: () => ValidationFn<string>
+  disabled?: () => boolean
 }
 
 export const Input: Component<Props> = (props) => {
@@ -48,6 +49,7 @@ export const Input: Component<Props> = (props) => {
         placeholder={props.title}
         aria-invalid={!!props.field.error()}
         value={props.field.get()}
+        disabled={props.disabled?.()}
       />
 
       <Show when={!!props.field.error()}>

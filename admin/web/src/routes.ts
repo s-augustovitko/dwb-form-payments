@@ -4,6 +4,7 @@ import { lazy } from "solid-js";
 import Home from "./pages/home";
 import Settings from "./pages/settings";
 import CreateSettings from "./pages/settings/create";
+import UpdateSettings from "./pages/settings/update";
 
 export const routes: RouteDefinition[] = [
 	{
@@ -19,9 +20,10 @@ export const routes: RouteDefinition[] = [
 		{
 			path: "/create",
 			component: CreateSettings
-			// {
-			// 	path: ":id",
-			// 	component: UpdateSettings
+		},
+		{
+			path: ":id",
+			component: UpdateSettings
 		}]
 	},
 

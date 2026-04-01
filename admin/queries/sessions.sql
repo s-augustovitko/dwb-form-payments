@@ -1,3 +1,12 @@
+-- name: ListSessionsBySettingsId :many
+SELECT
+    id,
+    title,
+    session_time
+FROM sessions
+WHERE settings_id = ?
+ORDER BY id;
+
 -- name: CreateSession :execresult
 INSERT INTO sessions (
     id,

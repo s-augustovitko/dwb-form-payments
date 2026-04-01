@@ -9,6 +9,7 @@ interface Props {
   field: Field<string>
   items: SelectItem[]
   validate?: () => ValidationFn<string>
+  disabled?: () => boolean
 }
 
 export const Select: Component<Props> = (props) => {
@@ -30,6 +31,7 @@ export const Select: Component<Props> = (props) => {
         class="select w-full"
         aria-invalid={!!props.field.error()}
         value={props.field.get()}
+        disabled={props.disabled?.()}
       >
         <For each={props.items}>
           {(item) => (

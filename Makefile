@@ -14,6 +14,11 @@ WEB_DIST_DIR := ${WEB_DIR}/dist
 
 FTP_ENV_FILE = ./.ftp.env
 
+.PHONY: deps
+deps:
+	@cd ${WEB_DIR} && npm i
+	$(MAKE) -C admin deps
+
 .PHONY: build
 build: clean_dist ## Builds the project
 	@echo "Building project into ${DIST_DIR}..."
@@ -60,6 +65,6 @@ dev: run ## Runs the project and watches for any changes
 	while true; do \
 		inotifywait -r -e modify,create,delete ${API_DIR} ${WEB_DIR}/src ${WEB_DIR}/.htaccess .env; \
 		echo "Changes detected. Rebuilding dist/..."; \
-		$(MAKE) build; \
+		$(MAKE) run; \
 	done
 

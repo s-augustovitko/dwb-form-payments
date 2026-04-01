@@ -23,13 +23,15 @@ try {
     $form_response_prep = db()->prepare(
         '
         SELECT
-            first_name,
-            payment_status,
-            payment_id,
-            email
-        FROM form_responses
+            r.first_name,
+            r.payment_status,
+            r.payment_id,
+            s.start_date,
+            r.email
+        FROM form_responses r
+        JOIN settings s ON s.id = r.settings_id AND active = TRUE
         WHERE
-            id = :form_id
+            r.id = :form_id
         LIMIT 1
         '
     );

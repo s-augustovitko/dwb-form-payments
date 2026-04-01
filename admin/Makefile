@@ -10,7 +10,7 @@ ENV_FILE="../.env"
 MIGRATIONS_COMPOSE="./migrations.compose.yaml"
 
 .PHONY: build
-build: clean_dist ## Build the front end
+build: ## Build the front end
 	@cd web && npm run build
 
 .PHONY: deps

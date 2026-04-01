@@ -2,7 +2,7 @@ import { Component } from "solid-js";
 
 const Home: Component = () => {
 	return (
-		<h1 class="text-lg font-bold">Administrador DWB</h1>
+		<h1 class="text-lg font-bold">DWB Admin</h1>
 	);
 };
 

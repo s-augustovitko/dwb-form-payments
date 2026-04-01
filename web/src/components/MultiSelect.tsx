@@ -1,5 +1,4 @@
-import { Component, For, Show } from "solid-js"
-import { Field, ValidationFn } from "../utils"
+import { Component, For, JSX, splitProps } from "solid-js"
 
 export interface MultiSelectItem {
   title: string
@@ -7,52 +6,45 @@ export interface MultiSelectItem {
   value: string
 }
 
-interface Props {
-  class?: string
-  title: string
-  field: Field<string[]>
-  items: () => MultiSelectItem[]
-  validate?: () => ValidationFn<string[]>
-  disabled?: () => boolean
-}
+type Props = {
+  name: string;
+  value?: string[];
+
+  label?: string;
+  error: string;
+  items: MultiSelectItem[]
+
+  disabled?: boolean;
+
+  ref: (element: HTMLInputElement) => void;
+  onInput: JSX.EventHandler<HTMLInputElement, InputEvent>;
+  onChange: JSX.EventHandler<HTMLInputElement, Event>;
+  onBlur: JSX.EventHandler<HTMLInputElement, FocusEvent>;
+};
 
 export const MultiSelect: Component<Props> = (props) => {
-  const toggleValue = (val: string, checked: boolean) => {
-    const current = props.field.get() || []
-
-    const next = checked
-      ? [...current, val]
-      : current.filter((v) => v !== val)
-
-    props.field.set(next)
-    props.field.setError(
-      props.validate?.()(next) || props.field.validate?.()
-    )
-  }
-
-
-  const isChecked = (value: string) =>
-    (props.field.get() || []).includes(value)
+  const [, inputProps] = splitProps(props, ['label', 'error', 'items']);
 
   return (
-    <fieldset class={`fieldset ${props.class ?? ""}`}>
-      <label class="label">{props.title}</label>
+    <fieldset class="fieldset">
+      <label class="label">
+        {props.label}
+      </label>
 
-      <For each={props.items()}>
+      <For each={props.items}>
         {({ title, subtitle, value }) => {
           return (
             <label class="label truncate cursor-pointer gap-3">
               <input
-                name={props.field.name}
+                {...inputProps}
+                id={`${props.name}−${value}`}
                 type="checkbox"
                 class="toggle toggle-success"
+                disabled={props.disabled}
+                checked={props.value?.includes(value)}
                 value={value}
-                checked={isChecked(value)}
-                onChange={(e) =>
-                  toggleValue(value, e.currentTarget.checked)
-                }
-                aria-invalid={!!props.field.error()}
-                disabled={props.disabled?.()}
+                aria-invalid={!!props.error}
+                aria-errormessage={`${props.name}-error`}
               />
 
               <div>
@@ -64,11 +56,7 @@ export const MultiSelect: Component<Props> = (props) => {
         }}
       </For>
 
-      <Show when={!!props.field.error()}>
-        <p class="text-xs text-error mt-2">
-          {props.field.error()}
-        </p>
-      </Show>
+      {props.error && <div id={`${props.name}-error`} class="text-xs text-error mt-2">{props.error}</div>}
     </fieldset>
-  )
+  );
 }
