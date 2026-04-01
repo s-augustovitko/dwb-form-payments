@@ -198,7 +198,7 @@ const specialSchema = v.pipe(
         return input.event_sessions.length > 0
       }
       return true
-    }, (_) => "Debe seleccionar al menos un dia"),
+    }, (_) => "Debe seleccionar al menos una sesion"),
     ['event_sessions']
   )
 );
@@ -235,7 +235,7 @@ const courseSchema = v.pipe(
         return input.event_sessions.length > 0
       }
       return true
-    }, (_) => "Debe seleccionar al menos un dia"),
+    }, (_) => "Debe seleccionar al menos una sesion"),
     ['event_sessions']
   )
 );

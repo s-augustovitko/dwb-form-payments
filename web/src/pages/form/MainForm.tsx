@@ -103,7 +103,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       }).toString())
       return
     } catch (err) {
-      notificationStore.error("No se pudo procesar el pago");
+      notificationStore.error((err as any).message || "No se pudo procesar el pago");
     } finally {
       setLoading(false)
     }

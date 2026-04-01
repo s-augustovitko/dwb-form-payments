@@ -68,10 +68,18 @@ try {
         ],
     ];
 
-    $charge = createCulqiCharge($charge_data);
-    if (!isset($charge['id']) || !isset($charge['outcome']['type'])) {
-        throw new Exception("Respuesta de pago inválida");
+    $charge;
+    $user_message;
+    try {
+        $charge = createCulqiCharge($charge_data);
+        if (!isset($charge['id']) || !isset($charge['outcome']['type'])) {
+            throw new Exception("Respuesta de pago inválida");
+        }
+    } catch (Throwable $e) {
+        $user_message = $e->getMessage();
+        $charge = ['id' => null, 'outcome' => ['type' => 'error']];
     }
+    $user_message = $user_message ?? $charge["user_message"] ?? "Intente de nuevo o use otro metodo de pago";
 
     $outcome_type = trim(strtolower($charge['outcome']['type'] ?? ''));
     $success_codes = ['successful_charge', 'venta_exitosa'];
@@ -93,7 +101,6 @@ try {
     ]);
 
     if ($payment_status === 'DECLINED') {
-        $user_message = $charge["user_message"] ?? "Intente de nuevo o use otro metodo de pago";
         throw new Exception("El pago no se pudo procesar: " . $user_message);
     }
 

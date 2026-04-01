@@ -65,6 +65,6 @@ dev: run ## Runs the project and watches for any changes
 	while true; do \
 		inotifywait -r -e modify,create,delete ${API_DIR} ${WEB_DIR}/src ${WEB_DIR}/.htaccess .env; \
 		echo "Changes detected. Rebuilding dist/..."; \
-		$(MAKE) build; \
+		$(MAKE) run; \
 	done
 

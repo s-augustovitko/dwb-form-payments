@@ -1,13 +1,16 @@
 import { A, useSearchParams } from "@solidjs/router";
 import { createResource, ErrorBoundary, Show, Suspense, type Component } from "solid-js";
 import { Method, request } from "../utils";
-import { LoadingRes } from "../components";
+import { LoadingRes, notificationStore } from "../components";
+import { domToPng } from 'modern-screenshot'
+import dayjs from "dayjs";
 
 interface FormResponseData {
 	first_name: string;
 	payment_status: string;
 	payment_id: string;
 	email: string;
+	start_date: string;
 }
 
 async function getFormResponse(form_id: string): Promise<FormResponseData> {
@@ -23,12 +26,27 @@ const Result: Component = () => {
 		(id) => getFormResponse(id),
 	)
 
+	const id = () => `form-id-${searchParams.form_id}`
+
 	const isSuccess = () => formResponse()?.payment_status === 'SUCCESS' || formResponse()?.payment_status === 'NOT_NEEDED'
 
 	const hasPayment = () => formResponse()?.payment_status === 'SUCCESS'
 
-	const handleScreenshot = () => {
-		window.print()
+	const handleScreenshot = async () => {
+
+		const body = document.querySelector(`#${id()}`)
+		if (!body) {
+			notificationStore.error("No se pudo generar el comprobante, por favor tome una captura")
+			return
+		}
+
+		await domToPng(body).then((dataUrl) => {
+			const link = document.createElement("a")
+			link.download = `comprobante_DWB_${dayjs(formResponse()?.start_date).format('MMM_YYYY').toUpperCase()
+				}.png`
+			link.href = dataUrl
+			link.click()
+		})
 	};
 
 	return (
@@ -40,7 +58,7 @@ const Result: Component = () => {
 			)}
 		>
 			<Suspense fallback={<LoadingRes />}>
-				<div class="grid grid-cols-1 gap-4 text-center">
+				<div class="grid grid-cols-1 gap-4 text-center bg-base-200" id={id()}>
 					<div role="alert" class="alert text-lg" classList={{
 						'alert-success': isSuccess(),
 						'alert-error': !isSuccess(),
