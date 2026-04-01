@@ -295,17 +295,34 @@ function getTotalPrice(array $input)
         throw new Exception("No hay formularios activos");
     }
 
+    $sessionsCount = (int)$input['sessions_count'];
+
+    $mealType = $input['meal_type'] ?? "REGULAR";
+    $mealsCount = isset($input['meals_count']) ? (int)$input['meals_count'] : 0;
+    if ($mealType === 'NONE') {
+        $mealsCount = 0;
+    } elseif ($mealsCount === 0) {
+        $mealType = 'NONE';
+    }
+
     $currency = (float)$settings['session_price_usd'] === 0.0 && (float)$settings['meal_price_usd'] === 0.0
         ? "PEN"
         : ($input['currency'] ?? 'PEN');
+
     $sessionPrice = (float)($currency === 'USD' ? $settings['session_price_usd'] : $settings['session_price_pen']);
     $mealPrice = (float)($currency === 'USD' ? $settings['meal_price_usd'] : $settings['meal_price_pen']);
-    $expectedPayment = ((int)($input['sessions_count']) * $sessionPrice) + ((int)($input['meals_count']) * $mealPrice);
+
+    $expectedPayment = (float)((int)($sessionsCount) * $sessionPrice) + (float)((int)($mealsCount) * $mealPrice);
 
     return [
         'payment_amount' => $expectedPayment,
         'currency' => $currency,
+
+        'meal_type' => $mealType,
         'meal_price' => $mealPrice,
+        'meals_count' => $mealsCount,
+
         'session_price' => $sessionPrice,
+        'sessions_count' => $sessionsCount,
     ];
 }
