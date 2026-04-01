@@ -45,6 +45,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
   });
 
   const getEventType = (): string => getValue(formDataStore, 'event_type') as string || EventType.FULL.toString()
+  const getMealType = (): string => getValue(formDataStore, 'meal_type') as string || MealType.REGULAR.toString()
   const getCurrency = (): string => getValue(formDataStore, 'currency') as string || Currency.PEN.toString()
   const getSessionPrice = (): number => (getCurrency() === Currency.USD ? props.settings?.session_price_usd : props.settings?.session_price_pen) || 0
   const getMealPrice = (): number => (getCurrency() === Currency.USD ? props.settings?.meal_price_usd : props.settings?.meal_price_pen) || 0
@@ -58,7 +59,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
   // const mealMap = (): Record<string, string> => convertListToMapping(meals())
   // const sessionMap = (): Record<string, string> => convertListToMapping(sessions())
 
-  const getEventMeals = (): string[] => getValue(formDataStore, 'event_meals') as string[] || []
+  const getEventMeals = (): string[] => getMealType() === MealType.NONE.toString() ? [] : getValue(formDataStore, 'event_meals') as string[] || []
 
   const getEventSessions = (): string[] => {
     const eventDays = getValue(formDataStore, 'event_days') as string[] || []
@@ -395,7 +396,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
           )}
         </Field>
 
-        <Show when={!!props.meals?.length}>
+        <Show when={!!props.meals?.length && getMealType() !== MealType.NONE.toString()}>
           <Field name="event_meals" type="string[]">
             {(field, props) => (
               <MultiSelect
