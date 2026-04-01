@@ -20,7 +20,7 @@ const CreateSettings: Component = () => {
 	const params = useParams<{ id: string }>();
 	const isUpdate = () => params.id.toLowerCase() !== "create";
 
-	const [] = createResource(
+	const [_res, { refetch }] = createResource(
 		() => params.id,
 		async (id) => {
 			if (id === "create") return null;
@@ -101,7 +101,14 @@ const CreateSettings: Component = () => {
 						: request(`meals/${settingsId}`, Method.POST, undefined, m);
 				}) || [];
 
-				await Promise.all([...sessionPromises, ...mealPromises]);
+				const results = await Promise.allSettled([...sessionPromises, ...mealPromises]);
+
+				const failures = results.filter(r => r.status === 'rejected');
+				if (failures.length > 0) {
+					notificationStore.error(`${failures.length} item(s) failed to save:\n ${failures.map(item => item.reason?.message || item.reason).join(",\n ")}`);
+					await refetch()
+					return;
+				}
 			} else {
 				const createData = {
 					...baseData,
@@ -122,7 +129,6 @@ const CreateSettings: Component = () => {
 
 	function addSession() {
 		const startDate = getValue(settingForm, 'start_date')
-		console.log(startDate)
 
 		insert(settingForm, 'sessions', {
 			value: {
