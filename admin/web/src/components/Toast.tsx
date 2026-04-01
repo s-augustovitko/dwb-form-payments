@@ -1,8 +1,8 @@
-import { Component, For } from "solid-js"
+import { Component, createUniqueId, For } from "solid-js"
 import { createStore } from "solid-js/store"
 
 export interface NotificationItem {
-  id: number
+  id: string
   title: string
   type: "info" | "warning" | "error"
 }
@@ -10,12 +10,12 @@ export interface NotificationItem {
 const createNotificationStore = () => {
   const [store, setStore] = createStore<Array<NotificationItem>>([])
 
-  function removeItem(id: number) {
+  function removeItem(id: string) {
     setStore(items => items.filter(i => i.id !== id))
   }
 
   function addItem(item: Omit<NotificationItem, "id">) {
-    const id = Date.now()
+    const id = createUniqueId()
 
     const notification: NotificationItem = {
       id,
@@ -26,7 +26,7 @@ const createNotificationStore = () => {
 
     setTimeout(() => {
       removeItem(id)
-    }, 3000)
+    }, 5000)
 
     return id
   }
@@ -34,6 +34,9 @@ const createNotificationStore = () => {
   return {
     getItems(): Array<NotificationItem> {
       return store
+    },
+    removeItem(id: string) {
+      removeItem(id)
     },
     info(title: string) {
       return addItem({
@@ -70,6 +73,7 @@ export const Toast: Component = () => {
               "alert-warning": item.type === "warning",
               "alert-error": item.type === "error"
             }}
+            onclick={() => notificationStore.removeItem(item.id)}
           >
             <span>{item.title}</span>
           </div>

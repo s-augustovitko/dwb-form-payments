@@ -14,11 +14,11 @@ type SettingsData struct {
 	StartDate time.Time `json:"start_date" validate:"required,gt"`
 	EndDate   time.Time `json:"end_date" validate:"required,gtfield=StartDate"`
 
-	MealPricePen float64 `json:"meal_price_pen" validate:"required,gte=0"`
-	MealPriceUsd float64 `json:"meal_price_usd" validate:"required,gte=0"`
+	MealPricePen float64 `json:"meal_price_pen" validate:"gte=0"`
+	MealPriceUsd float64 `json:"meal_price_usd" validate:"gte=0"`
 
-	SessionPricePen float64 `json:"session_price_pen" validate:"required,gte=0"`
-	SessionPriceUsd float64 `json:"session_price_usd" validate:"required,gte=0"`
+	SessionPricePen float64 `json:"session_price_pen" validate:"gte=0"`
+	SessionPriceUsd float64 `json:"session_price_usd" validate:"gte=0"`
 }
 
 func (s *SettingsData) Normalize() {

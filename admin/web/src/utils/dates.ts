@@ -20,7 +20,7 @@ export function getDateForDateTimePicker(date?: AnyDate) {
 }
 
 export function getDateTimeForBackEnd(date?: AnyDate) {
-	return dayjs(normalizeDate(date)).format("YYYY-MM-DD[T]HH:mm:ssZ");
+	return dayjs(date).format("YYYY-MM-DD[T]HH:mm:ssZ");
 }
 
 export function getDateForDatePicker(date?: AnyDate) {

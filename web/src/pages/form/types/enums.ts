@@ -28,6 +28,7 @@ export const IdTypeValueMap = {
 export enum MealType {
   REGULAR = "REGULAR",
   VEGGIE = "VEGGIE",
+  NONE = "NONE",
 }
 
 export const mealTypes = Object.values(MealType);
@@ -35,6 +36,7 @@ export const mealTypes = Object.values(MealType);
 export const MealTypeValueMap = {
   [MealType.REGULAR]: "Regular",
   [MealType.VEGGIE]: "Vegetariano",
+  [MealType.NONE]: "Sin Comidas",
 };
 
 export enum Currency {

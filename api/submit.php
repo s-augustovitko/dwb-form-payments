@@ -63,7 +63,7 @@ try {
         throw new Exception('tipo de documento invalido');
     }
 
-    $valid_meal_types = ['REGULAR', 'VEGGIE'];
+    $valid_meal_types = ['REGULAR', 'VEGGIE', 'NONE'];
     if (isset($input['meal_type']) && !in_array($input['meal_type'], $valid_meal_types, true)) {
         throw new Exception('tipo de comida invalido');
     }
@@ -88,6 +88,17 @@ try {
     if (isset($input['meals_count']) && (!is_numeric($input['meals_count']) || $input['meals_count'] < 0)) {
         throw new Exception('numero de comidas no puede ser negativo');
     }
+    $mealsCount = isset($input['meals_count']) ? (int)$input['meals_count'] : 0;
+    $mealType = $input['meal_type'] ?? null;
+
+    if ($mealType === 'NONE') {
+        $mealsCount = 0;
+    } elseif ($mealsCount === 0) {
+        $mealType = 'NONE';
+    }
+
+    $input['meals_count'] = $mealsCount;
+    $input['meal_type'] = $mealType;
 
     // =========================
     // EMERGENCY CONTACT
@@ -252,7 +263,7 @@ try {
         ':id_value' => $input['id_value'],
 
         ':meal_type' => $input['meal_type'] ?? null,
-        ':meals_count' => $input['meals_count'] ?? 0,
+        ':meals_count' => $input['meals_count'],
         ':meal_price' => $pricing['meal_price'] ?? 0, # pricing
 
         ':event_type' => $input['event_type'] ?? null,

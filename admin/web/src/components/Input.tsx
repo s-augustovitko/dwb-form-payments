@@ -1,7 +1,6 @@
-import { Component, createUniqueId, Show } from "solid-js"
-import { Field, ValidationFn } from "../utils"
+import { Component, JSX, splitProps } from "solid-js";
 
-interface Props {
+type Props = {
   type?: "date"
   | "datetime-local"
   | "email"
@@ -18,43 +17,44 @@ interface Props {
   | "tel"
   | "text"
   | "url"
-  class?: string
 
-  title: string
-  field: Field<any>
-  validate?: () => ValidationFn<string>
-  disabled?: () => boolean
-}
+  name: string;
+  required?: boolean;
+  value?: string | number;
+  step?: string;
+
+  label?: string;
+  error: string;
+
+  disabled?: boolean;
+
+  ref: (element: HTMLInputElement) => void;
+  onInput: JSX.EventHandler<HTMLInputElement, InputEvent>;
+  onChange: JSX.EventHandler<HTMLInputElement, Event>;
+  onBlur: JSX.EventHandler<HTMLInputElement, FocusEvent>;
+};
+
 
 export const Input: Component<Props> = (props) => {
-  const id = createUniqueId()
-
-  const applyValue = (val: string = "") => {
-    props.field.set(val)
-    props.field.setError(props.validate?.()(val) || props.field.validate?.())
-  }
+  const [, inputProps] = splitProps(props, ['label', 'error']);
 
   return (
-    <fieldset class={`fieldset ${props.class}`}>
-      <label for={id} class="label">{props.title}</label>
+    <fieldset class="fieldset w-full">
+      <label for={props.name} class="label">
+        {props.label} {props.required ? <span>*</span> : <span>(Opcional)</span>}
+      </label>
 
       <input
-        id={id}
-        type={props.type || "text"}
-        name={props.field.name}
-        inputmode={props.inputmode || "text"}
-        oninput={(e) => applyValue(e.currentTarget.value)}
-        onchange={(e) => applyValue(e.currentTarget.value?.trim())}
+        {...inputProps}
+        id={props.name}
+        value={props.value ?? ""}
+        placeholder={props.label}
+        aria-invalid={!!props.error}
+        aria-errormessage={`${props.name}-error`}
         class="input validator w-full"
-        placeholder={props.title}
-        aria-invalid={!!props.field.error()}
-        value={props.field.get()}
-        disabled={props.disabled?.()}
       />
 
-      <Show when={!!props.field.error()}>
-        <p class="text-xs text-error mt-2">{props.field.error()}</p>
-      </Show>
+      {props.error && <div id={`${props.name}-error`} class="text-xs text-error mt-2">{props.error}</div>}
     </fieldset>
-  )
+  );
 }

@@ -24,8 +24,9 @@ CREATE TABLE settings (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
-    INDEX idx_settings_end_date (end_date),
-    INDEX idx_settings_active (active)
+    -- INDEXES
+    INDEX idx_settings_active_start_id (active, start_date, id),
+    INDEX idx_settings_active_dates (active, start_date, end_date)
 )
 ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
@@ -44,7 +45,8 @@ CREATE TABLE meals (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
-    INDEX idx_meals_settings (settings_id),
+    -- INDEXES
+    INDEX idx_meals_settings_id (settings_id, id),
 
     CONSTRAINT fk_meals_settings
         FOREIGN KEY (settings_id)
@@ -69,7 +71,8 @@ CREATE TABLE sessions (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
-    INDEX idx_sessions_settings (settings_id),
+    -- INDEXES
+    INDEX idx_sessions_settings_time (settings_id, session_time, id),
 
     CONSTRAINT fk_sessions_settings
         FOREIGN KEY (settings_id)
@@ -131,7 +134,7 @@ CREATE TABLE form_responses (
         ON UPDATE CURRENT_TIMESTAMP,
 
     -- INDEXES
-    INDEX idx_responses_settings (settings_id),
+    INDEX idx_responses_settings_created (settings_id, created_at, id),
 
     CONSTRAINT fk_responses_settings
         FOREIGN KEY (settings_id)
