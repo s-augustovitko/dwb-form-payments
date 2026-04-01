@@ -88,17 +88,6 @@ try {
     if (isset($input['meals_count']) && (!is_numeric($input['meals_count']) || $input['meals_count'] < 0)) {
         throw new Exception('numero de comidas no puede ser negativo');
     }
-    $mealsCount = isset($input['meals_count']) ? (int)$input['meals_count'] : 0;
-    $mealType = $input['meal_type'] ?? null;
-
-    if ($mealType === 'NONE') {
-        $mealsCount = 0;
-    } elseif ($mealsCount === 0) {
-        $mealType = 'NONE';
-    }
-
-    $input['meals_count'] = $mealsCount;
-    $input['meal_type'] = $mealType;
 
     // =========================
     // EMERGENCY CONTACT
@@ -207,6 +196,7 @@ try {
             :meal_price,
 
             :event_type,
+
             :sessions_count,
             :session_price,
 
@@ -262,13 +252,14 @@ try {
         ':id_type' => $input['id_type'],
         ':id_value' => $input['id_value'],
 
-        ':meal_type' => $input['meal_type'] ?? null,
-        ':meals_count' => $input['meals_count'],
-        ':meal_price' => $pricing['meal_price'] ?? 0, # pricing
+        ':meal_type' => $pricing['meal_type'] ?? null,
+        ':meals_count' => $pricing['meals_count'],
+        ':meal_price' => $pricing['meal_price'] ?? 0,
 
         ':event_type' => $input['event_type'] ?? null,
-        ':sessions_count' => $input['sessions_count'] ?? 0,
-        ':session_price' => $pricing['session_price'] ?? 0, # pricing
+
+        ':sessions_count' => $pricing['sessions_count'] ?? 0,
+        ':session_price' => $pricing['session_price'] ?? 0,
 
         ':arrival_date' => $input['arrival_date'] ?? null,
         ':departure_date' => $input['departure_date'] ?? null,
@@ -280,10 +271,10 @@ try {
         ':emergency_contact_phone' => $input['emergency_contact_phone'] ?? null,
         ':emergency_contact_email' => $input['emergency_contact_email'] ?? null,
 
-        ':currency' => $pricing['currency'] ?? 'PEN', # pricing
-        ':payment_amount' => $pricing['payment_amount'] ?? 0.0, # pricing
+        ':currency' => $pricing['currency'] ?? 'PEN',
+        ':payment_amount' => $pricing['payment_amount'] ?? 0.0,
 
-        ':payment_status' => ((float) $pricing['payment_amount'] <= 0.0) ? 'NOT_NEEDED' : 'PENDING', # pricing
+        ':payment_status' => ((float) $pricing['payment_amount'] <= 0.0) ? 'NOT_NEEDED' : 'PENDING',
     ]);
 
     respond([
