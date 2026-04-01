@@ -1,13 +1,22 @@
-import { Component, createUniqueId, For, Show } from "solid-js"
-import { Field, ValidationFn } from "../utils"
-
+import { Component, For, JSX } from "solid-js"
 
 export interface SelectItem {
   label: string
   value: string
 }
 
-interface Props {
+type SelectProps = {
+  name: string;
+  value?: string;
+  disabled?: boolean;
+
+  ref: (element: HTMLSelectElement) => void;
+  onInput: JSX.EventHandler<HTMLSelectElement, InputEvent>;
+  onChange: JSX.EventHandler<HTMLSelectElement, Event>;
+  onBlur: JSX.EventHandler<HTMLSelectElement, FocusEvent>;
+};
+
+type InputProps = {
   type?: "date"
   | "datetime-local"
   | "email"
@@ -24,47 +33,53 @@ interface Props {
   | "tel"
   | "text"
   | "url"
-  class?: string
 
-  title: string
-  fieldInput: Field<string>
+  name: string;
+  value?: string;
+  disabled?: boolean;
 
-  fieldSelect: Field<string>
-  itemsSelect: SelectItem[]
+  ref: (element: HTMLInputElement) => void;
+  onInput: JSX.EventHandler<HTMLInputElement, InputEvent>;
+  onChange: JSX.EventHandler<HTMLInputElement, Event>;
+  onBlur: JSX.EventHandler<HTMLInputElement, FocusEvent>;
+};
 
-  validateInput?: () => ValidationFn<string>
-  validateSelect?: () => ValidationFn<string>
-  disabled?: () => boolean
+type Props = {
+  label?: string;
+  error: string;
+  items: SelectItem[];
+  required?: boolean;
+  disabled?: boolean;
+
+  select: SelectProps;
+  input: InputProps;
 }
 
 export const SelectInput: Component<Props> = (props) => {
-  const id = createUniqueId()
-  const error = () => props.fieldInput.error() || props.fieldSelect.error()
-
-  const applyValue = (key: "fieldInput" | "fieldSelect", val: string = "") => {
-    props[key].set(val)
-
-    props.fieldInput.setError(props.validateInput?.()(props.fieldInput.get()) || props.fieldInput.validate?.())
-    props.fieldSelect.setError(props.validateSelect?.()(props.fieldSelect.get()) || props.fieldSelect.validate?.())
-  }
+  const errorId = `${props.input.name}-error`
 
   return (
-    <fieldset class={`fieldset ${props.class}`}>
-      <label for={id} class="label">{props.title}</label>
+    <fieldset class="fieldset">
+      <label for={props.input.name} class="label">
+        {props.label} {props.required ? <span>*</span> : <span>(Opcional)</span>}
+      </label>
+
 
       <div class="join">
         <select
-          name={props.fieldSelect.name}
-          oninput={(e) => applyValue("fieldSelect", e.currentTarget.value)}
+          {...props.select}
+          value={props.select.value ?? ""}
+          id={props.select.name}
+          aria-invalid={!!props.error}
+          aria-errormessage={errorId}
           class="select w-1/3 join-item"
-          aria-invalid={!!props.fieldSelect.error()}
-          value={props.fieldSelect.get()}
-          disabled={props.disabled?.()}
+          required={props.required}
+          disabled={props.disabled}
         >
-          <For each={props.itemsSelect}>
+          <For each={props.items}>
             {(item) => (
               <option
-                value={item.value}
+                value={item.value} selected={item.value === props.select.value}
               >
                 {item.label}
               </option>
@@ -73,23 +88,20 @@ export const SelectInput: Component<Props> = (props) => {
         </select>
 
         <input
-          id={id}
-          type={props.type || "text"}
-          name={props.fieldInput.name}
-          oninput={(e) => applyValue("fieldInput", e.currentTarget.value)}
-          onchange={(e) => applyValue("fieldInput", e.currentTarget.value?.trim())}
-          class="input validator w-full"
-          placeholder={props.title}
-          aria-invalid={!!props.fieldInput.error()}
-          value={props.fieldInput.get()}
-          inputmode={props.inputmode || "text"}
-          disabled={props.disabled?.()}
+          {...props.input}
+          value={props.input.value ?? ""}
+          id={props.input.name}
+          placeholder={props.label}
+          aria-invalid={!!props.error}
+          aria-errormessage={errorId}
+          class="input validator w-full join-item"
+          required={props.required}
+          disabled={props.disabled}
         />
       </div>
 
-      <Show when={!!error()}>
-        <p class="text-xs text-error mt-2">{error()}</p>
-      </Show>
-    </fieldset>
+      {props.error && <div id={errorId} class="text-xs text-error mt-2">{props.error}</div>}
+    </fieldset >
   )
 }
+
