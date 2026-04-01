@@ -34,10 +34,10 @@ func (e ErrorResponse) Error() string {
 
 // ValidateData validates the provided data struct using predefined validation rules.
 // Returns nil if validation passes, or an aggregated error containing details for each failed validation.
-// Returns an error if the input data is nil or if validation cannot be performed.
+// Returns an error if the input data is nil or if validation should not be performed.
 func ValidateData(data any) error {
 	if data == nil {
-		return fmt.Errorf("validation data cannot be nil")
+		return fmt.Errorf("validation data should not be nil")
 	}
 
 	errs := validate.Struct(data)

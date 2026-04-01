@@ -46,7 +46,11 @@ const CourseForm: Component<FormDataResponse> = (props) => {
 
   const getEventType = (): string => getValue(formDataStore, 'event_type') as string || EventType.FULL.toString()
   const getMealType = (): string => getValue(formDataStore, 'meal_type') as string || MealType.REGULAR.toString()
-  const getCurrency = (): string => getValue(formDataStore, 'currency') as string || Currency.PEN.toString()
+  const getCurrency = (): string => {
+    return props.settings?.session_price_usd === 0 && props.settings?.meal_price_usd === 0
+      ? Currency.PEN.toString()
+      : (getValue(formDataStore, 'currency') as string || Currency.PEN.toString())
+  }
   const getSessionPrice = (): number => (getCurrency() === Currency.USD ? props.settings?.session_price_usd : props.settings?.session_price_pen) || 0
   const getMealPrice = (): number => (getCurrency() === Currency.USD ? props.settings?.meal_price_usd : props.settings?.meal_price_pen) || 0
 
@@ -368,19 +372,21 @@ const CourseForm: Component<FormDataResponse> = (props) => {
       <Show when={props.settings?.form_type === FormType.SPECIAL || props.settings?.form_type === FormType.COURSE}>
         <legend class="fieldset-legend mt-4">Evento</legend>
 
-        <Field name="currency">
-          {(field, props) => (
-            <Select
-              {...props}
-              value={field.value}
-              error={field.error}
-              required
-              disabled={loading()}
-              items={currencyTypesList}
-              label="Moneda"
-            />
-          )}
-        </Field>
+        <Show when={props.settings?.session_price_usd !== 0 || props.settings?.meal_price_usd !== 0}>
+          <Field name="currency">
+            {(field, props) => (
+              <Select
+                {...props}
+                value={field.value}
+                error={field.error}
+                required
+                disabled={loading()}
+                items={currencyTypesList}
+                label="Moneda"
+              />
+            )}
+          </Field>
+        </Show>
 
         <Field name="meal_type">
           {(field, props) => (

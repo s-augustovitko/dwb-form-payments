@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { SelectItem } from "../../components";
 
 export const settingTypes: SelectItem[] = [
-  { label: "Talk", value: "TALK" },
+  { label: "Conference", value: "TALK" },
   { label: "Course", value: "COURSE" },
   { label: "Special Course", value: "SPECIAL" },
 ];
@@ -44,12 +44,12 @@ export const settingSchema = v.pipe(
       v.string('Required field'),
       v.nonEmpty('Title is required'),
       v.minLength(3, 'Title must be at least 3 characters'),
-      v.maxLength(255, 'Title cannot exceed 255 characters')
+      v.maxLength(255, 'Title should not exceed 255 characters')
     ),
     description: v.optional(
       v.pipe(
         v.string('Must be a string'),
-        v.maxLength(2000, 'Description cannot exceed 2000 characters')
+        v.maxLength(2000, 'Description should not exceed 2000 characters')
       ),
       ""
     ),
@@ -64,7 +64,12 @@ export const settingSchema = v.pipe(
         if (!val) return true;
         const today = dayjs().startOf('d');
         return !dayjs(val).isBefore(today);
-      }, 'Date cannot be before today')
+      }, 'Date should not be before today'),
+      v.check((val) => {
+        if (!val) return true;
+        const oneYearLater = dayjs().add(1, 'year').endOf('d');
+        return !dayjs(val).isAfter(oneYearLater);
+      }, 'Date should not be later than 1 year from today')
     ),
     end_date: v.pipe(
       v.string('Required field'),
@@ -119,7 +124,7 @@ export const settingSchema = v.pipe(
             v.string('Required field'),
             v.nonEmpty('Session title is required'),
             v.minLength(3, 'Title must be at least 3 characters'),
-            v.maxLength(255, 'Title cannot exceed 255 characters')
+            v.maxLength(255, 'Title should not exceed 255 characters')
           ),
           session_time: v.pipe(
             v.string('Required field'),
@@ -141,7 +146,7 @@ export const settingSchema = v.pipe(
             v.string('Required field'),
             v.nonEmpty('Meal title is required'),
             v.minLength(3, 'Title must be at least 3 characters'),
-            v.maxLength(255, 'Title cannot exceed 255 characters')
+            v.maxLength(255, 'Title should not exceed 255 characters')
           )
         })
       ),
@@ -152,17 +157,22 @@ export const settingSchema = v.pipe(
   // Cross-field validation: End date not before Start date
   v.forward(
     v.check((input) => {
-      if (!input.start_date || !input.end_date) return true;
       return !dayjs(input.end_date).isBefore(dayjs(input.start_date));
-    }, "End date cannot be earlier than start date"),
+    }, "End date should not be earlier than start date"),
+    ['end_date']
+  ),
+
+  // Cross-field validation: End date is no later than 2 months from start date
+  v.forward(
+    v.check((input) => {
+      return !dayjs(input.end_date).isAfter(dayjs(input.start_date).add(2, 'month'));
+    }, "End date should not be more than 2 monts away from start date"),
     ['end_date']
   ),
 
   // Cross-field validation: Sessions inside start and end date range
   v.forward(
     v.check((input) => {
-      if (!input.start_date || !input.end_date || !input.sessions) return true;
-
       const start = dayjs(input.start_date).startOf('d');
       const end = dayjs(input.end_date).endOf('d');
 

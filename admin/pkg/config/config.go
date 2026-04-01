@@ -120,7 +120,7 @@ func validateNonZeroFields(cfg *Config) error {
 	var missing []string
 
 	if cfg == nil {
-		return errors.New("Config cannot be empty")
+		return errors.New("Config should not be empty")
 	}
 
 	root := reflect.ValueOf(cfg).Elem()
