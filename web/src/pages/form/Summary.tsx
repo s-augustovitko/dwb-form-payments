@@ -16,11 +16,10 @@ interface Props {
 export const Summary: Component<Props> = (props) => {
 	return (
 		<div class="grid w-full gap-4 my-6">
-
 			<hr class="border-base-300" />
 			<h2 class="text-lg font-bold">Resumen</h2>
 
-			<div class="overflow-x-auto bg-base-100 rounded-box shadow-md">
+			<div class="overflow-x-scroll bg-base-100 rounded-box shadow-md">
 				<table class="table">
 					{/* Head */}
 					<thead>
@@ -64,7 +63,7 @@ export const Summary: Component<Props> = (props) => {
 					</tbody>
 				</table>
 			</div>
-		</div>
+		</div >
 	)
 }
 

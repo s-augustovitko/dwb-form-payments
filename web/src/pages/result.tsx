@@ -33,20 +33,22 @@ const Result: Component = () => {
 	const hasPayment = () => formResponse()?.payment_status === 'SUCCESS'
 
 	const handleScreenshot = async () => {
+		try {
+			const body = document.querySelector(`#${id()}`)
+			if (!body) {
+				throw new Error("No existe el elemento en la pagina")
+			}
 
-		const body = document.querySelector(`#${id()}`)
-		if (!body) {
+			await domToPng(body).then((dataUrl) => {
+				const link = document.createElement("a")
+				link.download = `comprobante_DWB_${dayjs(formResponse()?.start_date).format('MMM_YYYY').toUpperCase()
+					}.png`
+				link.href = dataUrl
+				link.click()
+			})
+		} catch {
 			notificationStore.error("No se pudo generar el comprobante, por favor tome una captura")
-			return
 		}
-
-		await domToPng(body).then((dataUrl) => {
-			const link = document.createElement("a")
-			link.download = `comprobante_DWB_${dayjs(formResponse()?.start_date).format('MMM_YYYY').toUpperCase()
-				}.png`
-			link.href = dataUrl
-			link.click()
-		})
 	};
 
 	return (

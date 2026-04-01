@@ -69,7 +69,7 @@ const CourseForm: Component<FormDataResponse> = (props) => {
         return sessions().map(item => item.value)
       case EventType.DAYS.toString():
         return eventDays.reduce((acc: string[], newVal: string) => {
-          return [...acc, ...dayMap()[newVal]?.sessions]
+          return [...acc, ...(dayMap()[newVal]?.sessions || [])]
         }, [])
       case EventType.SESSIONS.toString():
         return eventSessions || []

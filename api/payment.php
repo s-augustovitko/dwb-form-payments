@@ -68,8 +68,8 @@ try {
         ],
     ];
 
-    $charge;
-    $user_message;
+    $charge = null;
+    $user_message = null;
     try {
         $charge = createCulqiCharge($charge_data);
         if (!isset($charge['id']) || !isset($charge['outcome']['type'])) {
