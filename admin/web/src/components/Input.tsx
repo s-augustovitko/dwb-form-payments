@@ -21,6 +21,7 @@ type Props = {
   name: string;
   required?: boolean;
   value?: string | number;
+  step?: string;
 
   label?: string;
   error: string;
@@ -38,7 +39,7 @@ export const Input: Component<Props> = (props) => {
   const [, inputProps] = splitProps(props, ['label', 'error']);
 
   return (
-    <fieldset class="fieldset">
+    <fieldset class="fieldset w-full">
       <label for={props.name} class="label">
         {props.label} {props.required ? <span>*</span> : <span>(Opcional)</span>}
       </label>

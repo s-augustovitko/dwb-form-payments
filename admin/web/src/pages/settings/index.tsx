@@ -151,6 +151,7 @@ const Settings: Component = () => {
 																<FaSolidPencil />
 															</A>
 														</div>
+
 														<div class="tooltip" data-tip="export">
 															<a href={`${BASE_URL}/form_responses/${item.id}/export`} target="_blank" class="btn btn-ghost btn-circle btn-info">
 																<FaSolidFileExport />

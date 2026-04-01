@@ -140,7 +140,7 @@ SELECT
     sett.end_date,
     active
 FROM settings sett
-ORDER BY sett.start_date DESC, sett.id
+ORDER BY sett.active, sett.start_date DESC, sett.id
 LIMIT ?
 OFFSET ?
 `

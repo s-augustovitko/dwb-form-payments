@@ -22,7 +22,7 @@ export const Select: Component<Props> = (props) => {
   const [, inputProps] = splitProps(props, ['label', 'error', 'items']);
 
   return (
-    <fieldset class="fieldset">
+    <fieldset class="fieldset w-full">
       <label for={props.name} class="label">
         {props.label} {props.required ? <span>*</span> : <span>(Opcional)</span>}
       </label>

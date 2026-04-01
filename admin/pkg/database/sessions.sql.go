@@ -59,7 +59,7 @@ SELECT
     session_time
 FROM sessions
 WHERE settings_id = ?
-ORDER BY id
+ORDER BY session_time, id
 `
 
 type ListSessionsBySettingsIdRow struct {

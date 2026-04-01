@@ -3,8 +3,7 @@ import { lazy } from "solid-js";
 
 import Home from "./pages/home";
 import Settings from "./pages/settings";
-import CreateSettings from "./pages/settings/create";
-import UpdateSettings from "./pages/settings/update";
+import CreateUpdateSettings from "./pages/settings/create_update";
 
 export const routes: RouteDefinition[] = [
 	{
@@ -18,12 +17,8 @@ export const routes: RouteDefinition[] = [
 			component: Settings,
 		},
 		{
-			path: "/create",
-			component: CreateSettings
-		},
-		{
 			path: ":id",
-			component: UpdateSettings
+			component: CreateUpdateSettings
 		}]
 	},
 

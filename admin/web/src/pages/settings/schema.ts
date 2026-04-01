@@ -8,33 +8,58 @@ export const settingTypes: SelectItem[] = [
   { label: "Special Course", value: "SPECIAL" },
 ];
 
+const numCheck = (v: string) => {
+  if (!v) {
+    return true
+  }
+
+  const val = Number(v)
+  if (Number.isNaN(val)) {
+    return false
+  }
+
+  return val >= 0
+}
+
+const decimalCheck = (v: string) => {
+  if (!v) {
+    return true
+  }
+
+  if (v.includes('.')) {
+    return (v.split('.').at(1)?.length || 0) <= 2;
+  }
+  return true;
+}
+
+
 export const settingSchema = v.pipe(
   v.object({
     form_type: v.pipe(
-      v.string(),
-      v.nonEmpty(),
-      v.maxLength(20)
+      v.string('Required field'),
+      v.nonEmpty('Please select a type'),
+      v.maxLength(20, 'Type too long')
     ),
     title: v.pipe(
-      v.string(),
-      v.nonEmpty(),
-      v.minLength(3),
-      v.maxLength(255)
+      v.string('Required field'),
+      v.nonEmpty('Title is required'),
+      v.minLength(3, 'Title must be at least 3 characters'),
+      v.maxLength(255, 'Title cannot exceed 255 characters')
     ),
     description: v.optional(
       v.pipe(
-        v.string(),
-        v.maxLength(2000)
+        v.string('Must be a string'),
+        v.maxLength(2000, 'Description cannot exceed 2000 characters')
       ),
       ""
     ),
     start_date: v.pipe(
-      v.string(),
-      v.nonEmpty(),
+      v.string('Required field'),
+      v.nonEmpty('Start date is required'),
       v.check((val) => {
         if (!val) return true;
         return dayjs(val).isValid();
-      }, 'Invalid Date'),
+      }, 'Invalid date format'),
       v.check((val) => {
         if (!val) return true;
         const today = dayjs().startOf('d');
@@ -42,12 +67,12 @@ export const settingSchema = v.pipe(
       }, 'Date cannot be before today')
     ),
     end_date: v.pipe(
-      v.string(),
-      v.nonEmpty('Campo es requerido'),
+      v.string('Required field'),
+      v.nonEmpty('End date is required'),
       v.check((val) => {
         if (!val) return true;
         return dayjs(val).isValid();
-      }, 'Invalid date'),
+      }, 'Invalid date format'),
       v.check((val) => {
         if (!val) return true;
         const tomorrow = dayjs().add(1, 'd').startOf('d');
@@ -56,63 +81,67 @@ export const settingSchema = v.pipe(
     ),
     meal_price_pen: v.optional(
       v.pipe(
-        v.number(),
-        v.minValue(0)
+        v.string(),
+        v.check(numCheck, "Must be a positive number"),
+        v.check(decimalCheck, "Should not have more than 2 decimals")
       ),
-      0
+      "0"
     ),
     meal_price_usd: v.optional(
       v.pipe(
-        v.number(),
-        v.minValue(0)
+        v.string(),
+        v.check(numCheck, "Must be a positive number"),
+        v.check(decimalCheck, "Should not have more than 2 decimals"),
       ),
-      0
+      "0"
     ),
     session_price_pen: v.optional(
       v.pipe(
-        v.number(),
-        v.minValue(0)
+        v.string(),
+        v.check(numCheck, "Must be a positive number"),
+        v.check(decimalCheck, "Should not have more than 2 decimals"),
       ),
-      0
+      "0"
     ),
     session_price_usd: v.optional(
       v.pipe(
-        v.number(),
-        v.minValue(0)
+        v.string(),
+        v.check(numCheck, "Must be a positive number"),
+        v.check(decimalCheck, "Should not have more than 2 decimals"),
       ),
-      0
+      "0"
     ),
     sessions: v.pipe(
       v.array(
         v.object({
           id: v.optional(v.string(), ""),
           title: v.pipe(
-            v.string(),
-            v.nonEmpty(),
-            v.minLength(3),
-            v.maxLength(255)
+            v.string('Required field'),
+            v.nonEmpty('Session title is required'),
+            v.minLength(3, 'Title must be at least 3 characters'),
+            v.maxLength(255, 'Title cannot exceed 255 characters')
           ),
           session_time: v.pipe(
-            v.string(),
-            v.nonEmpty(),
+            v.string('Required field'),
+            v.nonEmpty('Session time is required'),
             v.check((val) => {
               if (!val) return true;
               return dayjs(val).isValid();
-            })
+            }, 'Invalid date/time format')
           )
         })
       ),
-      v.minLength(1)
+      v.minLength(1, 'At least one session is required')
     ),
     meals: v.optional(
       v.array(
         v.object({
           id: v.optional(v.string(), ""),
           title: v.pipe(
-            v.string(),
-            v.nonEmpty(),
-            v.minLength(3),
-            v.maxLength(255)
+            v.string('Required field'),
+            v.nonEmpty('Meal title is required'),
+            v.minLength(3, 'Title must be at least 3 characters'),
+            v.maxLength(255, 'Title cannot exceed 255 characters')
           )
         })
       ),
@@ -125,7 +154,7 @@ export const settingSchema = v.pipe(
     v.check((input) => {
       if (!input.start_date || !input.end_date) return true;
       return !dayjs(input.end_date).isBefore(dayjs(input.start_date));
-    }, "End date should not be before start date"),
+    }, "End date cannot be earlier than start date"),
     ['end_date']
   ),
 
@@ -143,9 +172,9 @@ export const settingSchema = v.pipe(
         const sTime = dayjs(session.session_time);
         return !sTime.isBefore(start) && !sTime.isAfter(end);
       });
-    }, "Session times must not be outside of the start and end dates range"),
+    }, "Session times must fall within the start and end date range"),
     ['sessions']
   )
 );
 
-export type SettingSchema = v.InferInput<typeof settingSchema>
+export type SettingSchema = v.InferInput<typeof settingSchema>;

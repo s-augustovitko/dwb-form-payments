@@ -59,7 +59,7 @@ export const SelectInput: Component<Props> = (props) => {
   const errorId = `${props.input.name}-error`
 
   return (
-    <fieldset class="fieldset">
+    <fieldset class="fieldset w-full">
       <label for={props.input.name} class="label">
         {props.label} {props.required ? <span>*</span> : <span>(Opcional)</span>}
       </label>
