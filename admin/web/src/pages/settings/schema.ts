@@ -67,7 +67,7 @@ export const settingSchema = v.pipe(
       }, 'Date should not be before today'),
       v.check((val) => {
         if (!val) return true;
-        const oneYearLater = dayjs().add(1, 'year')
+        const oneYearLater = dayjs().add(1, 'year').endOf('d');
         return !dayjs(val).isAfter(oneYearLater);
       }, 'Date should not be later than 1 year from today')
     ),
