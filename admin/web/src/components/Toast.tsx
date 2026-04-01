@@ -10,10 +10,21 @@ export interface NotificationItem {
 const createNotificationStore = () => {
   const [store, setStore] = createStore<Array<NotificationItem>>([])
 
+  /**
+   * Remove a notification with the given id from the internal notification store.
+   *
+   * @param id - The notification `id` to remove
+   */
   function removeItem(id: string) {
     setStore(items => items.filter(i => i.id !== id))
   }
 
+  /**
+   * Create and append a notification to the store and schedule its automatic removal.
+   *
+   * @param item - Notification properties excluding `id` (e.g., `title` and `type`)
+   * @returns The generated notification `id`
+   */
   function addItem(item: Omit<NotificationItem, "id">) {
     const id = createUniqueId()
 

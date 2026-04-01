@@ -7,6 +7,12 @@ import dayjs from "dayjs";
 import { Input, notificationStore, Select } from "../../components";
 import { FaSolidAdd, FaSolidChevronLeft, FaSolidTrash } from "solid-icons/fa";
 
+/**
+ * Fetches a settings configuration by its ID.
+ *
+ * @param settingsId - The ID of the settings configuration to retrieve.
+ * @returns The settings configuration as a `SettingSchema`.
+ */
 async function getSettingsByID(settingsId: string): Promise<SettingSchema> {
 	return request<SettingSchema>(
 		"settings/" + settingsId,
@@ -127,6 +133,11 @@ const CreateSettings: Component = () => {
 		}
 	};
 
+	/**
+	 * Inserts a new session into the form's `sessions` array with an empty title and a default `session_time`.
+	 *
+	 * The default `session_time` is 10:00 on the form's `start_date` when `start_date` is present; otherwise it uses the current hour.
+	 */
 	function addSession() {
 		const startDate = getValue(settingForm, 'start_date')
 
@@ -138,6 +149,13 @@ const CreateSettings: Component = () => {
 		})
 	}
 
+	/**
+	 * Removes the session at the given index from the form and, if the session was persisted, attempts to delete it from the backend.
+	 *
+	 * The session is removed from the form immediately. If the removed session has an `id`, a DELETE request is sent to `sessions/{params.id}/{sessionId}`; on request failure the original session is re-inserted at the same index and an error notification is shown.
+	 *
+	 * @param idx - The zero-based index of the session to remove from the form
+	 */
 	async function removeSession(idx: number) {
 		let currentSession: { id?: string, title: string, session_time: string } = { title: "", session_time: "" };
 		try {
@@ -157,6 +175,11 @@ const CreateSettings: Component = () => {
 		}
 	}
 
+	/**
+	 * Insert a new empty meal entry into the form's meals array.
+	 *
+	 * The inserted meal has an empty `title` field.
+	 */
 	function addMeal() {
 		insert(settingForm, 'meals', {
 			value: {
@@ -165,6 +188,13 @@ const CreateSettings: Component = () => {
 		})
 	}
 
+	/**
+	 * Remove the meal at the specified index from the form and, if persisted, attempt to delete it on the server.
+	 *
+	 * If the remote delete fails, the removed meal is re-inserted at the same index and an error notification is recorded.
+	 *
+	 * @param idx - Index of the meal in the form's `meals` array to remove
+	 */
 	async function removeMeal(idx: number) {
 		let currentMeal: { id?: string, title: string } = { title: "" };
 		try {
