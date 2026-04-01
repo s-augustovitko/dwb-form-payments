@@ -295,7 +295,7 @@ function getTotalPrice(array $input)
         throw new Exception("No hay formularios activos");
     }
 
-    $currency = $settings['session_price_usd'] === 0 && $settings['meal_price_usd'] === 0  ? "PEN" : $input['currency'];
+    $currency = (float)$settings['session_price_usd'] === 0.0 && (float)$settings['meal_price_usd'] === 0.0  ? "PEN" : $input['currency'];
     $sessionPrice = (float)($currency === 'USD' ? $settings['session_price_usd'] : $settings['session_price_pen']);
     $mealPrice = (float)($currency === 'USD' ? $settings['meal_price_usd'] : $settings['meal_price_pen']);
     $expectedPayment = ((int)($input['sessions_count']) * $sessionPrice) + ((int)($input['meals_count']) * $mealPrice);
