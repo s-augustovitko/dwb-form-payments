@@ -46,7 +46,7 @@ CREATE TABLE meals (
         ON UPDATE CURRENT_TIMESTAMP,
 
     -- INDEXES
-    INDEX idx_meals_settings_id (settings_id, id)
+    INDEX idx_meals_settings_id (settings_id, id),
 
     CONSTRAINT fk_meals_settings
         FOREIGN KEY (settings_id)
