@@ -1,0 +1,6 @@
+{
+  "service": {
+    "name": "dwb-admin",
+    "allowOrigins": "http://localhost:3000"
+  }
+}

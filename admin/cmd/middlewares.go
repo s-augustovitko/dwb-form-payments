@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dwb-admin/pkg/config"
+	"dwb-admin/internal/config"
 	"time"
 
 	"github.com/gofiber/fiber/v2"

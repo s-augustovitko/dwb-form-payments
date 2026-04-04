@@ -1,8 +1,8 @@
 package main
 
 import (
-	"dwb-admin/pkg/api"
-	"dwb-admin/pkg/config"
+	"dwb-admin/internal/api"
+	"dwb-admin/internal/config"
 	"log"
 	"log/slog"
 	"os"

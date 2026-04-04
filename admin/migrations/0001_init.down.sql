@@ -1,6 +1,0 @@
-DROP TABLE IF EXISTS meals;
-DROP TABLE IF EXISTS sessions;
-DROP TABLE IF EXISTS form_responses;
-DROP TABLE IF EXISTS settings;
-
-DROP TABLE IF EXISTS rate_limits;

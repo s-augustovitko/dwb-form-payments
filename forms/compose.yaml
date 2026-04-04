@@ -1,0 +1,11 @@
+services:
+  dwb-forms:
+    build: .
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ../dist:/var/www/html
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://dwb-forms/api/health"]
+      start_period: 10s

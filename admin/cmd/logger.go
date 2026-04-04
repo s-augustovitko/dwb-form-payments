@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dwb-admin/pkg/config"
+	"dwb-admin/internal/config"
 	"log/slog"
 	"time"
 
@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/utils"
 )
 
-var skipPathsLogger = map[string]bool{"/v1/readyz": true, "/v1/livez": true}
+var skipPathsLogger = map[string]bool{"/api/v1/readyz": true, "api/v1/livez": true}
 
 func slogLogger(c *fiber.Ctx) error {
 	if skipPathsLogger[c.Path()] {

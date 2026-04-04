@@ -33,7 +33,7 @@ The project is divided into two primary environments:
 Create a `.env` file in the root directory:
 ```env
 APP_ENV=prod
-ALLOWED_ORIGINS=https://app.caminodeldiamante.pe
+ALLOW_ORIGINS=https://app.caminodeldiamante.pe
 DB_USER=your_user
 DB_PASS=your_password
 DB_HOST=localhost:3306
@@ -96,10 +96,10 @@ cd admin && make run_migrations
 To tail logs for a specific service (e.g., the admin API):
 ```bash
 # Public
-make logs SERVICE=apache
+make logs SERVICE=dwb-forms
 
 # Admin
-cd admin && make logs SERVICE=service-dwb-admin
+cd admin && make logs SERVICE=dwb-admin
 ```
 
 ### Admin Observability

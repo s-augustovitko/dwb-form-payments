@@ -1,23 +1,23 @@
 configs:
-  service-dwb-admin_config:
-    file: ./config/local.json
+  dwb-admin_config:
+    file: ./config/dev.json
 
 networks:
   dwb:
     driver: bridge
 
 services:
-  service-dwb-admin:
+  dwb-admin:
     env_file: ../.env
     build: ./
     restart: always
     configs:
-      - source: service-dwb-admin_config
+      - source: dwb-admin_config
         target: /service/config/service.json
     networks:
       - dwb
     healthcheck:
-      test: ["CMD", "wget", "--spider", "--quiet", "http://service-dwb-admin:3000/api/v1/readyz"]
+      test: ["CMD", "wget", "--spider", "--quiet", "http://dwb-admin:3000/api/v1/readyz"]
       start_period: 10s
 
   caddy:

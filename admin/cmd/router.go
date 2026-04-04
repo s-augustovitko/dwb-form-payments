@@ -2,12 +2,9 @@ package main
 
 import (
 	"database/sql"
-	"dwb-admin/pkg/api"
-	"dwb-admin/pkg/api/formresponses"
-	"dwb-admin/pkg/api/meals"
-	"dwb-admin/pkg/api/sessions"
-	"dwb-admin/pkg/api/settings"
-	"dwb-admin/pkg/config"
+	"dwb-admin/internal/api"
+	"dwb-admin/internal/api/forms"
+	"dwb-admin/internal/config"
 	"log/slog"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,10 +18,7 @@ func router(api fiber.Router, srv *api.DefaultServer) {
 	}))
 
 	// Register routes
-	settings.Register(api, &settings.Server{DefaultServer: srv})
-	meals.Register(api, &meals.Server{DefaultServer: srv})
-	sessions.Register(api, &sessions.Server{DefaultServer: srv})
-	formresponses.Register(api, &formresponses.Server{DefaultServer: srv})
+	forms.Register(api, &forms.Server{DefaultServer: srv})
 }
 
 func isServiceReady(srv *api.DefaultServer) healthcheck.HealthChecker {
