@@ -2,10 +2,10 @@ RewriteEngine On
 
 # Whitelist specific URLs
 RewriteRule "^health$" health.php [END]
-RewriteRule "^payment$" payment.php [END]
-RewriteRule "^submit$" submit.php [END]
 RewriteRule "^form_info$" form_info.php [END]
-RewriteRule "^form_response$" form_response.php [END]
+RewriteRule "^submit$" submit.php [END]
+RewriteRule "^payment$" payment.php [END]
+RewriteRule "^form_submission$" form_submission.php [END]
 
 # Block everything else
 RewriteRule ".*" - [F,L]

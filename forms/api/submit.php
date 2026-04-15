@@ -24,14 +24,16 @@ try {
     // REQUIRED FIELDS
     // =========================
     $required_fields = [
-        'settings_id',
         'first_name',
         'last_name',
         'email',
+        'id_type',
+        'id_value',
         'country_code',
         'phone',
-        'id_type',
-        'id_value'
+        'selected_addons',
+        'meal_type',
+        'event_type',
     ];
     foreach ($required_fields as $field) {
         if (empty($input[$field])) {
@@ -40,7 +42,7 @@ try {
     }
 
     // =========================
-    // BASIC VALIDATION
+    // REQUIRED
     // =========================
     if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
         throw new Exception('correo invalido');
@@ -55,42 +57,17 @@ try {
         throw new Exception('telefono debe ser numerico');
     }
 
-    // =========================
-    // ENUM VALIDATION
-    // =========================
     $valid_id_types = ['DNI', 'CE', 'PASSPORT'];
     if (!in_array($input['id_type'], $valid_id_types, true)) {
         throw new Exception('tipo de documento invalido');
     }
 
-    $valid_meal_types = ['REGULAR', 'VEGGIE', 'NONE'];
-    if (isset($input['meal_type']) && !in_array($input['meal_type'], $valid_meal_types, true)) {
-        throw new Exception('tipo de comida invalido');
-    }
-
-    $valid_event_types = ['FULL', 'DAYS', 'SESSIONS'];
-    if (isset($input['event_type']) && !in_array($input['event_type'], $valid_event_types, true)) {
-        throw new Exception('tipo de evento invalido');
-    }
-
-    $valid_currency = ['PEN', 'USD'];
-    if (isset($input['currency']) && !in_array($input['currency'], $valid_currency, true)) {
-        throw new Exception('moneda invalida');
+    if (!is_array($input['selected_addons'])) {
+        throw new Exception("debe seleccionar almenos una sesion");
     }
 
     // =========================
-    // NUMERIC RULES
-    // =========================
-    if (isset($input['sessions_count']) && (!is_numeric($input['sessions_count']) || $input['sessions_count'] < 1)) {
-        throw new Exception('numero de sesiones debe ser al menos 1');
-    }
-
-    if (isset($input['meals_count']) && (!is_numeric($input['meals_count']) || $input['meals_count'] < 0)) {
-        throw new Exception('numero de comidas no puede ser negativo');
-    }
-
-    // =========================
-    // EMERGENCY CONTACT
+    // OPTIONAL
     // =========================
     if (
         !empty($input['emergency_contact_country_code']) &&
@@ -113,10 +90,7 @@ try {
         throw new Exception('correo de contacto de emergencia invalido');
     }
 
-    // =========================
-    // DATE VALIDATION
-    // =========================
-    $today = new DateTime('today');
+    $today = new DateTime('midnight');
     $arrival = null;
     $departure = null;
 
@@ -138,149 +112,38 @@ try {
         throw new Exception('el retorno no puede ser antes de la llegada');
     }
 
-    $form_id = $input['form_id'] ?? guidv4();
-    $pricing = getTotalPrice($input);
+    if (isset($input['meal_type']) && !MealType::tryFrom($input['meal_type'])) {
+        throw new Exception('tipo de comida invalido');
+    }
 
-    // =========================
-    // PREPARE INSERT
-    // =========================
-    $stmt = db()->prepare(
-        '
-        INSERT INTO form_responses (
-            id,
-            settings_id,
+    if (isset($input['event_type']) && !EventType::tryFrom($input['event_type'])) {
+        throw new Exception('tipo de evento invalido');
+    }
 
-            first_name,
-            last_name,
-            email,
-            country_code,
-            phone,
-            id_type,
-            id_value,
+    if (isset($input['currency']) && !Currency::tryFrom($input['currency'])) {
+        throw new Exception('moneda invalida');
+    }
 
-            meal_type,
-            meals_count,
-            meal_price,
+    db()->beginTransaction();
 
-            event_type,
-            sessions_count,
-            session_price,
-
-            arrival_date,
-            departure_date,
-
-            medical_insurance,
-
-            emergency_contact_name,
-            emergency_contact_country_code,
-            emergency_contact_phone,
-            emergency_contact_email,
-
-            currency,
-            payment_amount,
-            payment_status
-        ) VALUES (
-            :form_id,
-            :settings_id,
-
-            :first_name,
-            :last_name,
-            :email,
-            :country_code,
-            :phone,
-            :id_type,
-            :id_value,
-
-            :meal_type,
-            :meals_count,
-            :meal_price,
-
-            :event_type,
-
-            :sessions_count,
-            :session_price,
-
-            :arrival_date,
-            :departure_date,
-
-            :medical_insurance,
-
-            :emergency_contact_name,
-            :emergency_contact_country_code,
-            :emergency_contact_phone,
-            :emergency_contact_email,
-
-            :currency,
-            :payment_amount,
-            :payment_status
-        )
-        ON DUPLICATE KEY UPDATE
-            first_name = VALUES(first_name),
-            last_name = VALUES(last_name),
-            email = VALUES(email),
-            country_code = VALUES(country_code),
-            phone = VALUES(phone),
-            id_type = VALUES(id_type),
-            id_value = VALUES(id_value),
-            meal_type = VALUES(meal_type),
-            meals_count = VALUES(meals_count),
-            meal_price = VALUES(meal_price),
-            event_type = VALUES(event_type),
-            sessions_count = VALUES(sessions_count),
-            session_price = VALUES(session_price),
-            arrival_date = VALUES(arrival_date),
-            departure_date = VALUES(departure_date),
-            medical_insurance = VALUES(medical_insurance),
-            emergency_contact_name = VALUES(emergency_contact_name),
-            emergency_contact_country_code = VALUES(emergency_contact_country_code),
-            emergency_contact_phone = VALUES(emergency_contact_phone),
-            emergency_contact_email = VALUES(emergency_contact_email),
-            currency = VALUES(currency),
-            payment_amount = VALUES(payment_amount);
-        '
+    $form = fetch_active_form();
+    $submission_id = upsert_submission($form['id'], $input);
+    $order_id = create_update_order(
+        $form['id'],
+        $submission_id,
+        $input['selected_addons'],
+        EventType::from($input['event_type']),
+        MealType::from($input['meal_type']),
+        Currency::from($input['currency']),
     );
 
-    $stmt->execute([
-        ':form_id' => $form_id,
-        ':settings_id' => $input['settings_id'],
-
-        ':first_name' => $input['first_name'],
-        ':last_name' => $input['last_name'],
-        ':email' => $input['email'],
-        ':country_code' => $input['country_code'],
-        ':phone' => $input['phone'],
-        ':id_type' => $input['id_type'],
-        ':id_value' => $input['id_value'],
-
-        ':meal_type' => $pricing['meal_type'] ?? null,
-        ':meals_count' => $pricing['meals_count'],
-        ':meal_price' => $pricing['meal_price'] ?? 0,
-
-        ':event_type' => $input['event_type'] ?? null,
-
-        ':sessions_count' => $pricing['sessions_count'] ?? 0,
-        ':session_price' => $pricing['session_price'] ?? 0,
-
-        ':arrival_date' => $input['arrival_date'] ?? null,
-        ':departure_date' => $input['departure_date'] ?? null,
-
-        ':medical_insurance' => $input['medical_insurance'] ?? null,
-
-        ':emergency_contact_name' => $input['emergency_contact_name'] ?? null,
-        ':emergency_contact_country_code' => $input['emergency_contact_country_code'] ?? null,
-        ':emergency_contact_phone' => $input['emergency_contact_phone'] ?? null,
-        ':emergency_contact_email' => $input['emergency_contact_email'] ?? null,
-
-        ':currency' => $pricing['currency'] ?? 'PEN',
-        ':payment_amount' => $pricing['payment_amount'] ?? 0.0,
-
-        ':payment_status' => ((float) $pricing['payment_amount'] <= 0.0) ? 'NOT_NEEDED' : 'PENDING',
-    ]);
-
+    db()->commit();
     respond([
-        'form_id' => $form_id,
+        "submission_id" => $submission_id,
+        "order_id" => $order_id,
     ]);
 } catch (Throwable $e) {
+    db()->rollBack();
     error_log($e->getMessage());
     respond_error($e->getMessage(), 400);
 }

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/utils.php';
+require_once __DIR__ . '/service.php';
 
 /* Load environment */
 load_env(__DIR__ . '/../.env');

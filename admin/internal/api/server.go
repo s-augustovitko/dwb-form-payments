@@ -1,8 +1,9 @@
 package api
 
 import (
+	"database/sql"
 	"dwb-admin/internal/config"
-	"dwb-admin/internal/database"
+	"log/slog"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,7 +12,19 @@ import (
 
 type DefaultServer struct {
 	Cfg *config.Config
-	DB  database.DBTX
+	DB  *sql.DB
+}
+
+func (s DefaultServer) Ready(c *fiber.Ctx) bool {
+	ctx, cancel := s.Cfg.ReadCtx(c.Context())
+	defer cancel()
+
+	if err := s.DB.PingContext(ctx); err != nil {
+		config.GetLogger(c).Error("could not connect to the database", slog.String("error", err.Error()))
+		return false
+	}
+
+	return s.Cfg != nil
 }
 
 type Paging struct {

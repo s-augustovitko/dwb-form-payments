@@ -37,6 +37,7 @@ type InputProps = {
   name: string;
   value?: string;
   disabled?: boolean;
+  step?: string;
 
   ref: (element: HTMLInputElement) => void;
   onInput: JSX.EventHandler<HTMLInputElement, InputEvent>;

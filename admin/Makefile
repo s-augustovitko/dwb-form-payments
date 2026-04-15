@@ -3,10 +3,10 @@ all: run
 
 include ../docker.mk
 
-CHANGES_DIRS="web/src internal cmd"
-COMPOSE="./compose.yaml"
-DOCKER="podman"
-ENV_FILE="../.env"
+CHANGES_DIRS=web/src internal cmd
+COMPOSE=./compose.yaml
+DOCKER=podman
+ENV_FILE=../.env
 
 .PHONY: build
 build: ## Build the front end

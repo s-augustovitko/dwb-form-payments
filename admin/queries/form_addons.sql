@@ -19,7 +19,7 @@ INSERT INTO addons (
     date_time = VALUES(date_time),
     hint = VALUES(hint);
 
--- name: CreateAddon :copyfrom
+-- name: CreateAddon :exec
 INSERT INTO addons (
     id, 
     form_id, 
@@ -39,22 +39,18 @@ UPDATE addons
 SET active = ?
 WHERE id = ?;
 
--- name: DeleteAddon :exec
-DELETE FROM addons
-WHERE id = ? AND form_id = ?;
-
 -- name: GetAddonsByFormID :many
-SELECT 
-    id, 
+SELECT
+    id,
     title,
-    addon_type, 
-    sort_order, 
+    addon_type,
+    sort_order,
     price,
-    currency, 
-    date_time, 
+    currency,
+    date_time,
     hint,
     active
 FROM addons
-WHERE form_id = ?
+WHERE form_id = ? AND active = TRUE
 ORDER BY addon_type DESC, sort_order ASC;
 

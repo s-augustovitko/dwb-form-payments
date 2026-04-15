@@ -24,17 +24,20 @@ SELECT
     end_date, 
     active
 FROM forms
-ORDER BY active DESC, start_date DESC, id DESC
+WHERE active = ?
+ORDER BY start_date DESC, id DESC
 LIMIT ?
 OFFSET ?;
 
 -- name: CountForms :one
 SELECT COUNT(*)
-FROM forms;
+FROM forms
+WHERE active = ?;
 
 -- name: UpdateForm :exec
 UPDATE forms
 SET 
+    form_type = ?,
     title = ?,
     description = ?,
     start_date = ?,
@@ -46,3 +49,13 @@ UPDATE forms
 SET active = ?
 WHERE id = ?;
 
+-- name: GetFormByID :one
+SELECT
+    id,
+    title,
+    form_type,
+    description,
+    start_date,
+    end_date
+FROM forms
+WHERE id = ?;

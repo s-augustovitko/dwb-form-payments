@@ -21,6 +21,7 @@ type Props = {
   name: string;
   required?: boolean;
   value?: string;
+  step?: string;
 
   label?: string;
   error: string;

@@ -8,10 +8,10 @@ WEB_DIR = ./web
 DIST_DIR = ../dist
 WEB_DIST_DIR := ${WEB_DIR}/dist
 
-CHANGES_DIRS="api web/src"
-COMPOSE="./compose.yaml"
-DOCKER="podman"
-ENV_FILE="../.env"
+CHANGES_DIRS=api web/src
+COMPOSE=./compose.yaml
+DOCKER=podman
+ENV_FILE=../.env
 
 FTP_ENV_FILE = ../.ftp.env
 

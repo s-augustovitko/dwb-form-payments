@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"strings"
 )
 
 const getSubmissionsReport = `-- name: GetSubmissionsReport :many
@@ -30,18 +31,23 @@ SELECT
 
     (SELECT COUNT(*) 
      FROM order_items i 
-     WHERE o.order_id = o.id AND i.addon_type = 'SESSION'
+     WHERE i.order_id = o.id AND i.addon_type = 'SESSION'
     ) AS session_count,
 
     (SELECT COUNT(*) 
      FROM order_items i 
-     WHERE o.order_id = o.id AND i.addon_type = 'MEAL'
+     WHERE i.order_id = o.id AND i.addon_type = 'MEAL'
     ) AS meal_count
 FROM submissions s
-LEFT JOIN orders o ON s.id = o.submission_id
-WHERE s.form_id = ?
+JOIN orders o ON s.id = o.submission_id AND o.status IN (/*SLICE:status*/?)
+WHERE s.form_id IN (/*SLICE:ids*/?)
 ORDER BY o.created_at DESC
 `
+
+type GetSubmissionsReportParams struct {
+	Status []OrdersStatus
+	Ids    []string
+}
 
 type GetSubmissionsReportRow struct {
 	ID           string
@@ -52,18 +58,36 @@ type GetSubmissionsReportRow struct {
 	IDValue      string
 	CountryCode  string
 	Phone        string
-	Status       NullOrdersStatus
-	Amount       sql.NullString
-	Currency     sql.NullString
-	EventType    NullOrdersEventType
-	MealType     NullOrdersMealType
+	Status       OrdersStatus
+	Amount       string
+	Currency     string
+	EventType    OrdersEventType
+	MealType     OrdersMealType
 	CreatedAt    sql.NullTime
 	SessionCount int64
 	MealCount    int64
 }
 
-func (q *Queries) GetSubmissionsReport(ctx context.Context, formID string) ([]GetSubmissionsReportRow, error) {
-	rows, err := q.db.QueryContext(ctx, getSubmissionsReport, formID)
+func (q *Queries) GetSubmissionsReport(ctx context.Context, arg GetSubmissionsReportParams) ([]GetSubmissionsReportRow, error) {
+	query := getSubmissionsReport
+	var queryParams []interface{}
+	if len(arg.Status) > 0 {
+		for _, v := range arg.Status {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:status*/?", strings.Repeat(",?", len(arg.Status))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:status*/?", "NULL", 1)
+	}
+	if len(arg.Ids) > 0 {
+		for _, v := range arg.Ids {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:ids*/?", strings.Repeat(",?", len(arg.Ids))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:ids*/?", "NULL", 1)
+	}
+	rows, err := q.db.QueryContext(ctx, query, queryParams...)
 	if err != nil {
 		return nil, err
 	}

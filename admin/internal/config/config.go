@@ -35,20 +35,16 @@ type (
 	}
 )
 
-func (t Timeout) ctx(timeout time.Duration) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), timeout)
+func (t Timeout) ReadCtx(c context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), t.Read)
 }
 
-func (t Timeout) ReadCtx() (context.Context, context.CancelFunc) {
-	return t.ctx(t.Read)
+func (t Timeout) WriteCtx(c context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), t.Write)
 }
 
-func (t Timeout) WriteCtx() (context.Context, context.CancelFunc) {
-	return t.ctx(t.Write)
-}
-
-func (t Timeout) TransactionCtx() (context.Context, context.CancelFunc) {
-	return t.ctx(t.Transaction)
+func (t Timeout) TransactionCtx(c context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), t.Transaction)
 }
 
 type Config struct {

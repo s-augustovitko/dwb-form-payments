@@ -38,7 +38,7 @@ export const TextArea: Component<Props> = (props) => {
   const [, inputProps] = splitProps(props, ['label', 'error']);
 
   return (
-    <fieldset class="fieldset w-full">
+    <fieldset class="fieldset">
       <label for={props.name} class="label">
         {props.label} {props.required ? <span>*</span> : <span>(Opcional)</span>}
       </label>

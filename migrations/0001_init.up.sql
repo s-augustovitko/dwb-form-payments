@@ -21,7 +21,7 @@ CREATE TABLE addons (
     form_id CHAR(36) NOT NULL,
 
     title VARCHAR(255) NOT NULL,
-    addon_type ENUM('SESSION', 'MEAL', 'ALL_SESSIONS_DISCOUNT') NOT NULL,
+    addon_type ENUM('SESSION', 'MEAL', 'ALL_SESSIONS_DISCOUNT', 'EARLY_DISCOUNT') NOT NULL,
     sort_order INT NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'PEN',
@@ -39,6 +39,7 @@ CREATE TABLE addons (
     CONSTRAINT fk_addons_form FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE,
     CONSTRAINT chk_addon_logic CHECK (
         (addon_type = 'SESSION' AND date_time IS NOT NULL) OR 
+        (addon_type = 'EARLY_DISCOUNT' AND date_time IS NOT NULL) OR 
         (addon_type = 'MEAL') OR 
         (addon_type = 'ALL_SESSIONS_DISCOUNT')
     )
@@ -116,13 +117,15 @@ CREATE TABLE order_items (
     addon_id CHAR(36) NOT NULL,
 
     title VARCHAR(255) NOT NULL,
-    addon_type ENUM('SESSION', 'MEAL', 'ALL_SESSIONS_DISCOUNT') NOT NULL,
+    addon_type ENUM('SESSION', 'MEAL', 'ALL_SESSIONS_DISCOUNT', 'EARLY_DISCOUNT') NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'PEN',
     date_time DATETIME,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY (order_id, addon_id),
 
     CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     CONSTRAINT fk_order_items_addon FOREIGN KEY (addon_id) REFERENCES addons(id) ON DELETE RESTRICT
@@ -140,7 +143,7 @@ CREATE TABLE payments (
     gateway_id VARCHAR(255),
     provider VARCHAR(63),
     error_message TEXT,
-    metadata JSON,
+    meta JSON,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

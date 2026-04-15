@@ -13,6 +13,11 @@ interface ApiRes<T> {
   message: string;
 }
 
+export type PagedResponse<T> = {
+  total: number
+  items: T[]
+}
+
 /**
  * Generic HTTP request helper
  *

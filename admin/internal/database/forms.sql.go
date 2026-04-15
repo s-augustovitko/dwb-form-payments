@@ -14,10 +14,11 @@ import (
 const countForms = `-- name: CountForms :one
 SELECT COUNT(*)
 FROM forms
+WHERE active = ?
 `
 
-func (q *Queries) CountForms(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countForms)
+func (q *Queries) CountForms(ctx context.Context, active bool) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countForms, active)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -62,6 +63,41 @@ func (q *Queries) CreateForm(ctx context.Context, arg CreateFormParams) error {
 	return err
 }
 
+const getFormByID = `-- name: GetFormByID :one
+SELECT
+    id,
+    title,
+    form_type,
+    description,
+    start_date,
+    end_date
+FROM forms
+WHERE id = ?
+`
+
+type GetFormByIDRow struct {
+	ID          string
+	Title       string
+	FormType    FormsFormType
+	Description sql.NullString
+	StartDate   time.Time
+	EndDate     time.Time
+}
+
+func (q *Queries) GetFormByID(ctx context.Context, id string) (GetFormByIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getFormByID, id)
+	var i GetFormByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.FormType,
+		&i.Description,
+		&i.StartDate,
+		&i.EndDate,
+	)
+	return i, err
+}
+
 const listForms = `-- name: ListForms :many
 SELECT 
     id, 
@@ -71,12 +107,14 @@ SELECT
     end_date, 
     active
 FROM forms
-ORDER BY active DESC, start_date DESC, id DESC
+WHERE active = ?
+ORDER BY start_date DESC, id DESC
 LIMIT ?
 OFFSET ?
 `
 
 type ListFormsParams struct {
+	Active bool
 	Limit  int32
 	Offset int32
 }
@@ -91,7 +129,7 @@ type ListFormsRow struct {
 }
 
 func (q *Queries) ListForms(ctx context.Context, arg ListFormsParams) ([]ListFormsRow, error) {
-	rows, err := q.db.QueryContext(ctx, listForms, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listForms, arg.Active, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -123,6 +161,7 @@ func (q *Queries) ListForms(ctx context.Context, arg ListFormsParams) ([]ListFor
 const updateForm = `-- name: UpdateForm :exec
 UPDATE forms
 SET 
+    form_type = ?,
     title = ?,
     description = ?,
     start_date = ?,
@@ -131,6 +170,7 @@ WHERE id = ?
 `
 
 type UpdateFormParams struct {
+	FormType    FormsFormType
 	Title       string
 	Description sql.NullString
 	StartDate   time.Time
@@ -140,6 +180,7 @@ type UpdateFormParams struct {
 
 func (q *Queries) UpdateForm(ctx context.Context, arg UpdateFormParams) error {
 	_, err := q.db.ExecContext(ctx, updateForm,
+		arg.FormType,
 		arg.Title,
 		arg.Description,
 		arg.StartDate,

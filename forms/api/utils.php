@@ -2,6 +2,57 @@
 
 declare(strict_types=1);
 
+enum PaymentStatus: string
+{
+    case PENDING = 'PENDING';
+    case PAID = 'PAID';
+    case FAILED = 'FAILED';
+    case EXEMPT = 'EXEMPT';
+    case REFUNDED = 'REFUNDED';
+}
+
+enum Currency: string
+{
+    case PEN = 'PEN';
+    case USD = 'USD';
+}
+
+enum PaymentType: string
+{
+    case CULQI = 'CULQI';
+    case ON_SITE = 'ON_SITE';
+}
+
+enum AddonType: string
+{
+    case SESSION = 'SESSION';
+    case MEAL = 'MEAL';
+    case ALL_SESSIONS_DISCOUNT = 'ALL_SESSIONS_DISCOUNT';
+    case EARLY_DISCOUNT = 'EARLY_DISCOUNT';
+}
+
+enum OrderStatus: string
+{
+    case DRAFT = 'DRAFT';
+    case CONFIRMED = 'CONFIRMED';
+    case CANCELLED = 'CANCELLED';
+    case ON_SITE = 'ON_SITE';
+}
+
+enum EventType: string
+{
+    case ALL_SESSIONS = 'ALL_SESSIONS';
+    case PER_SESSION = 'PER_SESSION';
+    case PER_DAY = 'PER_DAY';
+}
+
+enum MealType: string
+{
+    case NONE = 'NONE';
+    case REGULAR = 'REGULAR';
+    case VEGETARIAN = 'VEGETARIAN';
+}
+
 /* -----------------------------
    Secure headers
 ------------------------------*/
@@ -109,7 +160,7 @@ function json_input(): array
 {
     $data = json_decode(file_get_contents('php://input'), true);
     if (!is_array($data)) {
-        respond_error('Invalid JSON', 400);
+        respond_error('llamada invalida', 400);
     }
     return $data;
 }
@@ -242,14 +293,14 @@ function createCulqiCharge(array $data)
     $decoded = json_decode($response, true);
 
     if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception("Invalid JSON response");
+        throw new Exception("Respuesta invalida");
     }
 
     // Handle Culqi errors
     if ($statusCode < 200 || $statusCode >= 300) {
         $message = $decoded['user_message']
             ?? $decoded['merchant_message']
-            ?? "Culqi charge error";
+            ?? "Error a la hora de realizar cargo";
 
         throw new Exception($message, $statusCode);
     }
@@ -259,60 +310,4 @@ function createCulqiCharge(array $data)
     }
 
     return $decoded;
-}
-
-function getTotalPrice(array $input)
-{
-    $settings_prep = db()->prepare(
-        '
-        SELECT
-            meal_price_pen,
-            meal_price_usd,
-            session_price_pen,
-            session_price_usd
-        FROM settings
-        WHERE
-            active = TRUE AND
-            end_date > NOW()
-        ORDER BY
-            start_date ASC
-        LIMIT 1
-        '
-    );
-    $settings_prep->execute();
-    $settings = $settings_prep->fetch();
-    if (!$settings) {
-        throw new Exception("No hay formularios activos");
-    }
-
-    $sessionsCount = (int)$input['sessions_count'];
-
-    $mealType = $input['meal_type'] ?? "REGULAR";
-    $mealsCount = isset($input['meals_count']) ? (int)$input['meals_count'] : 0;
-    if ($mealType === 'NONE') {
-        $mealsCount = 0;
-    } elseif ($mealsCount === 0) {
-        $mealType = 'NONE';
-    }
-
-    $currency = (float)$settings['session_price_usd'] === 0.0 && (float)$settings['meal_price_usd'] === 0.0
-        ? "PEN"
-        : ($input['currency'] ?? 'PEN');
-
-    $sessionPrice = (float)($currency === 'USD' ? $settings['session_price_usd'] : $settings['session_price_pen']);
-    $mealPrice = (float)($currency === 'USD' ? $settings['meal_price_usd'] : $settings['meal_price_pen']);
-
-    $expectedPayment = (float)((int)($sessionsCount) * $sessionPrice) + (float)((int)($mealsCount) * $mealPrice);
-
-    return [
-        'payment_amount' => $expectedPayment,
-        'currency' => $currency,
-
-        'meal_type' => $mealType,
-        'meal_price' => $mealPrice,
-        'meals_count' => $mealsCount,
-
-        'session_price' => $sessionPrice,
-        'sessions_count' => $sessionsCount,
-    ];
 }

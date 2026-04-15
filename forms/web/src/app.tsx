@@ -1,14 +1,13 @@
 import { Toast } from "./components";
-import { type ParentComponent, Suspense } from "solid-js";
+import { type ParentComponent } from "solid-js";
 
 const App: ParentComponent = (props) => {
 	return (
 		<main>
+			<Toast />
+
 			<div class="max-w-xl p-4 mx-auto">
-				<div class="bg-base-200 border border-base-300 rounded-box p-4">
-					<Toast />
-					<Suspense>{props.children}</Suspense>
-				</div>
+				{props.children}
 			</div>
 		</main>
 	);

@@ -18,6 +18,7 @@ const (
 	AddonsAddonTypeSESSION             AddonsAddonType = "SESSION"
 	AddonsAddonTypeMEAL                AddonsAddonType = "MEAL"
 	AddonsAddonTypeALLSESSIONSDISCOUNT AddonsAddonType = "ALL_SESSIONS_DISCOUNT"
+	AddonsAddonTypeEARLYDISCOUNT       AddonsAddonType = "EARLY_DISCOUNT"
 )
 
 func (e *AddonsAddonType) Scan(src interface{}) error {
@@ -59,7 +60,8 @@ func (e AddonsAddonType) Valid() bool {
 	switch e {
 	case AddonsAddonTypeSESSION,
 		AddonsAddonTypeMEAL,
-		AddonsAddonTypeALLSESSIONSDISCOUNT:
+		AddonsAddonTypeALLSESSIONSDISCOUNT,
+		AddonsAddonTypeEARLYDISCOUNT:
 		return true
 	}
 	return false
@@ -124,6 +126,7 @@ const (
 	OrderItemsAddonTypeSESSION             OrderItemsAddonType = "SESSION"
 	OrderItemsAddonTypeMEAL                OrderItemsAddonType = "MEAL"
 	OrderItemsAddonTypeALLSESSIONSDISCOUNT OrderItemsAddonType = "ALL_SESSIONS_DISCOUNT"
+	OrderItemsAddonTypeEARLYDISCOUNT       OrderItemsAddonType = "EARLY_DISCOUNT"
 )
 
 func (e *OrderItemsAddonType) Scan(src interface{}) error {
@@ -165,7 +168,8 @@ func (e OrderItemsAddonType) Valid() bool {
 	switch e {
 	case OrderItemsAddonTypeSESSION,
 		OrderItemsAddonTypeMEAL,
-		OrderItemsAddonTypeALLSESSIONSDISCOUNT:
+		OrderItemsAddonTypeALLSESSIONSDISCOUNT,
+		OrderItemsAddonTypeEARLYDISCOUNT:
 		return true
 	}
 	return false
@@ -463,7 +467,7 @@ type Payment struct {
 	GatewayID    sql.NullString
 	Provider     sql.NullString
 	ErrorMessage sql.NullString
-	Metadata     json.RawMessage
+	Meta         json.RawMessage
 	CreatedAt    sql.NullTime
 	UpdatedAt    sql.NullTime
 }

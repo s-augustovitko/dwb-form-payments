@@ -2,7 +2,7 @@ import { Component, For, JSX, splitProps } from "solid-js"
 
 export interface MultiSelectItem {
   title: string
-  subtitle: string
+  subtitle?: string
   value: string
 }
 
@@ -11,15 +11,15 @@ type Props = {
   value?: string[];
 
   label?: string;
-  error: string;
+  error?: string;
   items: MultiSelectItem[]
 
   disabled?: boolean;
 
-  ref: (element: HTMLInputElement) => void;
-  onInput: JSX.EventHandler<HTMLInputElement, InputEvent>;
-  onChange: JSX.EventHandler<HTMLInputElement, Event>;
-  onBlur: JSX.EventHandler<HTMLInputElement, FocusEvent>;
+  ref?: (element: HTMLInputElement) => void;
+  onInput?: JSX.EventHandler<HTMLInputElement, InputEvent>;
+  onChange?: JSX.EventHandler<HTMLInputElement, Event>;
+  onBlur?: JSX.EventHandler<HTMLInputElement, FocusEvent>;
 };
 
 export const MultiSelect: Component<Props> = (props) => {

@@ -37,6 +37,7 @@ type InputProps = {
   name: string;
   value?: string;
   disabled?: boolean;
+  step?: string;
 
   ref: (element: HTMLInputElement) => void;
   onInput: JSX.EventHandler<HTMLInputElement, InputEvent>;
@@ -59,7 +60,7 @@ export const SelectInput: Component<Props> = (props) => {
   const errorId = `${props.input.name}-error`
 
   return (
-    <fieldset class="fieldset w-full">
+    <fieldset class="fieldset">
       <label for={props.input.name} class="label">
         {props.label} {props.required ? <span>*</span> : <span>(Opcional)</span>}
       </label>

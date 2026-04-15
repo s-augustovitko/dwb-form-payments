@@ -10,7 +10,7 @@ import (
 	"database/sql"
 )
 
-const createAddon = `-- name: CreateAddon :copyfrom
+const createAddon = `-- name: CreateAddon :exec
 INSERT INTO addons (
     id, 
     form_id, 
@@ -38,34 +38,34 @@ type CreateAddonParams struct {
 	Hint      sql.NullString
 }
 
-const deleteAddon = `-- name: DeleteAddon :exec
-DELETE FROM addons
-WHERE id = ? AND form_id = ?
-`
-
-type DeleteAddonParams struct {
-	ID     string
-	FormID string
-}
-
-func (q *Queries) DeleteAddon(ctx context.Context, arg DeleteAddonParams) error {
-	_, err := q.db.ExecContext(ctx, deleteAddon, arg.ID, arg.FormID)
+func (q *Queries) CreateAddon(ctx context.Context, arg CreateAddonParams) error {
+	_, err := q.db.ExecContext(ctx, createAddon,
+		arg.ID,
+		arg.FormID,
+		arg.Title,
+		arg.AddonType,
+		arg.SortOrder,
+		arg.Price,
+		arg.Currency,
+		arg.DateTime,
+		arg.Hint,
+	)
 	return err
 }
 
 const getAddonsByFormID = `-- name: GetAddonsByFormID :many
-SELECT 
-    id, 
+SELECT
+    id,
     title,
-    addon_type, 
-    sort_order, 
+    addon_type,
+    sort_order,
     price,
-    currency, 
-    date_time, 
+    currency,
+    date_time,
     hint,
     active
 FROM addons
-WHERE form_id = ?
+WHERE form_id = ? AND active = TRUE
 ORDER BY addon_type DESC, sort_order ASC
 `
 
