@@ -468,20 +468,20 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 					<table class="table">
 						<thead>
 							<Show when={getEarlyDiscount() || getAllSessionsDiscount()}>
-								<tr>
+								<tr class="text-xs">
 									<td>Subtotal</td>
 									<td>{getMoneyDisplay(getCurrency(), getSubtotal())}</td>
 								</tr>
 							</Show>
 
 							<Show when={getEarlyDiscount()}>
-								<tr>
+								<tr class="text-xs">
 									<td>{getEarlyDiscount()?.title}</td>
 									<td class="text-success">- {getMoneyDisplay(getEarlyDiscount()?.currency, Number(getEarlyDiscount()?.price))}</td>
 								</tr>
 							</Show>
 							<Show when={getAllSessionsDiscount()}>
-								<tr>
+								<tr class="text-xs">
 									<td>{getAllSessionsDiscount()?.title}</td>
 									<td class="text-success">- {getMoneyDisplay(getAllSessionsDiscount()?.currency, Number(getAllSessionsDiscount()?.price))}</td>
 								</tr>

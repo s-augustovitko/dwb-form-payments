@@ -31,6 +31,13 @@ const Checkout: Component = () => {
 	const getOnSitePrice = () =>
 		Number(submissionData()?.order.amount) + Number(getEarlyDiscount()?.price || 0)
 
+	const getSubtotal = () => {
+		return Number(submissionData()?.order.amount) +
+			(getDiscountList()?.
+				reduce((acc, item) => acc + Number(item.price || 0), 0) ||
+				0)
+	}
+
 	const getWebPrice = () => Number(submissionData()?.order.amount)
 
 
@@ -190,9 +197,14 @@ const Checkout: Component = () => {
 					<div class="overflow-x-scroll bg-base-100 rounded-box shadow-md">
 						<table class="table">
 							<thead>
+								<tr class="text-xs">
+									<th>Subtotal</th>
+									<th>{getMoneyDisplay(submissionData()?.order.currency, getSubtotal())}</th>
+								</tr>
+
 								<For each={getDiscountList()}>
 									{(item) => (
-										<tr>
+										<tr class="text-xs">
 											<td>{item.title} {item.addon_type === AddonType.EARLY_DISCOUNT ? "(Solo en Web)" : ""}</td>
 											<td class="text-success">- {getMoneyDisplay(submissionData()?.order.currency, Number(item.price))}</td>
 										</tr>
