@@ -149,9 +149,9 @@ function upsert_submission(string $form_id, array $input): string
 function _get_addons_for_order(
     string $form_id,
     array $addon_ids,
-    EventType $event_type,
-    MealType $meal_type,
-    Currency $currency,
+    string $event_type = 'ALL_SESSIONS',
+    string $meal_type = 'REGULAR',
+    string $currency = 'PEN',
 ) {
     $addons = fetch_addons_from_form_id($form_id);
     if (empty($addons)) {
@@ -168,28 +168,27 @@ function _get_addons_for_order(
 
     foreach ($addons as $addon) {
         // Skip anything that's not your selected currency
-        if (Currency::from($addon['currency']) !== $currency) {
+        if ($addon['currency'] !== $currency) {
             continue;
         }
 
-        if (AddonType::from($addon['addon_type']) === AddonType::EARLY_DISCOUNT) {
+        if ($addon['addon_type'] === 'EARLY_DISCOUNT') {
             $early_discount = $addon;
             continue;
         }
 
-        if (AddonType::from($addon['addon_type']) === AddonType::ALL_SESSIONS_DISCOUNT) {
+        if ($addon['addon_type'] === 'ALL_SESSIONS_DISCOUNT') {
             $all_session_discount = $addon;
             continue;
         }
 
-        if (AddonType::from($addon['addon_type']) === AddonType::SESSION) {
+        if ($addon['addon_type'] === 'SESSION') {
             $session_count++;
         }
 
         // Add all sessions and all_sessions_discount if event_type is 'ALL_SESSIONS'
         if (
-            $event_type === EventType::ALL_SESSIONS &&
-            AddonType::from($addon['addon_type']) === AddonType::SESSION
+            $event_type === 'ALL_SESSIONS' && $addon['addon_type'] === 'SESSION'
         ) {
             array_push($selected_addons, $addon);
             $selected_session_count++;
@@ -199,8 +198,8 @@ function _get_addons_for_order(
 
         // Dont apply meals if meal_type is NONE
         if (
-            $meal_type === MealType::NONE &&
-            AddonType::from($addon['addon_type']) === AddonType::MEAL
+            $meal_type === 'NONE' &&
+            $addon['addon_type'] === 'MEAL'
         ) {
             continue;
         }
@@ -209,7 +208,7 @@ function _get_addons_for_order(
         if (in_array($addon['id'], $addon_ids)) {
             array_push($selected_addons, $addon);
 
-            if (AddonType::from($addon['addon_type']) === AddonType::SESSION) {
+            if ($addon['addon_type'] === 'SESSION') {
                 $selected_session_count++;
             }
         }
@@ -349,14 +348,14 @@ function calculate_total(array $selected_addons): float
 {
     $total = 0.0;
     foreach ($selected_addons as $addon) {
-        switch (AddonType::from($addon['addon_type'])) {
-            case AddonType::SESSION:
-            case AddonType::MEAL:
+        switch ($addon['addon_type']) {
+            case 'SESSION':
+            case 'MEAL':
                 $total = $total + (float) $addon['price'];
                 break;
 
-            case AddonType::ALL_SESSIONS_DISCOUNT:
-            case AddonType::EARLY_DISCOUNT:
+            case 'ALL_SESSIONS_DISCOUNT':
+            case 'EARLY_DISCOUNT':
                 $total = $total - (float) $addon['price'];
                 break;
         }
@@ -369,9 +368,9 @@ function create_update_order(
     string $form_id,
     string $submission_id,
     array $selected_addon_ids,
-    EventType $event_type,
-    MealType $meal_type,
-    Currency $currency = Currency::PEN,
+    string $event_type = 'ALL_SESSIONS',
+    string $meal_type = 'REGULAR',
+    string $currency = 'PEN',
     ?string $existing_order_id = null,
 ): string {
     $selected_addons = _get_addons_for_order(
@@ -414,11 +413,11 @@ function create_update_order(
         'id' => $order_id,
         'form_id' => $form_id,
         'submission_id' => $submission_id,
-        'status' => OrderStatus::DRAFT->value,
+        'status' => 'DRAFT',
         'amount' => $total,
-        'currency' => $currency->value,
-        'event_type' => $event_type->value,
-        'meal_type' => $meal_type->value
+        'currency' => $currency,
+        'event_type' => $event_type,
+        'meal_type' => $meal_type
     ]);
 
     db()->prepare(
@@ -459,7 +458,7 @@ function create_update_order(
             'title' => $addon['title'],
             'addon_type' => $addon['addon_type'],
             'price' => $addon['price'],
-            'currency' => $currency->value,
+            'currency' => $currency,
             'date_time' => $addon['date_time']
         ]);
     }
@@ -479,8 +478,8 @@ function check_order_status(string $form_id, ?string $submission_id): ?string
     }
 
     if (
-        OrderStatus::from($existing_order['status']) === OrderStatus::CONFIRMED ||
-        OrderStatus::from($existing_order['status']) === OrderStatus::ON_SITE
+        $existing_order['status'] === 'CONFIRMED' ||
+        $existing_order['status'] === 'ON_SITE'
     ) {
         throw new Exception("orden ya ha sido confirmada, no puede ser modificada");
     }
@@ -492,10 +491,10 @@ function update_and_fetch_order_for_payment(
     string $form_id,
     string $order_id,
     string $submission_id,
-    OrderStatus $status,
+    string $status,
 ): array {
     // Remove Early Bird discount if payment is ON_SITE
-    if ($status === OrderStatus::ON_SITE) {
+    if ($status === 'ON_SITE') {
         db()->prepare(
             "DELETE FROM order_items WHERE order_id = :order_id AND addon_type = 'EARLY_DISCOUNT'"
         )->execute(
@@ -520,7 +519,7 @@ function update_and_fetch_order_for_payment(
         '
     )->execute([
         'id' => $order_id,
-        'status' => (float) $total === 0.0 ? OrderStatus::CONFIRMED->value : $status->value,
+        'status' => (float) $total === 0.0 ? 'CONFIRMED' : $status,
         'amount' => (float) $total,
     ]);
 
@@ -530,14 +529,14 @@ function update_and_fetch_order_for_payment(
 function upsert_payment(
     string $payment_id,
     string $order_id,
-    ?string $charge_id,
-    ?PaymentStatus $payment_status,
-    ?float $amount,
-    ?Currency $currency,
-    ?PaymentType $payment_type,
-    ?string $method,
-    ?string $error_message,
-    ?string $json_data,
+    ?string $charge_id = '',
+    ?string $payment_status = 'PENDING',
+    ?float $amount = '0.0',
+    ?string $currency = 'PEN',
+    ?string $payment_type = 'CULQI',
+    ?string $method = 'CASH',
+    ?string $error_message = '',
+    ?string $json_data = '{}',
 ): string {
     $id = empty($payment_id) ? guidv4() : $payment_id;
     db()->prepare(
@@ -578,13 +577,13 @@ function upsert_payment(
         'id' => $id,
         'order_id' => $order_id,
         'status' => (float) $amount === 0.0 ?
-            PaymentStatus::EXEMPT->value :
-            $payment_status?->value ?? PaymentStatus::PENDING->value,
+            'EXEMPT' :
+            $payment_status ?? 'PENDING',
         'amount' => $amount ?? 0.0,
-        'currency' => $currency?->value ?? Currency::PEN->value,
+        'currency' => $currency ?? 'PEN',
         'method' => $method ?: 'CASH',
         'gateway_id' => $charge_id ?? '',
-        'provider' => $payment_type?->value ?? PaymentType::ON_SITE->value,
+        'provider' => $payment_type ?? 'ON_SITE',
         'error_message' => $error_message ?? '',
         'meta' => $json_data ?? '{}',
     ]);

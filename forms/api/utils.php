@@ -2,55 +2,42 @@
 
 declare(strict_types=1);
 
-enum PaymentStatus: string
+class EnumConstants
 {
-    case PENDING = 'PENDING';
-    case PAID = 'PAID';
-    case FAILED = 'FAILED';
-    case EXEMPT = 'EXEMPT';
-    case REFUNDED = 'REFUNDED';
-}
+    public static function getPaymentStatuses(): array
+    {
+        return ['PENDING', 'PAID', 'FAILED', 'EXEMPT', 'REFUNDED'];
+    }
 
-enum Currency: string
-{
-    case PEN = 'PEN';
-    case USD = 'USD';
-}
+    public static function getCurrencies(): array
+    {
+        return ['PEN', 'USD'];
+    }
 
-enum PaymentType: string
-{
-    case CULQI = 'CULQI';
-    case ON_SITE = 'ON_SITE';
-}
+    public static function getPaymentTypes(): array
+    {
+        return ['CULQI', 'ON_SITE'];
+    }
 
-enum AddonType: string
-{
-    case SESSION = 'SESSION';
-    case MEAL = 'MEAL';
-    case ALL_SESSIONS_DISCOUNT = 'ALL_SESSIONS_DISCOUNT';
-    case EARLY_DISCOUNT = 'EARLY_DISCOUNT';
-}
+    public static function getAddonTypes(): array
+    {
+        return ['SESSION', 'MEAL', 'ALL_SESSIONS_DISCOUNT', 'EARLY_DISCOUNT'];
+    }
 
-enum OrderStatus: string
-{
-    case DRAFT = 'DRAFT';
-    case CONFIRMED = 'CONFIRMED';
-    case CANCELLED = 'CANCELLED';
-    case ON_SITE = 'ON_SITE';
-}
+    public static function getOrderStatuses(): array
+    {
+        return ['DRAFT', 'CONFIRMED', 'CANCELLED', 'ON_SITE'];
+    }
 
-enum EventType: string
-{
-    case ALL_SESSIONS = 'ALL_SESSIONS';
-    case PER_SESSION = 'PER_SESSION';
-    case PER_DAY = 'PER_DAY';
-}
+    public static function getEventTypes(): array
+    {
+        return ['ALL_SESSIONS', 'PER_SESSION', 'PER_DAY'];
+    }
 
-enum MealType: string
-{
-    case NONE = 'NONE';
-    case REGULAR = 'REGULAR';
-    case VEGETARIAN = 'VEGETARIAN';
+    public static function getMealTypes(): array
+    {
+        return ['NONE', 'REGULAR', 'VEGETARIAN'];
+    }
 }
 
 /* -----------------------------

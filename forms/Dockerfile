@@ -1,5 +1,5 @@
 # Dockerfile
-FROM php:8.2-apache
+FROM php:8.0-apache
 
 # 1. Fix the "Could not reliably determine FQDN" warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
