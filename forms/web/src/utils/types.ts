@@ -35,7 +35,7 @@ export enum EventType {
 }
 
 export const EventTypeValueMap = {
-  [EventType.PER_SESSION]: "Por Sesiones",
+  [EventType.PER_SESSION]: "Por Sesiones y Conferencias",
   [EventType.PER_DAY]: "Por Dias",
   [EventType.ALL_SESSIONS]: "Curso Completo",
 }
