@@ -54,7 +54,7 @@ const Result: Component = () => {
 				}}>
 					{OrderStatusMap[submissionData()?.order.status || OrderStatus.DRAFT]}
 				</div>
-				<div role="alert" class="alert alert-outline alert-info block p-4" classList={{
+				<div role="alert" class="alert block p-4" classList={{
 					"alert-error": !isSuccess(),
 					"alert-info": isSuccess()
 				}}>
