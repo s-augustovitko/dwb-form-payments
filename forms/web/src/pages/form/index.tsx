@@ -62,9 +62,9 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 	});
 
 	const [_res] = createResource(() => searchParams.submission_id, async (id) => {
-		setLoading(true)
 		if (!id) return null;
 
+		setLoading(true)
 		try {
 			const res = await getFormSubmission(id);
 

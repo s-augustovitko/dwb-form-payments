@@ -112,29 +112,35 @@ try {
         throw new Exception('el retorno no puede ser antes de la llegada');
     }
 
-    if (isset($input['meal_type']) && !MealType::tryFrom($input['meal_type'])) {
+    if (!empty($input['meal_type']) && !MealType::tryFrom($input['meal_type'])) {
         throw new Exception('tipo de comida invalido');
     }
 
-    if (isset($input['event_type']) && !EventType::tryFrom($input['event_type'])) {
+    if (!empty($input['event_type']) && !EventType::tryFrom($input['event_type'])) {
         throw new Exception('tipo de evento invalido');
     }
 
-    if (isset($input['currency']) && !Currency::tryFrom($input['currency'])) {
+    if (!empty($input['currency']) && !Currency::tryFrom($input['currency'])) {
         throw new Exception('moneda invalida');
     }
 
     db()->beginTransaction();
 
     $form = fetch_active_form();
+    if (empty($form)) {
+        throw new Exception("No se encontro un formulario activo");
+    }
+
+    $existing_order_id = check_order_status($form['id'], $input['submission_id']);
     $submission_id = upsert_submission($form['id'], $input);
     $order_id = create_update_order(
         $form['id'],
         $submission_id,
         $input['selected_addons'],
-        EventType::from($input['event_type']),
-        MealType::from($input['meal_type']),
-        Currency::from($input['currency']),
+        !empty($input['event_type']) ? EventType::from($input['event_type']) : EventType::ALL_SESSIONS,
+        !empty($input['meal_type']) ? MealType::from($input['meal_type']) : MealType::REGULAR,
+        !empty($input['currency']) ? Currency::from($input['currency']) : Currency::PEN,
+        $existing_order_id,
     );
 
     db()->commit();
@@ -143,7 +149,9 @@ try {
         "order_id" => $order_id,
     ]);
 } catch (Throwable $e) {
-    db()->rollBack();
+    if (db()->inTransaction()) {
+        db()->rollBack();
+    }
     error_log($e->getMessage());
     respond_error($e->getMessage(), 400);
 }

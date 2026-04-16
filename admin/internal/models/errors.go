@@ -2,42 +2,17 @@ package models
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 var validate = validator.New()
 
-type ErrorResponses []ErrorResponse
-
-func (e ErrorResponses) Error() string {
-	out := strings.Builder{}
-
-	for _, item := range e {
-		out.WriteString(item.Error())
-		out.WriteString("\n")
-	}
-
-	return out.String()
-}
-
-type ErrorResponse struct {
-	Field string
-	Tag   string
-	Value any
-}
-
-func (e ErrorResponse) Error() string {
-	return fmt.Sprintf("field [%s: %+v] failed validation for: %s", e.Field, e.Value, e.Tag)
-}
-
-// ValidateData validates the provided data struct using predefined validation rules.
-// Returns nil if validation passes, or an aggregated error containing details for each failed validation.
-// Returns an error if the input data is nil or if validation should not be performed.
+// Return an AppError
 func ValidateData(data any) error {
 	if data == nil {
-		return fmt.Errorf("validation data should not be nil")
+		return Error(fiber.StatusBadRequest, "Empty data", nil)
 	}
 
 	errs := validate.Struct(data)
@@ -47,19 +22,17 @@ func ValidateData(data any) error {
 
 	validErrs, ok := errs.(validator.ValidationErrors)
 	if !ok {
-		return errs
+		return Error(fiber.StatusBadRequest, "Invalid payload", errs)
 	}
 
-	validationErrors := make(ErrorResponses, 0, len(validErrs))
-	for _, err := range validErrs {
-		var elem ErrorResponse
-
-		elem.Field = err.Field()
-		elem.Tag = err.Tag()
-		elem.Value = err.Value()
-
-		validationErrors = append(validationErrors, elem)
+	if len(validErrs) > 0 && validErrs[0] != nil {
+		e := validErrs[0]
+		return Error(
+			fiber.StatusBadRequest,
+			fmt.Sprintf("field [%s: %+v] failed validation for: %s", e.Field(), e.Value(), e.Tag()),
+			validErrs,
+		)
 	}
 
-	return validationErrors
+	return nil
 }

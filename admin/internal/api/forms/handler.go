@@ -48,20 +48,17 @@ func newService(db *sql.DB) *service {
 
 // Database Layer
 type repository struct {
-	db database.DBTX
-	q  *database.Queries
+	q *database.Queries
 }
 
 func newRepository(db database.DBTX) *repository {
 	return &repository{
-		q:  database.New(db),
-		db: db,
+		q: database.New(db),
 	}
 }
 
 func (r repository) WithTx(tx *sql.Tx) *repository {
 	return &repository{
-		q:  database.New(tx),
-		db: tx,
+		q: database.New(tx),
 	}
 }

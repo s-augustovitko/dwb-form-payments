@@ -95,7 +95,7 @@ const fullSpecial = {
   departure_date: v.optional(v.pipe(
     v.string(),
     v.check((date) => dayjs(date).isValid(), "Fecha invalida"),
-    v.check((date) => dayjs(date).isAfter(dayjs().startOf('d')),
+    v.check((date) => dayjs(date).isAfter(dayjs().subtract(1, 'd'), 'd'),
       "'La fecha no puede ser anterior a hoy"),
     v.check((date) => dayjs(date).isBefore(dayjs().add(3, 'month')),
       "Fecha no puede ser posterior a 3 meses")

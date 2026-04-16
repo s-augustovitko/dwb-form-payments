@@ -49,7 +49,7 @@ export const formSchema = v.pipe(
     start_date: v.pipe(
       v.string(),
       v.check((date) => dayjs(date).isValid(), "Invalid date format"),
-      v.check((date) => dayjs(date).isAfter(new Date(), 'd'), "start_date must be in the future"),
+      v.check((date) => dayjs(date).isAfter(dayjs().subtract(1, 'd'), 'd'), "start_date must be in the future"),
       v.check((date) => dayjs(date).isBefore(dayjs().add(1, 'year')), "start_date must be in the less than 1 year in the future")
     ),
 

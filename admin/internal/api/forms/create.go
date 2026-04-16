@@ -6,7 +6,6 @@ import (
 	"dwb-admin/internal/config"
 	"dwb-admin/internal/database"
 	"dwb-admin/internal/models"
-	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -75,12 +74,12 @@ func mapCreateFormWithAddonsToDb(data createFormWithAddonsRequest) (database.Cre
 func (h handler) CreateFormWithAddons(c *fiber.Ctx) error {
 	var data createFormWithAddonsRequest
 	if err := c.BodyParser(&data); err != nil {
-		return models.ErrorBadData(c, err)
+		return models.Error(fiber.StatusBadRequest, "Invalid payload", err)
 	}
 
 	err := models.ValidateData(data)
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return err
 	}
 
 	ctx, cancel := h.cfg.TransactionCtx(c.Context())
@@ -90,7 +89,7 @@ func (h handler) CreateFormWithAddons(c *fiber.Ctx) error {
 	logger := config.GetLogger(c).With(slog.Any("data", data))
 
 	if err := h.svc.CreateFormWithAddons(ctx, form, addons, logger); err != nil {
-		return models.ErrorUnexpected(c, err)
+		return err
 	}
 
 	return models.Success(c, true)
@@ -107,12 +106,16 @@ func (s service) CreateFormWithAddons(ctx context.Context, form database.CreateF
 			continue
 		}
 		if item.DateTime.Time.Before(form.StartDate) || item.DateTime.Time.After(form.EndDate) {
-			return fmt.Errorf("addons.%d.date_time should be between form.start_date and form.end_date", idx)
+			return models.Error(
+				fiber.StatusBadRequest, fmt.Sprintf(
+					"addons.%d.date_time should be between form.start_date and form.end_date",
+					idx,
+				), nil)
 		}
 	}
 
 	if sessionCount == 0 {
-		return errors.New("must have at least 1 session")
+		return models.Error(fiber.StatusBadRequest, "must have at least 1 session", nil)
 	}
 
 	tx, err := s.db.BeginTx(ctx, nil)

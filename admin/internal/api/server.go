@@ -16,15 +16,21 @@ type DefaultServer struct {
 }
 
 func (s DefaultServer) Ready(c *fiber.Ctx) bool {
+	logger := config.GetLogger(c)
+	if s.Cfg == nil || s.DB == nil {
+		logger.Error("server dependencies are not initialized")
+		return false
+	}
+
 	ctx, cancel := s.Cfg.ReadCtx(c.Context())
 	defer cancel()
 
 	if err := s.DB.PingContext(ctx); err != nil {
-		config.GetLogger(c).Error("could not connect to the database", slog.String("error", err.Error()))
+		logger.Error("could not connect to the database", slog.String("error", err.Error()))
 		return false
 	}
 
-	return s.Cfg != nil
+	return true
 }
 
 type Paging struct {

@@ -35,40 +35,62 @@ try {
         }
     }
 
-    if (isset($input['payment_type']) && !PaymentType::tryFrom($input['payment_type'])) {
+    if (!empty($input['payment_type']) && !PaymentType::tryFrom($input['payment_type'])) {
         throw new Exception('tipo de pago invalido');
     }
 
-    if (isset($input['culqi_token']) && PaymentType::from($input['payment_type']) === PaymentType::CULQI) {
+    if (empty($input['culqi_token']) && PaymentType::from($input['payment_type']) === PaymentType::CULQI) {
         throw new Exception('token invalido, por favor intente de nuevo mas tarde');
     }
 
     $form = fetch_active_form();
+    if (empty($form)) {
+        throw new Exception("No se encontro un formulario activo");
+    }
+
     $submission = fetch_submission_by_id($form['id'], $input['submission_id']);
-    if (!$submission) {
+    if (empty($submission)) {
         throw new Exception("no se encontro la entrada, por favor intente desde el paso anterior");
     }
 
-    $order = update_and_fetch_order_for_payment(
-        $form['id'],
-        $submission['id'],
-        PaymentType::from($input['payment_type']) === PaymentType::ON_SITE ?
-            OrderStatus::ON_SITE :
-            OrderStatus::DRAFT,
-    );
+    $order_id = check_order_status($form['id'], $input['submission_id']);
+    if (empty($order_id)) {
+        throw new Exception("No se encontro la orden o es invalida");
+    }
 
-    $payment_id = upsert_payment(
-        '',
-        $order['id'],
-        $input['culqi_token'] ?? null,
-        PaymentStatus::PENDING,
-        (float) $order['amount'],
-        Currency::from($order['currency']),
-        PaymentType::from($input['payment_type']),
-        PaymentType::from($input['payment_type']) === PaymentType::CULQI ? 'CARD' : 'CASH',
-        null,
-        null
-    );
+    $order = null;
+    $payment_id = null;
+    try {
+        db()->beginTransaction();
+        $order = update_and_fetch_order_for_payment(
+            $form['id'],
+            $order_id,
+            $submission['id'],
+            PaymentType::from($input['payment_type']) === PaymentType::ON_SITE ?
+                OrderStatus::ON_SITE :
+                OrderStatus::DRAFT,
+        );
+
+        $payment_id = upsert_payment(
+            '',
+            $order['id'],
+            $input['culqi_token'] ?: null,
+            PaymentStatus::PENDING,
+            (float) $order['amount'],
+            Currency::from($order['currency']),
+            PaymentType::from($input['payment_type']),
+            PaymentType::from($input['payment_type']) === PaymentType::CULQI ? 'CARD' : 'CASH',
+            null,
+            null
+        );
+
+        db()->commit();
+    } catch (Throwable $e) {
+        if (db()->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $e;
+    }
 
     // =========================
     // CULQI
@@ -76,14 +98,14 @@ try {
     if (PaymentType::from($input['payment_type']) === PaymentType::CULQI && (float) $order['amount'] > 0.0) {
         $charge_data = [
             "amount" => strval(round((float) $order['amount'] * 100)),
-            "currency_code" => $order['currency'] ?? Currency::PEN->value,
+            "currency_code" => $order['currency'] ?: Currency::PEN->value,
             "email" => $submission['email'],
             "source_id" => $input['culqi_token'],
             "antifraud_details" => [
                 "first_name" => $submission['first_name'],
                 "last_name" => $submission['last_name'],
                 "email" => $submission['email'],
-                "phone_number" => ($submission['country_code'] ?? '+51') . $submission['phone']
+                "phone_number" => ($submission['country_code'] ?: '+51') . $submission['phone']
             ],
         ];
 
@@ -101,8 +123,8 @@ try {
                 'source' => ['type' => 'error'],
             ];
         }
-        $user_message = $user_message ??
-            $charge["user_message"] ??
+        $user_message = $user_message ?:
+            $charge["user_message"] ?:
             "Intente de nuevo o use otro metodo de pago";
 
         $outcome_type = trim(strtolower($charge['outcome']['type'] ?? ''));
@@ -124,13 +146,13 @@ try {
                 PaymentType::from($input['payment_type']),
                 $charge['source']['type'],
                 $user_message,
-                json_encode($charge),
+                json_encode($charge) ?: '{}',
             );
 
             update_and_fetch_order_for_payment(
                 $form['id'],
-                $submission['id'],
                 $order['id'],
+                $submission['id'],
                 $payment_status === PaymentStatus::FAILED ?
                     OrderStatus::CANCELLED :
                     OrderStatus::CONFIRMED,
@@ -138,7 +160,9 @@ try {
 
             db()->commit();
         } catch (Throwable $e) {
-            db()->rollBack();
+            if (db()->inTransaction()) {
+                db()->rollBack();
+            }
             throw $e;
         }
 

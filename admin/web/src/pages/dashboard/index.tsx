@@ -1,6 +1,6 @@
 import { Component, createEffect, createResource, createMemo, onCleanup, For } from "solid-js";
 import { useSearchParams } from "@solidjs/router";
-import { MultiSelect, PageLayout, Card } from "../../components";
+import { MultiSelect, PageLayout, Card, Stat } from "../../components";
 import { AddonType, addonTypeMap, BASE_URL, Currency, getDateDisplay, getMoneyDisplay, Method, OrderStatus, orderStatusMap, request } from "../../utils";
 import { DashboardDataResponse } from "./types";
 import Chart from 'chart.js/auto';
@@ -133,21 +133,21 @@ const Dashboard: Component = () => {
 				</>
 			}
 		>
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-				<Card
+			<div class="stats mb-4">
+				<Stat
 					title="Total Courses"
-					data={dashboardData()?.course_count || '0'}
-					footer="Active"
+					value={dashboardData()?.course_count || '0'}
+					desc="Active"
 				/>
-				<Card
+				<Stat
 					title="Total Registrations"
-					data={dashboardData()?.registration_count || '0'}
-					footer="Across all selected courses"
+					value={dashboardData()?.registration_count || '0'}
+					desc="Across all selected courses"
 				/>
-				<Card
+				<Stat
 					title="Total Revenue"
-					data={getMoneyDisplay(Currency.PEN, dashboardData()?.total_revenue?.PEN)}
-					footer={getMoneyDisplay(Currency.USD, dashboardData()?.total_revenue?.USD)}
+					value={getMoneyDisplay(Currency.PEN, dashboardData()?.total_revenue?.PEN)}
+					desc={getMoneyDisplay(Currency.USD, dashboardData()?.total_revenue?.USD)}
 				/>
 			</div>
 

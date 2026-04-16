@@ -13,7 +13,7 @@ import (
 
 func (h handler) ListForms(c *fiber.Ctx) error {
 	paging := api.GetPaging(c)
-	active := strings.ToLower(utils.CopyString(c.Query("active", "true"))) == "true"
+	active := strings.TrimSpace(strings.ToLower(utils.CopyString(c.Query("active", "true")))) == "true"
 
 	ctx, cancel := h.cfg.ReadCtx(c.Context())
 	defer cancel()
@@ -24,7 +24,7 @@ func (h handler) ListForms(c *fiber.Ctx) error {
 		Active: active,
 	})
 	if err != nil {
-		return models.ErrorUnexpected(c, err)
+		return err
 	}
 
 	items := mapListFormRowsToResponse(formsList)

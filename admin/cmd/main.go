@@ -48,6 +48,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		ProxyHeader:             fiber.HeaderXForwardedFor,
 		EnableTrustedProxyCheck: true,
+		ErrorHandler:            globalErrorHandler,
 	})
 	defer func() {
 		if err := app.Shutdown(); err != nil {

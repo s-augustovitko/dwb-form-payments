@@ -40,17 +40,17 @@ func mapUpdateFormToDb(formID string, data updateFormRequest) database.UpdateFor
 func (h handler) UpdateForm(c *fiber.Ctx) error {
 	formID, err := uuid.Parse(utils.CopyString(c.Params("id", "")))
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return models.Error(fiber.StatusBadRequest, "Invalid form", err)
 	}
 
 	var data updateFormRequest
 	if err = c.BodyParser(&data); err != nil {
-		return models.ErrorBadData(c, err)
+		return models.Error(fiber.StatusBadRequest, "Invalid payload", err)
 	}
 
 	err = models.ValidateData(data)
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return err
 	}
 
 	ctx, cancel := h.cfg.WriteCtx(c.Context())
@@ -58,7 +58,7 @@ func (h handler) UpdateForm(c *fiber.Ctx) error {
 
 	form := mapUpdateFormToDb(formID.String(), data)
 	if err = h.svc.UpdateForm(ctx, form); err != nil {
-		return models.ErrorUnexpected(c, err)
+		return err
 	}
 
 	return models.Success(c, true)

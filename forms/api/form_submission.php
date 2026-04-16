@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
-    $submission_id = $_GET['submission_id'] ?? null;
+    $submission_id = $_GET['submission_id'] ?: null;
     if (!$submission_id) {
         respond_error('Debe mandar el codigo de respuesta', 400);
     }
@@ -19,20 +19,24 @@ try {
     }
 
     $form = fetch_active_form();
-    if (!$form) {
+    if (empty($form)) {
         throw new Exception('No hay formularios activos');
     }
 
     $submission = fetch_submission_by_id($form['id'], $submission_id);
-    if (!$submission) {
+    if (empty($submission)) {
         throw new Exception('No se encontro la respuesta, ingrese sus datos nuevamente');
     }
 
     $order = fetch_order_by_submission_id($form['id'], $submission_id);
-    if (!$order) {
+    if (empty($order)) {
         throw new Exception('No se encontro la orden, ingrese sus datos nuevamente');
     }
+
     $order_items = fetch_order_items_by_order_id($order['id']);
+    if (empty($order_items)) {
+        throw new Exception('No hay ningun elemento seleccionado');
+    }
 
     respond([
         'submission' => $submission,

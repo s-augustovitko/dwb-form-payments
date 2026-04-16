@@ -79,27 +79,26 @@ type Params = {
 }
 
 const FormList: Component<Params> = ({ formList, mutate }) => {
-	const updateActiveListData = (id: string) => {
-		mutate((prev) => {
-			if (!prev) {
-				return { total: 0, items: [] }
-			}
-
-			return {
-				total: (prev?.total || 0) - 1,
-				items: prev?.items?.filter(item => item.id !== id)
-			}
-		})
-	}
-
 	const updateActive = async (item: FormListItem) => {
+		let previous: PagedResponse<FormListItem> | undefined;
 		try {
-			updateActiveListData(item.id)
+			mutate((prev) => {
+				previous = prev;
+				if (!prev) {
+					return { total: 0, items: [] };
+				}
+
+				return {
+					total: prev.total - 1,
+					items: prev.items.filter((current) => current.id !== item.id),
+				};
+			});
+
 			const action = item.active ? "Disabled" : "Enabled";
 			await request(`forms/${item.id}/active`, Method.PUT, undefined, { active: !item.active })
 			notificationStore.info(`${action} ${item.title}`);
 		} catch (err) {
-			updateActiveListData(item.id) // Revert on failure
+			mutate(() => previous)
 			notificationStore.error((err as any).message)
 		}
 	}

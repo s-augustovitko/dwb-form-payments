@@ -21,12 +21,7 @@ function fetch_active_form(): array
         '
     );
     $form_prep->execute();
-    $form = $form_prep->fetch();
-    if (!$form) {
-        throw new Exception("No hay formularios activos");
-    }
-
-    return $form;
+    return $form_prep->fetch();
 }
 
 function fetch_addons_from_form_id(string $form_id): array
@@ -49,17 +44,12 @@ function fetch_addons_from_form_id(string $form_id): array
         '
     );
     $addons_prep->execute([':form_id' => $form_id]);
-    $addons = $addons_prep->fetchAll();
-    if (!$addons) {
-        throw new Exception("No hay formularios activos");
-    }
-
-    return $addons;
+    return $addons_prep->fetchAll();
 }
 
 function upsert_submission(string $form_id, array $input): string
 {
-    $submission_id = $input['submission_id'] ?? guidv4();
+    $submission_id = $input['submission_id'] ?: guidv4();
     db()->prepare(
         '
         INSERT INTO submissions (
@@ -106,13 +96,13 @@ function upsert_submission(string $form_id, array $input): string
         ':first_name' => $input['first_name'],
         ':last_name' => $input['last_name'],
         ':email' => $input['email'],
-        ':id_type' => $input['id_type'] ?? 'DNI',
+        ':id_type' => $input['id_type'] ?: 'DNI',
         ':id_value' => $input['id_value'],
-        ':country_code' => $input['country_code'] ?? '+51',
+        ':country_code' => $input['country_code'] ?: '+51',
         ':phone' => $input['phone'],
-        ':arrival_date' => $input['arrival_date'] ?? null,
-        ':departure_date' => $input['departure_date'] ?? null,
-        ':medical_insurance' => $input['medical_insurance'] ?? null
+        ':arrival_date' => $input['arrival_date'] ?: null,
+        ':departure_date' => $input['departure_date'] ?: null,
+        ':medical_insurance' => $input['medical_insurance'] ?: null
     ]);
 
     if (
@@ -147,8 +137,8 @@ function upsert_submission(string $form_id, array $input): string
     )->execute([
         ':submission_id' => $submission_id,
         ':full_name' => $input['emergency_contact_full_name'],
-        ':email' => $input['emergency_contact_email'] ?? null,
-        ':country_code' => $input['emergency_contact_country_code'] ?? '+51',
+        ':email' => $input['emergency_contact_email'] ?: null,
+        ':country_code' => $input['emergency_contact_country_code'] ?: '+51',
         ':phone' => $input['emergency_contact_phone'],
     ]);
 
@@ -163,6 +153,10 @@ function _get_addons_for_order(
     Currency $currency,
 ) {
     $addons = fetch_addons_from_form_id($form_id);
+    if (empty($addons)) {
+        throw new Exception("No se encontraron sesiones activas");
+    }
+
     $selected_addons = [];
 
     $session_count = 0;
@@ -259,7 +253,6 @@ function _get_addons_for_order(
     return $selected_addons;
 }
 
-// Does not throw exception if order is not found
 function fetch_order_by_submission_id(string $form_id, string $submission_id): ?array
 {
     $order_prep = db()->prepare(
@@ -284,9 +277,7 @@ function fetch_order_by_submission_id(string $form_id, string $submission_id): ?
         ':submission_id' => $submission_id,
         ':form_id' => $form_id,
     ]);
-    $order = $order_prep->fetch();
-
-    return $order ?: null;
+    return $order_prep->fetch();
 }
 
 function fetch_submission_by_id(string $form_id, string $submission_id): ?array
@@ -322,12 +313,7 @@ function fetch_submission_by_id(string $form_id, string $submission_id): ?array
         ':submission_id' => $submission_id,
         ':form_id' => $form_id,
     ]);
-    $submission = $submission_prep->fetch();
-    if (!$submission) {
-        throw new Exception("entrada invalida, por favor complete el formulario");
-    }
-
-    return $submission;
+    return $submission_prep->fetch();
 }
 
 
@@ -353,29 +339,27 @@ function fetch_order_items_by_order_id(string $order_id): array
     $order_items_prep->execute([
         ':order_id' => $order_id,
     ]);
-    $order_items = $order_items_prep->fetchAll();
-
-    return $order_items;
+    return $order_items_prep->fetchAll();
 }
 
 function calculate_total(array $selected_addons): float
 {
-    $total = '0.0';
+    $total = 0.0;
     foreach ($selected_addons as $addon) {
         switch (AddonType::from($addon['addon_type'])) {
             case AddonType::SESSION:
             case AddonType::MEAL:
-                $total = (float) $total + (float) $addon['price'];
+                $total = $total + (float) $addon['price'];
                 break;
 
             case AddonType::ALL_SESSIONS_DISCOUNT:
             case AddonType::EARLY_DISCOUNT:
-                $total = (float) $total - (float) $addon['price'];
+                $total = $total - (float) $addon['price'];
                 break;
         }
     }
 
-    return (float) $total;
+    return $total;
 }
 
 function create_update_order(
@@ -384,18 +368,9 @@ function create_update_order(
     array $selected_addon_ids,
     EventType $event_type,
     MealType $meal_type,
-    Currency $currency = Currency::PEN
+    Currency $currency = Currency::PEN,
+    ?string $existing_order_id,
 ): string {
-    $existing_order = fetch_order_by_submission_id($form_id, $submission_id) ?? [];
-    if (
-        !empty($existing_order) &&
-        (
-            OrderStatus::from($existing_order['status']) === OrderStatus::CONFIRMED ||
-            OrderStatus::from($existing_order['status']) === OrderStatus::ON_SITE
-        )
-    ) {
-        throw new Exception("orden ya ha sido confirmada, no puede ser modificada");
-    }
     $selected_addons = _get_addons_for_order(
         $form_id,
         $selected_addon_ids,
@@ -405,7 +380,7 @@ function create_update_order(
     );
 
     $total = calculate_total($selected_addons);
-    $order_id = $existing_order['id'] ?? guidv4();
+    $order_id = $existing_order_id ?? guidv4();
     db()->prepare(
         '
         INSERT INTO orders (
@@ -436,7 +411,7 @@ function create_update_order(
         'id' => $order_id,
         'form_id' => $form_id,
         'submission_id' => $submission_id,
-        'status' => 'DRAFT',
+        'status' => OrderStatus::DRAFT->value,
         'amount' => $total,
         'currency' => $currency->value,
         'event_type' => $event_type->value,
@@ -489,31 +464,48 @@ function create_update_order(
     return $order_id;
 }
 
-function update_and_fetch_order_for_payment(
-    string $form_id,
-    string $submission_id,
-    OrderStatus $status,
-): array {
-    $order = fetch_order_by_submission_id($form_id, $submission_id);
-    if (!$order) {
-        throw new Exception('orden invalida, intente registrarse de nuevo');
+function check_order_status(string $form_id, ?string $submission_id): ?string
+{
+    if (empty($submission_id)) {
+        return null;
     }
-    if (OrderStatus::from($order['status']) === OrderStatus::CONFIRMED) {
+
+    $existing_order = fetch_order_by_submission_id($form_id, $submission_id);
+    if (empty($existing_order)) {
+        return null;
+    }
+
+    if (
+        OrderStatus::from($existing_order['status']) === OrderStatus::CONFIRMED ||
+        OrderStatus::from($existing_order['status']) === OrderStatus::ON_SITE
+    ) {
         throw new Exception("orden ya ha sido confirmada, no puede ser modificada");
     }
 
+    return $existing_order['id'];
+}
+
+function update_and_fetch_order_for_payment(
+    string $form_id,
+    string $order_id,
+    string $submission_id,
+    OrderStatus $status,
+): array {
+    // Remove Early Bird discount if payment is ON_SITE
     if ($status === OrderStatus::ON_SITE) {
         db()->prepare(
-            "
-            DELETE FROM order_items WHERE order_id = :order_id AND addon_type = 'EARLY_DISCOUNT'
-            "
-        )->execute([
-            ':order_id' => $order['id']
-        ]);
+            "DELETE FROM order_items WHERE order_id = :order_id AND addon_type = 'EARLY_DISCOUNT'"
+        )->execute(
+            [':order_id' => $order_id]
+        );
     }
-    $selected_addons = fetch_order_items_by_order_id($order['id']);
-    $total = calculate_total($selected_addons);
 
+    $order_items = fetch_order_items_by_order_id($order_id);
+    if (empty($order_items)) {
+        throw new Exception('No hay ningun elemento seleccionado');
+    }
+
+    $total = calculate_total($order_items);
     db()->prepare(
         '
         UPDATE orders
@@ -524,7 +516,7 @@ function update_and_fetch_order_for_payment(
             id = :id
         '
     )->execute([
-        'id' => $order['id'],
+        'id' => $order_id,
         'status' => (float) $total === 0.0 ? OrderStatus::CONFIRMED->value : $status->value,
         'amount' => (float) $total,
     ]);
@@ -584,12 +576,12 @@ function upsert_payment(
         'order_id' => $order_id,
         'status' => (float) $amount === 0.0 ?
             PaymentStatus::EXEMPT->value :
-            $payment_status->value ?? PaymentStatus::PENDING,
+            $payment_status?->value ?? PaymentStatus::PENDING->value,
         'amount' => $amount ?? 0.0,
-        'currency' => $currency->value ?? Currency::PEN,
-        'method' => $method ?? 'CASH',
+        'currency' => $currency?->value ?? Currency::PEN->value,
+        'method' => $method ?: 'CASH',
         'gateway_id' => $charge_id ?? '',
-        'provider' => $payment_type->value ?? PaymentType::ON_SITE,
+        'provider' => $payment_type?->value ?? PaymentType::ON_SITE->value,
         'error_message' => $error_message ?? '',
         'meta' => $json_data ?? '{}',
     ]);

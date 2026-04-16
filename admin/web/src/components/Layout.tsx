@@ -18,7 +18,10 @@ type NavItem = {
 export const MainLayout: ParentComponent<LayoutProps> = (props) => {
   const location = useLocation();
 
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: string) =>
+    path === "/"
+      ? location.pathname === path
+      : location.pathname === path || location.pathname.startsWith(`${path}/`)
 
   return (
     <div class="drawer lg:drawer-open">

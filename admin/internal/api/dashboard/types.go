@@ -91,23 +91,23 @@ func mapOrdersAddonsSubmissionsToDashboardResponse(formOrders []database.Dashboa
 		"ON_SITE":   0,
 	}
 	for _, formOrder := range formOrders {
-		if draftCount, ok := formOrder.DraftCount.(int); ok {
+		if draftCount, err := strconv.Atoi(formOrder.DraftCount.(string)); err != nil {
 			statusMap["DRAFT"] += draftCount
 		}
-		if cancelledCount, ok := formOrder.CancelledCount.(int); ok {
+		if cancelledCount, err := strconv.Atoi(formOrder.CancelledCount.(string)); err != nil {
 			statusMap["CANCELLED"] += cancelledCount
 		}
-		if onSiteCount, ok := formOrder.OnSiteCount.(int); ok {
+		if onSiteCount, err := strconv.Atoi(formOrder.OnSiteCount.(string)); err != nil {
 			statusMap["ON_SITE"] += onSiteCount
 		}
-		if confirmedCount, ok := formOrder.ConfirmedCount.(int); ok {
+		if confirmedCount, err := strconv.Atoi(formOrder.ConfirmedCount.(string)); err != nil {
 			statusMap["CONFIRMED"] += confirmedCount
 		}
 
 		rev, _ := strconv.ParseFloat(formOrder.Revenue.(string), 64)
 		out.TotalRevenue[formOrder.Currency] += rev
 
-		out.CourseCount = int(formOrder.FormCount)
+		out.CourseCount += int(formOrder.FormCount)
 		out.RegistrationCount += float64(formOrder.OrderCount)
 	}
 

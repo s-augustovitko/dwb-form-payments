@@ -8,7 +8,6 @@ import (
 	"dwb-admin/internal/models"
 	"encoding/csv"
 	"fmt"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
@@ -20,7 +19,7 @@ func sanitizeCSVCell(value string) string {
 	}
 
 	switch value[0] {
-	case '=', '+', '-', '@':
+	case '=', '+', '-', '@', '\t', '\r', '\n':
 		return "'" + value
 	default:
 		return value
@@ -44,7 +43,7 @@ func nullTimeHandle(val sql.NullTime) string {
 func (h handler) Export(c *fiber.Ctx) error {
 	formIDs, err := models.GetIDsArray(utils.CopyString(c.Query("form_ids")))
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return models.Error(fiber.StatusBadRequest, "invalid form_ids parameter", err)
 	}
 	orderStatusList := models.GetStatusFromCommaSep(utils.CopyString(c.Query("order_status")))
 
@@ -56,7 +55,7 @@ func (h handler) Export(c *fiber.Ctx) error {
 		Ids:    formIDs,
 	})
 	if err != nil {
-		return models.ErrorNotFound(c, err)
+		return models.Error(fiber.StatusNotFound, "Could find report data", err)
 	}
 
 	var buffer bytes.Buffer
@@ -80,7 +79,7 @@ func (h handler) Export(c *fiber.Ctx) error {
 	}
 
 	if err := writer.Write(headers); err != nil {
-		return models.ErrorUnexpected(c, err)
+		return err
 	}
 
 	for _, item := range submissionData {
@@ -95,9 +94,9 @@ func (h handler) Export(c *fiber.Ctx) error {
 			strOrDefault(item.Amount, "0.00"),
 			strOrDefault(item.Currency, "PEN"),
 			strOrDefault(string(item.MealType), string(database.OrdersMealTypeREGULAR)),
-			strconv.Itoa(int(item.MealCount)),
+			item.MealCount.(string),
 			strOrDefault(string(item.EventType), string(database.OrdersEventTypeALLSESSIONS)),
-			strconv.Itoa(int(item.SessionCount)),
+			item.SessionCount.(string),
 			nullTimeHandle(item.CreatedAt),
 		}
 
@@ -106,13 +105,13 @@ func (h handler) Export(c *fiber.Ctx) error {
 		}
 
 		if err := writer.Write(row); err != nil {
-			return models.ErrorUnexpected(c, err)
+			return err
 		}
 	}
 
 	writer.Flush()
 	if err := writer.Error(); err != nil {
-		return models.ErrorUnexpected(c, err)
+		return err
 	}
 
 	c.Set("Content-Type", "text/csv")

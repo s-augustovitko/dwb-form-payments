@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"dwb-admin/internal/database"
 	"dwb-admin/internal/models"
-	"errors"
 	"fmt"
 	"time"
 
@@ -54,12 +53,12 @@ func mapUpsertAddonToDB(addon upsertAddonRequest) database.UpsertAddonParams {
 func (h handler) UpsertAddon(c *fiber.Ctx) error {
 	var data upsertAddonRequest
 	if err := c.BodyParser(&data); err != nil {
-		return models.ErrorBadData(c, err)
+		return models.Error(fiber.StatusBadRequest, "Invalid payload", err)
 	}
 
 	err := models.ValidateData(data)
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return err
 	}
 
 	ctx, cancel := h.cfg.WriteCtx(c.Context())
@@ -67,7 +66,7 @@ func (h handler) UpsertAddon(c *fiber.Ctx) error {
 
 	addon := mapUpsertAddonToDB(data)
 	if err := h.svc.UpsertAddon(ctx, addon); err != nil {
-		return models.ErrorUnexpected(c, err)
+		return err
 	}
 
 	return models.Success(c, true)
@@ -81,7 +80,7 @@ func (s service) UpsertAddon(ctx context.Context, data database.UpsertAddonParam
 
 	if data.DateTime.Valid {
 		if data.DateTime.Time.Before(form.StartDate) || data.DateTime.Time.After(form.EndDate.Add(23*time.Hour)) {
-			return errors.New("addons.date_time should be between form.start_date and form.end_date")
+			return models.Error(fiber.StatusBadRequest, "addons.date_time should be between form.start_date and form.end_date", nil)
 		}
 	}
 

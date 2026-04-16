@@ -37,7 +37,7 @@ export const MultiSelect: Component<Props> = (props) => {
             <label class="label truncate cursor-pointer gap-3">
               <input
                 {...inputProps}
-                id={`${props.name}−${value}`}
+                id={`${props.name}-${value}`}
                 type="checkbox"
                 class="toggle toggle-success"
                 disabled={props.disabled}

@@ -368,7 +368,7 @@ const CreateUpdateForm: Component = () => {
 													moveAddon={moveAddon}
 													removeAddon={removeAddon}
 													index={index}
-													maxIdx={() => fieldArray.items.length}
+													maxIdx={() => fieldArray.items.length - 1}
 													addAddon={addAddon}
 												/>
 
@@ -472,7 +472,7 @@ const CreateUpdateForm: Component = () => {
 													moveAddon={moveAddon}
 													removeAddon={removeAddon}
 													index={index}
-													maxIdx={() => fieldArray.items.length}
+													maxIdx={() => fieldArray.items.length - 1}
 													addAddon={addAddon}
 												/>
 
@@ -564,7 +564,7 @@ const CreateUpdateForm: Component = () => {
 															moveAddon={moveAddon}
 															removeAddon={removeAddon}
 															index={index}
-															maxIdx={() => fieldArray.items.length}
+															maxIdx={() => fieldArray.items.length - 1}
 															addAddon={addAddon}
 														/>
 													)}

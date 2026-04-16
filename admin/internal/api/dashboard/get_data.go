@@ -12,7 +12,7 @@ import (
 func (h handler) GetDashboardData(c *fiber.Ctx) error {
 	formIDs, err := models.GetIDsArray(utils.CopyString(c.Query("form_ids")))
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return models.Error(fiber.StatusBadRequest, "Invalid forms", err)
 	}
 	orderStatusList := models.GetStatusFromCommaSep(utils.CopyString(c.Query("order_status")))
 
@@ -21,7 +21,7 @@ func (h handler) GetDashboardData(c *fiber.Ctx) error {
 
 	formData, addons, submissions, err := h.svc.GetDashboardData(ctx, formIDs, orderStatusList)
 	if err != nil {
-		return models.ErrorUnexpected(c, err)
+		return models.Error(fiber.StatusNotFound, "Could not find dashboard data", err)
 	}
 
 	items := mapOrdersAddonsSubmissionsToDashboardResponse(formData, addons, submissions)

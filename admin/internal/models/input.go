@@ -18,9 +18,9 @@ func GetIDsArray(IDs string) ([]string, error) {
 		return []string{}, errors.New("ids is empty")
 	}
 
-	formIDsArr := strings.Split(strings.TrimSpace(IDs), ",")
+	formIDsArr := strings.Split(IDs, ",")
 	for _, item := range formIDsArr {
-		if _, err := uuid.Parse(item); err != nil {
+		if _, err := uuid.Parse(strings.TrimSpace(item)); err != nil {
 			return []string{}, fmt.Errorf("invalid id: %s", item)
 		}
 	}
@@ -41,9 +41,9 @@ func GetStatusFromCommaSep(statusStr string) []database.OrdersStatus {
 		return def
 	}
 
-	statusArr := strings.SplitSeq(strings.TrimSpace(statusStr), ",")
+	statusArr := strings.SplitSeq(statusStr, ",")
 	for item := range statusArr {
-		switch item {
+		switch strings.TrimSpace(item) {
 		case string(database.OrdersStatusDRAFT):
 			out = append(out, database.OrdersStatusDRAFT)
 		case string(database.OrdersStatusCANCELLED):

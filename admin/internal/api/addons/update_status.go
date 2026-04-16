@@ -17,17 +17,17 @@ type updateAddonStatusRequest struct {
 func (h handler) UpdateAddonStatus(c *fiber.Ctx) error {
 	addonID, err := uuid.Parse(utils.CopyString(c.Params("id", "")))
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return models.Error(fiber.StatusBadRequest, "Invalid addon", err)
 	}
 
 	var data updateAddonStatusRequest
 	if err = c.BodyParser(&data); err != nil {
-		return models.ErrorBadData(c, err)
+		return models.Error(fiber.StatusBadRequest, "Invalid payload", err)
 	}
 
 	err = models.ValidateData(data)
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return err
 	}
 
 	ctx, cancel := h.cfg.WriteCtx(c.Context())
@@ -37,7 +37,7 @@ func (h handler) UpdateAddonStatus(c *fiber.Ctx) error {
 		ID:     addonID.String(),
 		Active: data.Active,
 	}); err != nil {
-		return models.ErrorUnexpected(c, err)
+		return err
 	}
 
 	return models.Success(c, true)

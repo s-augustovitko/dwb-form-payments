@@ -4,17 +4,24 @@ import (
 	"context"
 	"dwb-admin/internal/database"
 	"dwb-admin/internal/models"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/utils"
 )
 
 func (h handler) ListForms(c *fiber.Ctx) error {
+	limit, err := strconv.Atoi(utils.CopyString(c.Query("limit", "100")))
+	if err != nil {
+		limit = 100
+	}
+
 	ctx, cancel := h.cfg.ReadCtx(c.Context())
 	defer cancel()
 
-	formsList, err := h.svc.DashboardListForms(ctx, 100)
+	formsList, err := h.svc.DashboardListForms(ctx, int32(limit))
 	if err != nil {
-		return models.ErrorUnexpected(c, err)
+		return err
 	}
 
 	items := mapListFormRowsToResponse(formsList)

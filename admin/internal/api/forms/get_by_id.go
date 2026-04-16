@@ -14,7 +14,7 @@ import (
 func (h handler) GetPopulatedByID(c *fiber.Ctx) error {
 	formID, err := uuid.Parse(utils.CopyString(c.Params("id", "")))
 	if err != nil {
-		return models.ErrorBadData(c, err)
+		return models.Error(fiber.StatusBadRequest, "Invalid form", err)
 	}
 
 	ctx, cancel := h.cfg.ReadCtx(c.Context())
@@ -22,7 +22,7 @@ func (h handler) GetPopulatedByID(c *fiber.Ctx) error {
 
 	form, addons, err := h.svc.GetPopulatedByID(ctx, formID.String())
 	if err != nil {
-		return models.ErrorUnexpected(c, err)
+		return models.Error(fiber.StatusNotFound, "Form and addons not found", err)
 	}
 
 	logger := config.GetLogger(c)

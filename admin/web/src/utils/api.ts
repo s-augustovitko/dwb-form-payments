@@ -44,7 +44,7 @@ export async function request<T>(path: string, method: Method, query?: Record<st
     options.body = JSON.stringify(body);
   }
 
-  // Perform the HTTP request and get resposne
+  // Perform the HTTP request and get response
   const queryString = query ? `?${new URLSearchParams(query).toString()}` : "";
   const url = `${BASE_URL}/${path}${queryString}`;
   const response: Response = await fetch(url, options);
