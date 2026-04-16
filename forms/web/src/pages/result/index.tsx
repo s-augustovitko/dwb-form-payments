@@ -55,7 +55,7 @@ const Result: Component = () => {
 					{OrderStatusMap[submissionData()?.order.status || OrderStatus.DRAFT]}
 				</div>
 				<Show when={isSuccess()}>
-					<div role="alert" class="alert block p-4">
+					<div role="alert" class="alert block p-4 bg-base-100">
 						<p><strong>Nombre:</strong> {
 							`${submissionData()?.submission.first_name} ${submissionData()?.submission.last_name}`
 						}</p>
