@@ -407,7 +407,7 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 								value={field.value ?? []}
 								error={field.error}
 								disabled={loading()}
-								label="Seleccion de Sesiones"
+								label="Seleccion de Sesiones y Conferencias"
 								items={addonsList().sessions}
 							/>
 						)}
