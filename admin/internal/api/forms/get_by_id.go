@@ -2,9 +2,11 @@ package forms
 
 import (
 	"context"
+	"database/sql"
 	"dwb-admin/internal/config"
 	"dwb-admin/internal/database"
 	"dwb-admin/internal/models"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
@@ -31,7 +33,12 @@ func (h handler) GetPopulatedByID(c *fiber.Ctx) error {
 }
 
 func (s service) GetPopulatedByID(ctx context.Context, formID string) (database.GetFormByIDRow, []database.GetAddonsByFormIDRow, error) {
-	return s.repo.GetPopulatedFormByID(ctx, formID)
+	form, addons, err := s.repo.GetPopulatedFormByID(ctx, formID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return form, addons, models.Error(fiber.StatusNotFound, "Form not found", err)
+	}
+
+	return form, addons, err
 }
 
 func (r repository) GetPopulatedFormByID(ctx context.Context, formID string) (database.GetFormByIDRow, []database.GetAddonsByFormIDRow, error) {

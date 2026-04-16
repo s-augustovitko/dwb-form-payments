@@ -299,8 +299,8 @@ function createCulqiCharge(array $data)
     // Handle Culqi errors
     if ($statusCode < 200 || $statusCode >= 300) {
         $message = $decoded['user_message']
-            ?: $decoded['merchant_message']
-            ?: "Error a la hora de realizar cargo";
+            ?? $decoded['merchant_message']
+            ?? "Error a la hora de realizar cargo";
 
         throw new Exception($message, $statusCode);
     }

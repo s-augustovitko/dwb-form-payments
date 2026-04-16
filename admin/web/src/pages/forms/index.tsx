@@ -34,7 +34,7 @@ const Form: Component = () => {
 
 	return (
 		<PageLayout
-			title="Dashboard Overview"
+			title="Forms"
 			subtitle={`Showing ${formList()?.total ?? 0} forms`}
 			actions={<A href="create" class="btn btn-primary"><FiPlus /> Create New Form</A>}
 		>

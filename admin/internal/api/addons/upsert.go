@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"dwb-admin/internal/database"
 	"dwb-admin/internal/models"
+	"errors"
 	"fmt"
 	"time"
 
@@ -75,6 +76,9 @@ func (h handler) UpsertAddon(c *fiber.Ctx) error {
 func (s service) UpsertAddon(ctx context.Context, data database.UpsertAddonParams) error {
 	form, err := s.repo.GetFormByID(ctx, data.FormID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.Error(fiber.StatusNotFound, "Form not found", err)
+		}
 		return err
 	}
 

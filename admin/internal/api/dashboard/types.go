@@ -91,16 +91,16 @@ func mapOrdersAddonsSubmissionsToDashboardResponse(formOrders []database.Dashboa
 		"ON_SITE":   0,
 	}
 	for _, formOrder := range formOrders {
-		if draftCount, err := strconv.Atoi(formOrder.DraftCount.(string)); err != nil {
+		if draftCount, err := strconv.Atoi(formOrder.DraftCount.(string)); err == nil {
 			statusMap["DRAFT"] += draftCount
 		}
-		if cancelledCount, err := strconv.Atoi(formOrder.CancelledCount.(string)); err != nil {
+		if cancelledCount, err := strconv.Atoi(formOrder.CancelledCount.(string)); err == nil {
 			statusMap["CANCELLED"] += cancelledCount
 		}
-		if onSiteCount, err := strconv.Atoi(formOrder.OnSiteCount.(string)); err != nil {
+		if onSiteCount, err := strconv.Atoi(formOrder.OnSiteCount.(string)); err == nil {
 			statusMap["ON_SITE"] += onSiteCount
 		}
-		if confirmedCount, err := strconv.Atoi(formOrder.ConfirmedCount.(string)); err != nil {
+		if confirmedCount, err := strconv.Atoi(formOrder.ConfirmedCount.(string)); err == nil {
 			statusMap["CONFIRMED"] += confirmedCount
 		}
 

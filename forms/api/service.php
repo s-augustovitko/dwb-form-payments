@@ -21,7 +21,7 @@ function fetch_active_form(): array
         '
     );
     $form_prep->execute();
-    return $form_prep->fetch();
+    return $form_prep->fetch() ?? null;
 }
 
 function fetch_addons_from_form_id(string $form_id): array
@@ -49,7 +49,7 @@ function fetch_addons_from_form_id(string $form_id): array
 
 function upsert_submission(string $form_id, array $input): string
 {
-    $submission_id = $input['submission_id'] ?: guidv4();
+    $submission_id = $input['submission_id'] ?? guidv4();
     db()->prepare(
         '
         INSERT INTO submissions (
@@ -96,13 +96,13 @@ function upsert_submission(string $form_id, array $input): string
         ':first_name' => $input['first_name'],
         ':last_name' => $input['last_name'],
         ':email' => $input['email'],
-        ':id_type' => $input['id_type'] ?: 'DNI',
+        ':id_type' => $input['id_type'] ?? 'DNI',
         ':id_value' => $input['id_value'],
-        ':country_code' => $input['country_code'] ?: '+51',
+        ':country_code' => $input['country_code'] ?? '+51',
         ':phone' => $input['phone'],
-        ':arrival_date' => $input['arrival_date'] ?: null,
-        ':departure_date' => $input['departure_date'] ?: null,
-        ':medical_insurance' => $input['medical_insurance'] ?: null
+        ':arrival_date' => $input['arrival_date'] ?? null,
+        ':departure_date' => $input['departure_date'] ?? null,
+        ':medical_insurance' => $input['medical_insurance'] ?? null
     ]);
 
     if (
@@ -137,8 +137,8 @@ function upsert_submission(string $form_id, array $input): string
     )->execute([
         ':submission_id' => $submission_id,
         ':full_name' => $input['emergency_contact_full_name'],
-        ':email' => $input['emergency_contact_email'] ?: null,
-        ':country_code' => $input['emergency_contact_country_code'] ?: '+51',
+        ':email' => $input['emergency_contact_email'],
+        ':country_code' => $input['emergency_contact_country_code'] ?? '+51',
         ':phone' => $input['emergency_contact_phone'],
     ]);
 
@@ -277,7 +277,7 @@ function fetch_order_by_submission_id(string $form_id, string $submission_id): ?
         ':submission_id' => $submission_id,
         ':form_id' => $form_id,
     ]);
-    return $order_prep->fetch();
+    return $order_prep->fetch() ?? null;
 }
 
 function fetch_submission_by_id(string $form_id, string $submission_id): ?array
@@ -313,7 +313,7 @@ function fetch_submission_by_id(string $form_id, string $submission_id): ?array
         ':submission_id' => $submission_id,
         ':form_id' => $form_id,
     ]);
-    return $submission_prep->fetch();
+    return $submission_prep->fetch() ?? null;
 }
 
 

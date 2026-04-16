@@ -18,14 +18,17 @@ func GetIDsArray(IDs string) ([]string, error) {
 		return []string{}, errors.New("ids is empty")
 	}
 
-	formIDsArr := strings.Split(IDs, ",")
-	for _, item := range formIDsArr {
-		if _, err := uuid.Parse(strings.TrimSpace(item)); err != nil {
+	out := []string{}
+	for item := range strings.SplitSeq(IDs, ",") {
+		trimmed := strings.TrimSpace(item)
+		if _, err := uuid.Parse(trimmed); err != nil {
 			return []string{}, fmt.Errorf("invalid id: %s", item)
 		}
+
+		out = append(out, trimmed)
 	}
 
-	return formIDsArr, nil
+	return out, nil
 }
 
 func GetStatusFromCommaSep(statusStr string) []database.OrdersStatus {

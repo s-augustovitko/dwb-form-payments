@@ -53,7 +53,7 @@ try {
         throw new Exception("no se encontro la entrada, por favor intente desde el paso anterior");
     }
 
-    $order_id = check_order_status($form['id'], $input['submission_id']);
+    $order_id = check_order_status($form['id'], $input['submission_id'] ?? null);
     if (empty($order_id)) {
         throw new Exception("No se encontro la orden o es invalida");
     }
@@ -74,7 +74,7 @@ try {
         $payment_id = upsert_payment(
             '',
             $order['id'],
-            $input['culqi_token'] ?: null,
+            $input['culqi_token'] ?? null,
             PaymentStatus::PENDING,
             (float) $order['amount'],
             Currency::from($order['currency']),
@@ -98,14 +98,14 @@ try {
     if (PaymentType::from($input['payment_type']) === PaymentType::CULQI && (float) $order['amount'] > 0.0) {
         $charge_data = [
             "amount" => strval(round((float) $order['amount'] * 100)),
-            "currency_code" => $order['currency'] ?: Currency::PEN->value,
+            "currency_code" => $order['currency'] ?? Currency::PEN->value,
             "email" => $submission['email'],
-            "source_id" => $input['culqi_token'],
+            "source_id" => $input['culqi_token'] ?? "",
             "antifraud_details" => [
                 "first_name" => $submission['first_name'],
                 "last_name" => $submission['last_name'],
                 "email" => $submission['email'],
-                "phone_number" => ($submission['country_code'] ?: '+51') . $submission['phone']
+                "phone_number" => ($submission['country_code'] ?? '+51') . $submission['phone']
             ],
         ];
 
@@ -116,7 +116,7 @@ try {
             $charge['outcome'] = $charge['outcome'] ?? ['type' => 'error'];
             $charge['source'] = $charge['source'] ?? ['type' => 'error'];
         } catch (Throwable $e) {
-            $user_message = $e->getMessage();
+            $user_message = $e->getMessage() ?? "";
             $charge = [
                 'id' => null,
                 'outcome' => ['type' => 'error'],
@@ -124,7 +124,7 @@ try {
             ];
         }
         $user_message = $user_message ?:
-            $charge["user_message"] ?:
+            $charge["user_message"] ??
             "Intente de nuevo o use otro metodo de pago";
 
         $outcome_type = trim(strtolower($charge['outcome']['type'] ?? ''));

@@ -131,7 +131,7 @@ try {
         throw new Exception("No se encontro un formulario activo");
     }
 
-    $existing_order_id = check_order_status($form['id'], $input['submission_id']);
+    $existing_order_id = check_order_status($form['id'], $input['submission_id'] ?? null);
     $submission_id = upsert_submission($form['id'], $input);
     $order_id = create_update_order(
         $form['id'],
