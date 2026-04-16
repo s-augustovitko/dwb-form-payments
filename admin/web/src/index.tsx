@@ -17,5 +17,5 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 
 render(
 	() => <Router root={(props) => <App>{props.children}</App>}>{routes}</Router>,
-	root,
+	root!,
 );

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"dwb-admin/pkg/api"
-	"dwb-admin/pkg/config"
+	"dwb-admin/internal/api"
+	"dwb-admin/internal/config"
 	"log"
 	"log/slog"
 	"os"
@@ -48,6 +48,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		ProxyHeader:             fiber.HeaderXForwardedFor,
 		EnableTrustedProxyCheck: true,
+		ErrorHandler:            globalErrorHandler,
 	})
 	defer func() {
 		if err := app.Shutdown(); err != nil {

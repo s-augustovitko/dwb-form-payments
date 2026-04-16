@@ -1,0 +1,111 @@
+networks:
+  dwb_public:
+    driver: bridge
+  dwb_internal:
+    internal: true
+    driver: bridge
+
+configs:
+  admin_config:
+    file: ./admin/config/local.json
+
+volumes:
+  db_data:
+
+x-common: &common
+  env_file: ./.local.env
+  restart: always
+  networks:
+    - dwb_internal
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+  healthcheck:
+    start_period: 10s
+    interval: 10s
+    timeout: 5s
+    retries: 5
+
+x-common-public: &common-public
+  <<: *common
+  networks:
+    - dwb_internal
+    - dwb_public
+
+services:
+  mysql:
+    <<: *common
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:?value DB_NAME is required}
+      MYSQL_USER: ${DB_USER:?value DB_USER is required}
+      MYSQL_PASSWORD: ${DB_PASS:?value DB_PASS is required}
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:?value DB_PASS is required}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysql"]
+
+  migrations:
+    <<: *common
+    image: migrate/migrate
+    restart: on-failure
+    volumes:
+      - ./migrations:/migrations:ro
+    entrypoint:
+      [
+        "migrate",
+        "-path",
+        "/migrations",
+        "-database",
+        "mysql://${DB_USER:?value DB_USER is required}:${DB_PASS:?value DB_PASS is required}@tcp(mysql:3306)/${DB_NAME:?value DB_NAME is required}",
+        "up"
+      ]
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  dozzle:
+    <<: *common
+    image: amir20/dozzle:latest
+    environment:
+      DOZZLE_ENABLE_ACTION: true
+      DOZZLE_ENABLE_SHELL: true
+    volumes:
+      - ${XDG_RUNTIME_DIR:-/run/user/1000}/podman/podman.sock:/var/run/docker.sock:ro
+    healthcheck:
+      test: ["CMD", "/dozzle", "healthcheck"]
+
+  dwb-admin:
+    <<: *common
+    build: ./admin
+    configs:
+      - source: admin_config
+        target: /service/config/service.json
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://dwb-admin:3000/api/v1/readyz"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  dwb-forms:
+    <<: *common
+    build: ./forms
+    volumes:
+      - ./dist:/var/www/html
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://dwb-forms:8080/api/health"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  caddy:
+    <<: *common-public
+    image: caddy:2-alpine
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./admin/web/dist:/srv:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile

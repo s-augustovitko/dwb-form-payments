@@ -1,0 +1,16 @@
+services:
+  migrations:
+    env_file: ./.env
+    image: migrate/migrate
+    restart: "on-failure"
+    volumes:
+      - ./migrations:/migrations:ro
+    entrypoint:
+      [
+        "migrate",
+        "-path",
+        "/migrations",
+        "-database",
+        "mysql://${DB_USER}:${DB_PASS}@tcp(${DB_HOST})/${DB_NAME}",
+        "up",
+      ]

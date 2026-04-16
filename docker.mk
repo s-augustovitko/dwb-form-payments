@@ -5,22 +5,34 @@
 # DOCKER => command to run for docker (docker or podman)
 # COMPOSE => .compose file to start the services
 # ENV_FILE => .env file used in the compose process
+# CHANGES_DIRS => .env file used in the compose process
+APPS=dwb-admin dwb-forms caddy
 
+.PHONY: dev
+dev: run ## Runs the project and watches for any changes
+	@echo "Watching files and configs for changes..."
+	@command -v inotifywait >/dev/null 2>&1 || { echo "Error: inotifywait not installed"; exit 1; }; \
+	trap "echo 'Stopping dev watcher'; exit 0" INT; \
+	while inotifywait -r -e modify,create,delete ${CHANGES_DIRS}; do \
+		echo "Changes detected. Rebuilding..."; \
+		$(MAKE) run SERVICE="$(APPS)" FLAGS="--no-deps"; \
+	done
 
 .PHONY: run
 run: build ## Builds and runs the project's services or specific $SERVICE
-	${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} up --build -d $(SERVICE)
+	@${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} up --build -d $(FLAGS) $(SERVICE)
 
 .PHONY: clean
 clean: clean_dist ## cleans dist directories and stops the current $COMPOSE services 
 	@echo "Stopping and pruning docker resources (no images)"
-	@${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} down --volumes --remove-orphans
+	@${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} down
 
 .PHONY: clean_all
 clean_all: clean_dist ## Cleans everything $DOCKER related, not only this project
 	@echo "Stopping and pruning docker resources (with images)"
 	@${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} down --rmi all --volumes --remove-orphans
 	@${DOCKER} system prune -a -f --volumes
+	@${DOCKER} builder prune --all --force
 
 .PHONY: clean_dist
 clean_dist: ## Remove known dist folders
@@ -29,7 +41,7 @@ clean_dist: ## Remove known dist folders
 .PHONY: logs
 logs: ## Tails the docker $SERVICE logs
 ifdef SERVICE
-		${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} logs -f --tail=400 $(SERVICE)
+		@${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} logs -f --tail=400 $(SERVICE)
 else
 		@echo "Please define SERVICE environment/make variable. Example:"
 		@echo
@@ -44,7 +56,7 @@ endif
 .PHONY: exec
 exec: ## Executes into the docker $SERVICE pod
 ifdef SERVICE
-		${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} exec $(SERVICE) /bin/sh
+		@${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} exec $(SERVICE) /bin/sh
 else
 		@echo "Please define SERVICE environment/make variable. Example:"
 		@echo

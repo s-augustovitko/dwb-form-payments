@@ -1,0 +1,23 @@
+# Dozzle Logs UI
+http://dozzle.localhost:3000 {
+    reverse_proxy dozzle:8080
+}
+
+# Main Application
+http://admin.localhost:3000 {
+    handle /api/v1* {
+        reverse_proxy dwb-admin:3000
+    }
+
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+}
+
+# Public Forms Application
+http://forms.localhost:3000 {
+    reverse_proxy dwb-forms:8080
+}
+

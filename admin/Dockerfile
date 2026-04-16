@@ -10,7 +10,7 @@ RUN go mod download
 
 # Copy the entire source code
 COPY cmd/ ./cmd/
-COPY pkg/ ./pkg/
+COPY internal/ ./internal/
 
 # Build the Go app
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o main ./cmd/...

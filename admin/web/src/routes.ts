@@ -1,29 +1,39 @@
 import type { RouteDefinition } from "@solidjs/router";
 import { lazy } from "solid-js";
 
-import Home from "./pages/home";
-import Settings from "./pages/settings";
-import CreateUpdateSettings from "./pages/settings/create_update";
+import Dashboard from "./pages/dashboard";
+import Forms from "./pages/forms";
+import CreateUpdateForm from "./pages/forms/create_update";
 
 export const routes: RouteDefinition[] = [
 	{
 		path: "/",
-		component: Home,
+		component: Dashboard,
 	},
 	{
-		path: "/settings",
+		path: "/forms",
 		children: [{
 			path: "/",
-			component: Settings,
+			component: Forms,
 		},
 		{
-			path: ":id",
-			component: CreateUpdateSettings
+			path: ":id", // /create for creating
+			component: CreateUpdateForm
 		}]
 	},
-
+	// {
+	// 	path: "/articles",
+	// 	children: [{
+	// 		path: "/",
+	// 		component: Articles,
+	// 	},
+	// 	{
+	// 		path: ":id", // /create for creating
+	// 		component: CreateUpdateArticle
+	// 	}]
+	// },
 	{
 		path: "**",
-		component: lazy(() => import("./errors/404")),
+		component: lazy(() => import("./pages/404")),
 	},
 ];

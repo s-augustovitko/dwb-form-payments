@@ -1,9 +1,9 @@
-import { Component, For } from "solid-js"
+import { Accessor, Component, For, Setter } from "solid-js"
 
 interface Props {
-  page: () => number;
-  totalPages: () => number;
-  setPage: (p: number) => void;
+  page: Accessor<number>;
+  totalPages: Accessor<number>
+  setPage: Setter<number>;
 }
 
 export const Pagination: Component<Props> = (props) => {
@@ -41,22 +41,26 @@ export const Pagination: Component<Props> = (props) => {
     getPagination(props.page(), props.totalPages());
 
   return (
-    <div class="join mt-4 mx-auto w-full">
-      <For each={pages()}>
-        {(p) => (
-          <button
-            class="join-item btn"
-            classList={{
-              "btn-active": p === props.page(),
-              "btn-disabled": p === "...",
-            }}
-            disabled={p === "..."}
-            onClick={() => typeof p === "number" && props.setPage(p)}
-          >
-            {p}
-          </button>
-        )}
-      </For>
-    </div>
+    <>
+      {pages().length > 0 ? <div class="divider my-4" /> : undefined}
+
+      <div class="join mx-auto w-full">
+        <For each={pages()}>
+          {(p) => (
+            <button
+              class="join-item btn"
+              classList={{
+                "btn-active": p === props.page(),
+                "btn-disabled": p === "...",
+              }}
+              disabled={p === "..."}
+              onClick={() => typeof p === "number" && props.setPage(p)}
+            >
+              {p}
+            </button>
+          )}
+        </For>
+      </div>
+    </>
   );
 }
