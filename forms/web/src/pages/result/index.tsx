@@ -2,7 +2,7 @@ import { Component, createResource, Show } from "solid-js";
 import { notificationStore, PageLayout } from "../../components";
 import { getFormSubmission } from "../form/requests";
 import { A, useParams } from "@solidjs/router";
-import { OrderStatus, OrderStatusMap } from "../../utils";
+import { getMoneyDisplay, OrderStatus, OrderStatusMap } from "../../utils";
 import { domToPng } from "modern-screenshot";
 import dayjs from "dayjs";
 
@@ -64,6 +64,7 @@ const Result: Component = () => {
 					<p><strong>Orden:</strong> {submissionData()?.order.id}</p>
 					<p><strong>Respuesta:</strong> {submissionData()?.submission.id}</p>
 					<p><strong>Correo:</strong> {submissionData()?.submission.email}</p>
+					<p><strong>Monto:</strong> {getMoneyDisplay(submissionData()?.order.currency, Number(submissionData()?.order.amount))}</p>
 				</div>
 
 

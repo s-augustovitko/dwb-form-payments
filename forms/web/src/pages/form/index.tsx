@@ -1,6 +1,6 @@
 import { Component, createMemo, createResource, createSignal, Show } from "solid-js";
 import { Input, MultiSelect, notificationStore, PageLayout, Select, SelectInput } from "../../components";
-import { Currency, EventType, FormType, getMoneyDisplay, IdType, MealType } from "../../utils";
+import { AddonType, AddonTypeMap, Currency, EventType, FormType, getMoneyDisplay, IdType, MealType, normalizeDate } from "../../utils";
 import {
 	countryCodesList,
 	currencyTypesList,
@@ -16,6 +16,7 @@ import { useNavigate, useSearchParams } from "@solidjs/router";
 import { getSchema, SubmissionSchema } from "./schema";
 import { getFormInfo, getFormSubmission, SubmissionRequest, submissionRequest } from "./requests";
 import { FormInfoResponse } from "./types";
+import dayjs from "dayjs";
 
 type SearchParams = {
 	submission_id?: string
@@ -128,12 +129,46 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 
 	const getSelectedAddons = () => [...getSelectedSessions(), ...getSelectedMeals()];
 
-	const getTotal = () => {
+	const getSubtotal = () => {
 		const selectedAddonsSet = new Set(getSelectedAddons());
 		return (formInfo?.addons || []).reduce((acc, item) =>
 			selectedAddonsSet.has(item.id) ? acc + Number(item.price) : acc
 			, 0);
 	}
+
+	const getAllSessionsDiscount = () => formInfo?.addons.find((item) => {
+		if (item.addon_type !== AddonType.ALL_SESSIONS_DISCOUNT || item.currency !== getCurrency())
+			return false
+
+		return true
+	})
+
+	const getEarlyDiscount = () => formInfo?.addons.find((item) => {
+		if (item.addon_type !== AddonType.EARLY_DISCOUNT || item.currency !== getCurrency())
+			return false
+
+		if (!item.date_time || dayjs(normalizeDate(item.date_time)).isBefore(new Date()))
+			return false
+
+		return true
+	})
+
+	const getDiscountTotal = (): number => {
+		const allSessionsDiscount = getAllSessionsDiscount()
+		const earlyDiscount = getEarlyDiscount()
+
+		let total = 0.0
+		if (allSessionsDiscount) {
+			total += Number(allSessionsDiscount.price)
+		}
+		if (earlyDiscount) {
+			total += Number(earlyDiscount.price)
+		}
+
+		return total
+	}
+
+	const getTotal = () => getSubtotal() - getDiscountTotal()
 
 	const handleSubmit: SubmitHandler<SubmissionSchema> = async (values, _) => {
 		setLoading(true)
@@ -427,8 +462,26 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 					<table class="table">
 						<thead>
 							<tr>
-								<th>Subtotal</th>
-								<th>{getMoneyDisplay(getCurrency(), getTotal())}</th>
+								<td>Subtotal</td>
+								<td>{getMoneyDisplay(getCurrency(), getSubtotal())}</td>
+							</tr>
+
+							<Show when={getEarlyDiscount()}>
+								<tr>
+									<td>{getEarlyDiscount()?.title}</td>
+									<td class="text-success">- {getMoneyDisplay(getEarlyDiscount()?.currency, Number(getEarlyDiscount()?.price))}</td>
+								</tr>
+							</Show>
+							<Show when={getEarlyDiscount()}>
+								<tr>
+									<td>{getEarlyDiscount()?.title}</td>
+									<td class="text-success">- {getMoneyDisplay(getEarlyDiscount()?.currency, Number(getEarlyDiscount()?.price))}</td>
+								</tr>
+							</Show>
+
+							<tr>
+								<th>Total</th>
+								<th>{getMoneyDisplay(getCurrency(), getSubtotal())}</th>
 							</tr>
 						</thead>
 					</table>
