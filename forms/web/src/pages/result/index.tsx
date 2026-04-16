@@ -77,16 +77,18 @@ const Result: Component = () => {
 
 					<button
 						onclick={handleScreenshot}
-						class="btn btn-primary w-full"
+						class="btn btn-primary btn-lg w-full"
 					>
 						Descarga tu comprobante
 					</button>
+					<A href="/" class="btn btn-outline w-full">Regresar al formulario</A>
 				</Show>
 
 				<Show when={!isSuccess()}>
 					<p>Error a la hora de realizar el pago por favor intentelo de nuevo.</p>
 					<A href="/" class="btn btn-primary w-full">Regresar al formulario</A>
 				</Show>
+
 			</div>
 		</PageLayout>
 	)

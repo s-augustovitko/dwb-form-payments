@@ -11,3 +11,4 @@ sql:
         sql_driver: "github.com/go-sql-driver/mysql"
         emit_empty_slices: true
         emit_enum_valid_method: true
+

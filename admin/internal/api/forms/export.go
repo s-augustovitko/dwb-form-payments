@@ -8,6 +8,7 @@ import (
 	"dwb-admin/internal/models"
 	"encoding/csv"
 	"fmt"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
@@ -94,9 +95,9 @@ func (h handler) Export(c *fiber.Ctx) error {
 			strOrDefault(item.Amount, "0.00"),
 			strOrDefault(item.Currency, "PEN"),
 			strOrDefault(string(item.MealType), string(database.OrdersMealTypeREGULAR)),
-			item.MealCount.(string),
+			strconv.Itoa(int(item.MealCount.(int64))),
 			strOrDefault(string(item.EventType), string(database.OrdersEventTypeALLSESSIONS)),
-			item.SessionCount.(string),
+			strconv.Itoa(int(item.SessionCount.(int64))),
 			nullTimeHandle(item.CreatedAt),
 		}
 

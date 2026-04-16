@@ -133,7 +133,7 @@ const Dashboard: Component = () => {
 				</>
 			}
 		>
-			<div class="stats mb-4">
+			<div class="stats border border-base-300 bg-base-200 w-full mb-4">
 				<Stat
 					title="Total Courses"
 					value={dashboardData()?.course_count || '0'}

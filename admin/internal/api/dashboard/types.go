@@ -91,21 +91,23 @@ func mapOrdersAddonsSubmissionsToDashboardResponse(formOrders []database.Dashboa
 		"ON_SITE":   0,
 	}
 	for _, formOrder := range formOrders {
-		if draftCount, err := strconv.Atoi(formOrder.DraftCount.(string)); err == nil {
-			statusMap["DRAFT"] += draftCount
+		if draftCount, ok := formOrder.DraftCount.(int64); ok {
+			statusMap["DRAFT"] += int(draftCount)
 		}
-		if cancelledCount, err := strconv.Atoi(formOrder.CancelledCount.(string)); err == nil {
-			statusMap["CANCELLED"] += cancelledCount
+		if cancelledCount, ok := formOrder.CancelledCount.(int64); ok {
+			statusMap["CANCELLED"] += int(cancelledCount)
 		}
-		if onSiteCount, err := strconv.Atoi(formOrder.OnSiteCount.(string)); err == nil {
-			statusMap["ON_SITE"] += onSiteCount
+		if onSiteCount, ok := formOrder.OnSiteCount.(int64); ok {
+			statusMap["ON_SITE"] += int(onSiteCount)
 		}
-		if confirmedCount, err := strconv.Atoi(formOrder.ConfirmedCount.(string)); err == nil {
-			statusMap["CONFIRMED"] += confirmedCount
+		if confirmedCount, ok := formOrder.ConfirmedCount.(int64); ok {
+			statusMap["CONFIRMED"] += int(confirmedCount)
 		}
 
-		rev, _ := strconv.ParseFloat(formOrder.Revenue.(string), 64)
-		out.TotalRevenue[formOrder.Currency] += rev
+		if revenueStr, ok := formOrder.Revenue.([]uint8); ok {
+			rev, _ := strconv.ParseFloat(string(revenueStr), 64)
+			out.TotalRevenue[formOrder.Currency] += rev
+		}
 
 		out.CourseCount += int(formOrder.FormCount)
 		out.RegistrationCount += float64(formOrder.OrderCount)

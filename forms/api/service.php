@@ -21,7 +21,8 @@ function fetch_active_form(): array
         '
     );
     $form_prep->execute();
-    return $form_prep->fetch() ?? null;
+    $form = $form_prep->fetch();
+    return !$form ? null : $form;
 }
 
 function fetch_addons_from_form_id(string $form_id): array
@@ -277,7 +278,8 @@ function fetch_order_by_submission_id(string $form_id, string $submission_id): ?
         ':submission_id' => $submission_id,
         ':form_id' => $form_id,
     ]);
-    return $order_prep->fetch() ?? null;
+    $order = $order_prep->fetch();
+    return !$order ? null : $order;
 }
 
 function fetch_submission_by_id(string $form_id, string $submission_id): ?array
@@ -313,7 +315,8 @@ function fetch_submission_by_id(string $form_id, string $submission_id): ?array
         ':submission_id' => $submission_id,
         ':form_id' => $form_id,
     ]);
-    return $submission_prep->fetch() ?? null;
+    $submission = $submission_prep->fetch();
+    return !$submission ? null : $submission;
 }
 
 
@@ -369,7 +372,7 @@ function create_update_order(
     EventType $event_type,
     MealType $meal_type,
     Currency $currency = Currency::PEN,
-    ?string $existing_order_id,
+    ?string $existing_order_id = null,
 ): string {
     $selected_addons = _get_addons_for_order(
         $form_id,

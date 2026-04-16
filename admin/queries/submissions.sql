@@ -22,8 +22,8 @@ FROM submissions s
 JOIN orders o ON s.id = o.submission_id AND o.status IN (sqlc.slice('status'))
 LEFT JOIN (
     SELECT order_id,
-           SUM(CASE WHEN addon_type = 'SESSION' THEN 1 ELSE 0 END) AS session_count,
-           SUM(CASE WHEN addon_type = 'MEAL' THEN 1 ELSE 0 END) AS meal_count
+           COALESCE(CAST(SUM(CASE WHEN addon_type = 'SESSION' THEN 1 ELSE 0 END) AS SIGNED), 0) AS session_count,
+           COALESCE(CAST(SUM(CASE WHEN addon_type = 'MEAL' THEN 1 ELSE 0 END) AS SIGNED), 0) AS meal_count
     FROM order_items
     WHERE addon_type IN ('SESSION', 'MEAL')
     GROUP BY order_id

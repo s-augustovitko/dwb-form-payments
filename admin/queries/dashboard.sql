@@ -12,11 +12,11 @@ SELECT
     o.currency currency,
     COUNT(DISTINCT f.id) form_count,
     COUNT(DISTINCT o.id) order_count,
-    SUM(CASE WHEN o.status = 'CONFIRMED' THEN o.amount ELSE 0 END) revenue,
-    SUM(CASE WHEN o.status = 'DRAFT' THEN 1 ELSE 0 END) draft_count,
-    SUM(CASE WHEN o.status = 'CONFIRMED' THEN 1 ELSE 0 END) confirmed_count,
-    SUM(CASE WHEN o.status = 'CANCELLED' THEN 1 ELSE 0 END) cancelled_count,
-    SUM(CASE WHEN o.status = 'ON_SITE' THEN 1 ELSE 0 END) on_site_count
+    COALESCE(CAST(SUM(CASE WHEN o.status = 'CONFIRMED' THEN o.amount ELSE 0 END) AS DECIMAL(10,2)), 0) revenue,
+    COALESCE(CAST(SUM(CASE WHEN o.status = 'DRAFT' THEN 1 ELSE 0 END) AS SIGNED), 0) draft_count,
+    COALESCE(CAST(SUM(CASE WHEN o.status = 'CONFIRMED' THEN 1 ELSE 0 END) AS SIGNED), 0) confirmed_count,
+    COALESCE(CAST(SUM(CASE WHEN o.status = 'CANCELLED' THEN 1 ELSE 0 END) AS SIGNED), 0) cancelled_count,
+    COALESCE(CAST(SUM(CASE WHEN o.status = 'ON_SITE' THEN 1 ELSE 0 END) AS SIGNED), 0) on_site_count
 FROM forms f
 JOIN orders o ON o.form_id = f.id AND o.status IN (sqlc.slice('status'))
 WHERE f.id IN (sqlc.slice('ids'))
