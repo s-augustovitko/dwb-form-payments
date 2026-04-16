@@ -531,7 +531,7 @@ function upsert_payment(
     string $order_id,
     ?string $charge_id = '',
     ?string $payment_status = 'PENDING',
-    ?float $amount = '0.0',
+    ?float $amount = 0.0,
     ?string $currency = 'PEN',
     ?string $payment_type = 'CULQI',
     ?string $method = 'CASH',
