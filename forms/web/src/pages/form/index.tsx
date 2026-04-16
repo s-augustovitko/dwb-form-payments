@@ -1,6 +1,6 @@
 import { Component, createMemo, createResource, createSignal, Show } from "solid-js";
 import { Input, MultiSelect, notificationStore, PageLayout, Select, SelectInput } from "../../components";
-import { AddonType, AddonTypeMap, Currency, EventType, FormType, getMoneyDisplay, IdType, MealType, normalizeDate } from "../../utils";
+import { AddonType, Currency, EventType, FormType, getMoneyDisplay, IdType, MealType, normalizeDate } from "../../utils";
 import {
 	countryCodesList,
 	currencyTypesList,
@@ -472,16 +472,16 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 									<td class="text-success">- {getMoneyDisplay(getEarlyDiscount()?.currency, Number(getEarlyDiscount()?.price))}</td>
 								</tr>
 							</Show>
-							<Show when={getEarlyDiscount()}>
+							<Show when={getAllSessionsDiscount()}>
 								<tr>
-									<td>{getEarlyDiscount()?.title}</td>
-									<td class="text-success">- {getMoneyDisplay(getEarlyDiscount()?.currency, Number(getEarlyDiscount()?.price))}</td>
+									<td>{getAllSessionsDiscount()?.title}</td>
+									<td class="text-success">- {getMoneyDisplay(getAllSessionsDiscount()?.currency, Number(getAllSessionsDiscount()?.price))}</td>
 								</tr>
 							</Show>
 
 							<tr>
 								<th>Total</th>
-								<th>{getMoneyDisplay(getCurrency(), getSubtotal())}</th>
+								<th>{getMoneyDisplay(getCurrency(), getTotal())}</th>
 							</tr>
 						</thead>
 					</table>
