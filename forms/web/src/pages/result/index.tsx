@@ -54,24 +54,20 @@ const Result: Component = () => {
 				}}>
 					{OrderStatusMap[submissionData()?.order.status || OrderStatus.DRAFT]}
 				</div>
-				<div role="alert" class="alert block p-4" classList={{
-					"alert-error": !isSuccess(),
-					"alert-info": isSuccess()
-				}}>
-					<p><strong>Nombre:</strong> {
-						`${submissionData()?.submission.first_name} ${submissionData()?.submission.last_name}`
-					}</p>
-					<p><strong>Orden:</strong> {submissionData()?.order.id}</p>
-					<p><strong>Respuesta:</strong> {submissionData()?.submission.id}</p>
-					<p><strong>Correo:</strong> {submissionData()?.submission.email}</p>
-					<div class="divider my-2" />
-					<p><strong>Numero de Sesiones:</strong> {submissionData()?.order_items.filter(item => item.addon_type === AddonType.SESSION).length}</p>
-					<p><strong>Numero de Comidas:</strong> {submissionData()?.order_items.filter(item => item.addon_type === AddonType.MEAL).length}</p>
-					<p><strong>Monto:</strong> {getMoneyDisplay(submissionData()?.order.currency, Number(submissionData()?.order.amount))}</p>
-				</div>
-
-
 				<Show when={isSuccess()}>
+					<div role="alert" class="alert block p-4">
+						<p><strong>Nombre:</strong> {
+							`${submissionData()?.submission.first_name} ${submissionData()?.submission.last_name}`
+						}</p>
+						<p><strong>Orden:</strong> {submissionData()?.order.id}</p>
+						<p><strong>Respuesta:</strong> {submissionData()?.submission.id}</p>
+						<p><strong>Correo:</strong> {submissionData()?.submission.email}</p>
+						<div class="divider my-2" />
+						<p><strong>Numero de Sesiones:</strong> {submissionData()?.order_items.filter(item => item.addon_type === AddonType.SESSION).length}</p>
+						<p><strong>Numero de Comidas:</strong> {submissionData()?.order_items.filter(item => item.addon_type === AddonType.MEAL).length}</p>
+						<p><strong>Monto:</strong> {getMoneyDisplay(submissionData()?.order.currency, Number(submissionData()?.order.amount))}</p>
+					</div>
+
 					<p>
 						Hola {submissionData()?.submission.first_name},<br />
 						tu inscripción fue correctamente completada<br />
@@ -90,7 +86,7 @@ const Result: Component = () => {
 
 				<Show when={!isSuccess()}>
 					<p>Error a la hora de realizar el pago por favor intentelo de nuevo.</p>
-					<A href="/" class="btn btn-primary w-full">Regresar al formulario</A>
+					<A href={`/?submission_id=${submissionData()?.submission.id}`} class="btn btn-primary w-full">Regresar al formulario</A>
 				</Show>
 
 			</div>
