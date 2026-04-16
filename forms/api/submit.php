@@ -112,15 +112,15 @@ try {
         throw new Exception('el retorno no puede ser antes de la llegada');
     }
 
-    if (!empty($input['meal_type']) && !MealType::tryFrom($input['meal_type'])) {
+    if (!empty($input['meal_type']) && !in_array($input['meal_type'], EnumConstants::getMealTypes(), true)) {
         throw new Exception('tipo de comida invalido');
     }
 
-    if (!empty($input['event_type']) && !EventType::tryFrom($input['event_type'])) {
+    if (!empty($input['event_type']) && !in_array($input['event_type'], EnumConstants::getEventTypes(), true)) {
         throw new Exception('tipo de evento invalido');
     }
 
-    if (!empty($input['currency']) && !Currency::tryFrom($input['currency'])) {
+    if (!empty($input['currency']) && !in_array($input['currency'], EnumConstants::getCurrencies(), true)) {
         throw new Exception('moneda invalida');
     }
 
@@ -137,9 +137,9 @@ try {
         $form['id'],
         $submission_id,
         $input['selected_addons'],
-        !empty($input['event_type']) ? EventType::from($input['event_type']) : EventType::ALL_SESSIONS,
-        !empty($input['meal_type']) ? MealType::from($input['meal_type']) : MealType::REGULAR,
-        !empty($input['currency']) ? Currency::from($input['currency']) : Currency::PEN,
+        !empty($input['event_type']) ? $input['event_type'] : 'ALL_SESSIONS',
+        !empty($input['meal_type']) ? $input['meal_type'] : 'REGULAR',
+        !empty($input['currency']) ? $input['currency'] : 'PEN',
         $existing_order_id,
     );
 

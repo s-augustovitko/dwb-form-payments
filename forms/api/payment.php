@@ -35,11 +35,11 @@ try {
         }
     }
 
-    if (!empty($input['payment_type']) && !PaymentType::tryFrom($input['payment_type'])) {
+    if (!empty($input['payment_type']) && !in_array($input['payment_type'], EnumConstants::getPaymentTypes(), true)) {
         throw new Exception('tipo de pago invalido');
     }
 
-    if (empty($input['culqi_token']) && PaymentType::from($input['payment_type']) === PaymentType::CULQI) {
+    if (empty($input['culqi_token']) && $input['payment_type'] === 'CULQI') {
         throw new Exception('token invalido, por favor intente de nuevo mas tarde');
     }
 
@@ -66,20 +66,20 @@ try {
             $form['id'],
             $order_id,
             $submission['id'],
-            PaymentType::from($input['payment_type']) === PaymentType::ON_SITE ?
-                OrderStatus::ON_SITE :
-                OrderStatus::DRAFT,
+            $input['payment_type'] === 'ON_SITE' ?
+                'ON_SITE' :
+                'DRAFT',
         );
 
         $payment_id = upsert_payment(
             '',
             $order['id'],
             $input['culqi_token'] ?? null,
-            PaymentStatus::PENDING,
+            'PENDING',
             (float) $order['amount'],
-            Currency::from($order['currency']),
-            PaymentType::from($input['payment_type']),
-            PaymentType::from($input['payment_type']) === PaymentType::CULQI ? 'CARD' : 'CASH',
+            $order['currency'],
+            $input['payment_type'],
+            $input['payment_type'] === 'CULQI' ? 'CARD' : 'CASH',
             null,
             null
         );
@@ -95,10 +95,10 @@ try {
     // =========================
     // CULQI
     // =========================
-    if (PaymentType::from($input['payment_type']) === PaymentType::CULQI && (float) $order['amount'] > 0.0) {
+    if ($input['payment_type'] === 'CULQI' && (float) $order['amount'] > 0.0) {
         $charge_data = [
             "amount" => strval(round((float) $order['amount'] * 100)),
-            "currency_code" => $order['currency'] ?? Currency::PEN->value,
+            "currency_code" => $order['currency'] ?? 'PEN',
             "email" => $submission['email'],
             "source_id" => $input['culqi_token'] ?? "",
             "antifraud_details" => [
@@ -130,8 +130,8 @@ try {
         $outcome_type = trim(strtolower($charge['outcome']['type'] ?? ''));
         $success_codes = ['successful_charge', 'venta_exitosa'];
         $payment_status = in_array($outcome_type, $success_codes, true) ?
-            PaymentStatus::PAID :
-            PaymentStatus::FAILED;
+            'PAID' :
+            'FAILED';
 
         try {
             db()->beginTransaction();
@@ -142,8 +142,8 @@ try {
                 $charge['id'],
                 $payment_status,
                 (float) $order['amount'],
-                Currency::from($order['currency']),
-                PaymentType::from($input['payment_type']),
+                $order['currency'],
+                $input['payment_type'],
                 $charge['source']['type'],
                 $user_message,
                 json_encode($charge) ?: '{}',
@@ -153,9 +153,9 @@ try {
                 $form['id'],
                 $order['id'],
                 $submission['id'],
-                $payment_status === PaymentStatus::FAILED ?
-                    OrderStatus::CANCELLED :
-                    OrderStatus::CONFIRMED,
+                $payment_status === 'FAILED' ?
+                    'CANCELLED' :
+                    'CONFIRMED',
             );
 
             db()->commit();
@@ -166,7 +166,7 @@ try {
             throw $e;
         }
 
-        if ($payment_status === PaymentStatus::FAILED) {
+        if ($payment_status === 'FAILED') {
             throw new Exception("El pago no se pudo procesar: " . $user_message);
         }
     }
