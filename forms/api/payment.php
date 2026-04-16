@@ -146,7 +146,7 @@ try {
                 $input['payment_type'],
                 $charge['source']['type'],
                 $user_message,
-                json_encode($charge),
+                json_encode($charge) ?: '{}',
             );
 
             update_and_fetch_order_for_payment(

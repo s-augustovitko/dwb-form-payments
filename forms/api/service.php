@@ -533,7 +533,7 @@ function upsert_payment(
     ?string $payment_status = 'PENDING',
     ?float $amount = 0.0,
     ?string $currency = 'PEN',
-    ?string $payment_type = 'CULQI',
+    ?string $payment_type = 'ON_SITE',
     ?string $method = 'CASH',
     ?string $error_message = '',
     ?string $json_data = '{}',
