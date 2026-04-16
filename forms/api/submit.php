@@ -112,15 +112,15 @@ try {
         throw new Exception('el retorno no puede ser antes de la llegada');
     }
 
-    if (!empty($input['meal_type']) && !in_array($input['meal_type'], EnumConstants::getMealTypes())) {
+    if (!empty($input['meal_type']) && !in_array($input['meal_type'], EnumConstants::getMealTypes(), true)) {
         throw new Exception('tipo de comida invalido');
     }
 
-    if (!empty($input['event_type']) && !in_array($input['event_type'], EnumConstants::getEventTypes())) {
+    if (!empty($input['event_type']) && !in_array($input['event_type'], EnumConstants::getEventTypes(), true)) {
         throw new Exception('tipo de evento invalido');
     }
 
-    if (!empty($input['currency']) && !in_array($input['currency'], EnumConstants::getCurrencies())) {
+    if (!empty($input['currency']) && !in_array($input['currency'], EnumConstants::getCurrencies(), true)) {
         throw new Exception('moneda invalida');
     }
 

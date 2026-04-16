@@ -35,7 +35,7 @@ try {
         }
     }
 
-    if (!empty($input['payment_type']) && !in_array($input['payment_type'], EnumConstants::getPaymentTypes())) {
+    if (!empty($input['payment_type']) && !in_array($input['payment_type'], EnumConstants::getPaymentTypes(), true)) {
         throw new Exception('tipo de pago invalido');
     }
 

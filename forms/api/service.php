@@ -205,7 +205,7 @@ function _get_addons_for_order(
         }
 
         // Only sessions and meals (if meals is not NONE) left
-        if (in_array($addon['id'], $addon_ids)) {
+        if (in_array($addon['id'], $addon_ids, true)) {
             array_push($selected_addons, $addon);
 
             if ($addon['addon_type'] === 'SESSION') {
