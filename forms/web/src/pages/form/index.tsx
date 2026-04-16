@@ -140,11 +140,17 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 		if (item.addon_type !== AddonType.ALL_SESSIONS_DISCOUNT || item.currency !== getCurrency())
 			return false
 
+		if (getSelectedSessions().length !== addonsList().sessions.length)
+			return false
+
 		return true
 	})
 
 	const getEarlyDiscount = () => formInfo?.addons.find((item) => {
 		if (item.addon_type !== AddonType.EARLY_DISCOUNT || item.currency !== getCurrency())
+			return false
+
+		if (getSelectedSessions().length !== addonsList().sessions.length)
 			return false
 
 		if (!item.date_time || dayjs(normalizeDate(item.date_time)).isBefore(new Date()))
@@ -461,10 +467,12 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 				<div class="overflow-x-scroll bg-base-100 rounded-box shadow-md">
 					<table class="table">
 						<thead>
-							<tr>
-								<td>Subtotal</td>
-								<td>{getMoneyDisplay(getCurrency(), getSubtotal())}</td>
-							</tr>
+							<Show when={getEarlyDiscount() || getAllSessionsDiscount()}>
+								<tr>
+									<td>Subtotal</td>
+									<td>{getMoneyDisplay(getCurrency(), getSubtotal())}</td>
+								</tr>
+							</Show>
 
 							<Show when={getEarlyDiscount()}>
 								<tr>

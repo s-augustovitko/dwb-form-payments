@@ -112,7 +112,7 @@ const Checkout: Component = () => {
 				navigate("/result/" + params.submission_id)
 			}
 		} catch (err) {
-			notificationStore.error(`Could not process form: ${(err as any).message} `)
+			notificationStore.error(`No se pudo procesar el formulario: ${(err as any).message} `)
 		} finally {
 			setLoading(false)
 		}
