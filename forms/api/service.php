@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-function fetch_active_form(): array
+function fetch_active_form(): ?array
 {
     $form_prep = db()->prepare(
         '
