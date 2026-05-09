@@ -1,7 +1,7 @@
-# IMPORTANT: Needs the build command to be available for the run to work
-# 
+# IMPORTANT: Needs the build and deps command to be available for the run to work
+#
 # IMPORTANT: Needs the following variables to be set
-# 
+#
 # DOCKER => command to run for docker (docker or podman)
 # COMPOSE => .compose file to start the services
 # ENV_FILE => .env file used in the compose process
@@ -23,7 +23,7 @@ run: build ## Builds and runs the project's services or specific $SERVICE
 	@${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} up --build -d $(FLAGS) $(SERVICE)
 
 .PHONY: clean
-clean: clean_dist ## cleans dist directories and stops the current $COMPOSE services 
+clean: clean_dist ## cleans dist directories and stops the current $COMPOSE services
 	@echo "Stopping and pruning docker resources (no images)"
 	@${DOCKER} compose -f ${COMPOSE} --env-file ${ENV_FILE} down
 

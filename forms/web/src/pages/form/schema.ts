@@ -163,6 +163,16 @@ const specialSchema = v.pipe(
 
   v.forward(
     v.check((input) => {
+      if (input.meal_type !== MealType.NONE) {
+        return input.selected_meals.length > 0
+      }
+      return true
+    }, (_) => "Debe seleccionar al menos una comida"),
+    ['selected_meals']
+  ),
+
+  v.forward(
+    v.check((input) => {
       if (!input.arrival_date || !input.departure_date) {
         return true
       }
@@ -209,6 +219,15 @@ const courseSchema = v.pipe(
     ['id_value']
   ),
 
+  v.forward(
+    v.check((input) => {
+      if (input.meal_type !== MealType.NONE) {
+        return input.selected_meals.length > 0
+      }
+      return true
+    }, (_) => "Debe seleccionar al menos una comida"),
+    ['selected_meals']
+  ),
 
   v.forward(
     v.check((input) => {

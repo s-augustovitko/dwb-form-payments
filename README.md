@@ -1,125 +1,113 @@
 # DWB Form Payments
 
-A robust, dual-application system featuring a public-facing course registration form for DWB and a high-performance administrative dashboard.
+A robust, dual-application system for DWB Form Payments. The project manages two distinct, interconnected services: a public-facing portal and an administrative dashboard.
 
-## 🏗 System Architecture
+## 🚀 Overview & Operational Context
 
-The project is divided into two primary environments:
+The project is designed to support two primary operational modes, managed by environment variables:
 
-1.  **Public Portal (Root):**
-    *   **Frontend:** SolidJS SPA (located in `/web`).
-    *   **Backend:** PHP 8.2 API (located in `/api`) handling form submissions and payments.
-    *   **Environment:** Orchestrated via Apache and Podman/Docker.
+1.  **Development (Local):** Running from the project root (`.local.env`). This context connects to local services (e.g., local databases) for safe testing and development.
+2.  **Staging/Production:** Running from component-specific directories (`/admin` or `/forms`). These contexts utilize the root `.env` file, connecting to deployed or staging environments.
 
+## 🧱 System Architecture
+
+The system is composed of three main boundaries:
+
+1.  **Public Portal (`/forms`):**
+    *   **Function:** Handles public form submissions and payments.
+    *   **Frontend:** SolidJS SPA (Located in `/forms/web`).
+    *   **Backend:** PHP 8.0 API (Located in `/forms/api`).
+    *   **Orchestration:** Apache / Podman/Docker.
 2.  **Admin Dashboard (`/admin`):**
-    *   **Frontend:** SolidJS SPA (located in `/admin/web`).
+    *   **Function:** Internal management and data viewing.
+    *   **Frontend:** SolidJS SPA (Located in `/admin/web`).
     *   **Backend:** Go (Golang) REST API using `sqlc` for type-safe database operations.
-    *   **Proxy:** Caddy Server for serving the frontend and routing API traffic.
-    *   **Database:** MySQL with automated migrations via `golang-migrate`.
+    *   **Proxy:** Caddy Server.
+3.  **Database Migrations (`/migrations`):**
+    *   **Function:** Manages MySQL schema changes.
+    *   **Files:** `*.up.sql` (Migrations) and `*.down.sql` (Teardown).
 
----
+## 🛠️ Tech Stack
 
-## 🛠 Prerequisites
+| Layer | Technology | Details |
+| :--- | :--- | :--- |
+| **Frontend** | SolidJS, Vite, TypeScript | Used in `forms/web` and `admin/web`. |
+| **Backend** | PHP 8.0 (Public) / Go 1.25 (Admin) | Core business logic services. |
+| **Database** | MySQL | Managed via `sqlc` (Go) and `golang-migrate`. |
+| **Proxy/Server** | Apache / Caddy | Serving and routing API traffic. |
+| **Containerization** | Podman / Docker | Uses `local.compose.yaml` for local orchestration. |
 
-*   **Container Engine:** [Podman](https://podman.io/) (default in Makefiles) or Docker.
-*   **Runtimes:** Node.js (v18+), Go 1.25+, and PHP 8.2.
-*   **Tools:** `make`, `npm`, `inotifywait` (for dev mode).
+## ⚙️ Prerequisites
 
----
+Before starting, ensure the following tools and runtimes are installed:
 
-## 🚀 Getting Started
+*   **Container Engine:** Podman (preferred) or Docker.
+*   **Runtimes:** Node.js (v24+), Go 1.25+, and PHP 8.0.
+*   **Tools:** `make`, `npm`, `go`, `inotifywait` (for development mode).
 
-### 1. Environment Setup
-Create a `.env` file in the root directory:
-```env
-APP_ENV=prod
-ALLOW_ORIGINS=https://app.caminodeldiamante.pe
-DB_USER=your_user
-DB_PASS=your_password
-DB_HOST=localhost:3306
-DB_NAME=your_db
-CULQI_PRIV_KEY=sk_live_culkiprivkey
-```
+## 📝 Setup & Workflow
 
-### 2. Public Portal Deployment
-To build the frontend and start the Apache container:
-```bash
-make run
-```
-*   **Build Only:** `make build` (outputs to `/dist`)
-*   **Development:** `make dev` (watches for changes and rebuilds)
-*   **FTP Deploy:** `make deploy` (requires `.ftp.env`)
+### 1. Configuration
 
-```env
-FTP_USER=your_user
-FTP_PASS=your_pass
-FTP_HOST=localhost:21
-FTP_TARGET_DIR=/
-```
+You must define credentials in two primary files:
 
-### 3. Admin Dashboard Deployment
-Navigate to the admin folder:
-```bash
-cd admin
-# Run database migrations
-make run_migrations
+*   **`.local.env` (Local):** Credentials for local databases and services (used by the root context).
+*   **`.env` (Deployment):** Credentials for live/staging endpoints and external API keys.
+*   **FTP Credentials:** For deployment, define credentials in `.ftp.env` (in root) with `FTP_USER`, `FTP_PASS`, `FTP_HOST`, and `FTP_TARGET_DIR`.
 
-# Start the Go API and Caddy server
-make run
-```
-* **Access:** The dashboard is available at `http://localhost:3000`
-* **Generate SQL Code:** `make deps` (runs `sqlc` and formats code)
-* **Stop Services:** `make stop
+### 2. Core Commands
 
----
+The project utilizes dedicated `Makefile`s within each major component (`root`, `admin`, `forms`) to manage context-specific operations.
 
-## 📂 Project Structure
+#### A. Root Context (Local Development)
 
-* **/api**: Public PHP backend.
-* **/web**: Public SolidJS frontend.
-* **/admin**: Go backend and Admin SolidJS frontend.
-* **/docker**: Infrastructure and Dockerfiles.
-* **/dist**: The final compiled code for production.
-* **/scripts**: Deployment and automation scripts.
+Used for local development and orchestration.
 
----
+| Command | Description | Usage Notes |
+| :--- | :--- | :--- |
+| `make dev` | Starts a development watch mode, rebuilding on changes. | Optional `APPS=...` to target a specific app. |
+| `make run` | Builds and runs all services defined in `local.compose.yaml`. | Optional `SERVICE=...` or `FLAGS=...` for fine-tuning. |
+| `make build` | Compiles all necessary assets without running containers. | |
+| `make clean` | Stops and removes containers based on the compose file. | |
+| `make clean_all` | Clears all local container state, volumes, and images. | Use with caution; impacts other services. |
+| `make logs SERVICE=<service>` | Views logs for a specific service. | e.g., `make logs SERVICE=dwb-forms` |
+| `make exec SERVICE=<service>` | Executes a command inside a running container. | |
+| `make help` | Lists all available `make` commands. | |
 
-## 🔧 Development Workflow
+#### B. Component Context (Staging/Production)
 
-### Database Migrations
-Migrations are stored in `admin/migrations`. To apply them:
-```bash
-cd admin && make run_migrations
-```
+When operating in specific directories, the environment switches to use the deployed `.env` variables.
 
-### Logs & Debugging
-To tail logs for a specific service (e.g., the admin API):
-```bash
-# Public
-make logs SERVICE=dwb-forms
+| Directory | Context | Dependency Command | Key Commands |
+| :--- | :--- | :--- | :--- |
+| **`/admin`** | Admin Dashboard | `make deps` | Manages Go backend, Caddy proxy, and Admin SPA lifecycle. |
+| **`/forms`** | Public Portal | `make deps` | Manages PHP API, Public SPA, and deployment. |
+| **`/forms`** | Deployment | `make deploy` | Requires `.ftp.env` for FTP transfer. |
 
-# Admin
-cd admin && make logs SERVICE=dwb-admin
-```
+### 3. Development Workflow Details
 
-### Admin Observability
-The Admin stack includes **Dozzle**, a lightweight container log viewer.
-* **Logs UI:** Access via `http://dozzle.localhost:3000` (if routed via Caddy) or check your `compose.yaml` for the specific Dozzle port if mapped separately.
+#### Database Migrations
 
-### 🧹 Cleanup
-Use these commands to reset your environment or fix build issues:
+*   **Running Migrations:** `make run_migrations`
+*   *Note:* If migration parameters need updating, modify the relevant compose file (`migrations.compose.yaml` or related `.env` file).
 
-| Command | What it does |
-| :--- | :--- |
-| **`make clean`** | Stops containers and deletes the `dist/` build folder. Use this for a **standard reset**. |
-| **`make clean_all`** | **The Nuclear Option.** Deletes all containers, volumes, and **cached images**. Use this to free up disk space or fix "stuck" builds. |
+#### Logs & Observability
 
----
+*   **Standard Logging:** Always specify the service and the context (root or component directory).
+    *   *Example:* `make logs SERVICE=dwb-forms`
+*   **Local Log UI:** The Development setup and Admin stack support **Dozzle**, accessible at `http://dozzle.localhost:3000` (if routed via Caddy).
 
-## 🛠 Tech Stack
-* **Frontend:** SolidJS, Vite, TypeScript.
-* **Backend:** PHP 8.2 (Public) / Go 1.25 (Admin).
-* **Database:** MySQL + `sqlc` (Go) + `golang-migrate`.
-* **Proxy/Server:** Apache (Public) / Caddy (Admin).
-* **Containerization:** Podman/Docker.
+## 📂 Project Structure Reference
 
+*   **/forms:** Dedicated Forms Service. Contains the public-facing application logic.
+    *   `forms/api/`: PHP backend API and business logic.
+    *   `forms/web/`: Public-facing SolidJS SPA frontend.
+    *   `forms/Dockerfile`, `forms/Makefile`, `forms/compose.yaml`: Defines container setup.
+*   **/admin:** Administrative dashboard module.
+    *   `admin/internal/`: Go backend logic.
+    *   `admin/cmd/`: Go main application entry points.
+    *   `admin/config/`: JSON configurations for the Go application.
+    *   `admin/web/`: SolidJS frontend for the admin dashboard.
+    *   `admin/Dockerfile`, `admin/Makefile`, `admin/compose.yaml`: Defines container setup.
+*   **/migrations:** MySQL schema migration files.
+*   **/dist:** Final compiled code intended for production deployment.

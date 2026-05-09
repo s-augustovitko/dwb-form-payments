@@ -4,7 +4,7 @@ dayjs.locale("es", esLocale());
 
 type AnyDate = Date | dayjs.Dayjs | string
 
-function normalizeDate(date?: AnyDate) {
+export function normalizeDate(date?: AnyDate) {
 	if (!date) return undefined;
 
 	if (typeof date === "string") {

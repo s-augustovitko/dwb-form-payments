@@ -15,7 +15,6 @@ ENV_FILE=../.env
 
 FTP_ENV_FILE = ../.ftp.env
 
-
 .PHONY: deps
 deps:
 	@cd ${WEB_DIR} && npm i
@@ -57,4 +56,3 @@ build: clean_dist ## Builds the project
 deploy: build ## Deploy service via FTP - needs .ftp.env to be created
 	@echo "Calling deploy.sh..."
 	@./deploy.sh ${DIST_DIR} ${FTP_ENV_FILE}
-
