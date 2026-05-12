@@ -52,8 +52,8 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 			id_type: IdType.DNI,
 			country_code: "+51",
 			emergency_contact_country_code: "+51",
-			event_type: EventType.ALL_SESSIONS,
-			meal_type: MealType.REGULAR,
+			meal_type: undefined,
+			event_type: undefined,
 			currency: Currency.PEN,
 			selected_meals: [],
 			selected_days: [],
@@ -389,7 +389,7 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 					{(field, props) => (
 						<Select
 							{...props}
-							value={field.value}
+							value={field.value || ""}
 							error={field.error}
 							required
 							disabled={loading()}
@@ -435,7 +435,7 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 					{(field, props) => (
 						<Select
 							{...props}
-							value={field.value}
+							value={field.value || ""}
 							error={field.error}
 							required
 							disabled={loading()}
