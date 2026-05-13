@@ -82,10 +82,13 @@ func (s service) UpsertAddon(ctx context.Context, data database.UpsertAddonParam
 		return err
 	}
 
-	if data.DateTime.Valid {
-		if data.DateTime.Time.Before(form.StartDate) || data.DateTime.Time.After(form.EndDate.Add(23*time.Hour)) {
-			return models.Error(fiber.StatusBadRequest, "addons.date_time should be between form.start_date and form.end_date", nil)
-		}
+	if (data.AddonType == database.AddonsAddonTypeSESSION || data.AddonType == database.AddonsAddonTypeEARLYDISCOUNT) &&
+		(!data.DateTime.Valid || data.DateTime.Time.After(form.EndDate.Add(23*time.Hour))) {
+		return models.Error(fiber.StatusBadRequest, "addons.date_time should be a valid date and before end date", nil)
+	}
+
+	if data.AddonType == database.AddonsAddonTypeSESSION && data.DateTime.Time.Before(form.StartDate) {
+		return models.Error(fiber.StatusBadRequest, "addons.date_time should be between form.start_date and form.end_date", nil)
 	}
 
 	return s.repo.UpsertAddon(ctx, data)

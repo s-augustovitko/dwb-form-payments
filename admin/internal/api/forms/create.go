@@ -103,8 +103,18 @@ func (s service) CreateFormWithAddons(ctx context.Context, form database.CreateF
 		}
 
 		if !item.DateTime.Valid {
+			if item.AddonType == database.AddonsAddonTypeALLSESSIONSDISCOUNT ||
+				item.AddonType == database.AddonsAddonTypeSESSION {
+				return models.Error(
+					fiber.StatusBadRequest, fmt.Sprintf(
+						"addons.%d.date_time should be a valid date",
+						idx,
+					), nil)
+			}
+
 			continue
 		}
+
 		if item.DateTime.Time.Before(form.StartDate) || item.DateTime.Time.After(form.EndDate) {
 			return models.Error(
 				fiber.StatusBadRequest, fmt.Sprintf(
