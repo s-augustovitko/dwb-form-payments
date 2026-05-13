@@ -33,8 +33,9 @@ export const Select: Component<Props> = (props) => {
         aria-invalid={!!props.error}
         aria-errormessage={`${props.name}-error`}
         class="select validator w-full"
+        classList={{ "text-base-content/50": !props.value }}
       >
-        <option value="">Selecccione {props.label}... {props.required ? <span>*</span> : <span>(Opcional)</span>}</option>
+        <option value="" disabled>Seleccione...</option>
         <For each={props.items}>
           {(item) => (
             <option

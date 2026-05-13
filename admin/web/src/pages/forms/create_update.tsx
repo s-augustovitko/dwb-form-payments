@@ -651,6 +651,9 @@ const CreateUpdateForm: Component = () => {
 							</button>
 						</div>
 					</Card>
+
+
+					<button type="submit" class="btn btn-primary w-full">Save Form</button>
 				</div>
 			</PageLayout>
 		</Form >
