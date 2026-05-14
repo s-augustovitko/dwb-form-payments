@@ -7,6 +7,8 @@ import {
   Currency,
   getDateList,
   getMoneyDisplay,
+  MealType,
+  MealTypeValueMap,
   PUBLIC_KEY,
   RETURN_URL,
   RSA_PUB_ID,
@@ -213,7 +215,7 @@ const Checkout: Component = () => {
           <div class="bg-base-100 border-base-300 collapse shadow">
             <input type="checkbox" class="peer" />
             <div class="collapse-title peer-checked:bg-base-200">
-              Comidas ({getMealList()?.length})
+              Comidas ({MealTypeValueMap[submissionData()?.order.meal_type || MealType.REGULAR] || MealTypeValueMap[MealType.REGULAR]} - {getMealList()?.length})
             </div>
             <ul class="collapse-content list">
               <For each={getMealList()}>
