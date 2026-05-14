@@ -228,7 +228,7 @@ function clean_string(string $value, int $maxLength = 512): string
 {
     $value = trim($value);
     $value = mb_substr($value, 0, $maxLength);
-    return $value
+    return $value;
 }
 
 /* -----------------------------
