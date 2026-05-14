@@ -161,7 +161,7 @@ const Checkout: Component = () => {
       title="Resumen"
       actions={
         <A
-          class="btn btn-circle btn-ghost text-xl"
+          class="btn btn-circle btn-ghost text-3xl"
           href={`/?submission_id=${params.submission_id}`}
         >
           &#129168;
@@ -186,7 +186,7 @@ const Checkout: Component = () => {
         </div>
 
         <Show when={(getSessionList()?.length || 0) > 0}>
-          <div class="bg-base-100 border-base-300 collapse shadow">
+          <div class="bg-base-100 border-base-300 collapse collapse-plus shadow">
             <input type="checkbox" class="peer" />
             <div class="collapse-title peer-checked:bg-base-200">
               Sesiones ({getSessionList()?.length})
@@ -212,7 +212,7 @@ const Checkout: Component = () => {
         </Show>
 
         <Show when={(getMealList()?.length || 0) > 0}>
-          <div class="bg-base-100 border-base-300 collapse shadow">
+          <div class="bg-base-100 border-base-300 collapse collapse-plus shadow">
             <input type="checkbox" class="peer" />
             <div class="collapse-title peer-checked:bg-base-200">
               Comidas ({getMealList()?.length} - {MealTypeValueMap[submissionData()?.order.meal_type || MealType.REGULAR] || MealTypeValueMap[MealType.REGULAR]})
