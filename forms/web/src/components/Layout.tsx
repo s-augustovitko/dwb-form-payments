@@ -20,6 +20,8 @@ export const PageLayout: ParentComponent<Props> = (props) => {
 				)
 			}>
 				<Suspense fallback={<Loading />}>
+					<img src="/dwb-header.webp" alt="Diamond Way Header" class="w-full contain mb-4" />
+
 					<div class="flex items-center justify-start mb-4 gap-4">
 						{props.actions &&
 							<div class="flex gap-2">

@@ -97,9 +97,8 @@ const Checkout: Component = () => {
   const openCulqi = async () => {
     const data = submissionData();
     const settings = {
-      title: `${data?.submission.first_name || ""} ${
-        submissionData()?.submission.last_name || ""
-      } Curso`,
+      title: `${data?.submission.first_name || ""} ${submissionData()?.submission.last_name || ""
+        } Curso`,
       currency: data?.order.currency || Currency.PEN,
       amount: getWebPrice() * 100,
       xculqirsaid: RSA_PUB_ID,
@@ -251,8 +250,7 @@ const Checkout: Component = () => {
                   {(item) => (
                     <tr class="text-xs">
                       <td>
-                        {item.title}
-                        {item.addon_type === AddonType.EARLY_DISCOUNT
+                        {item.title} {item.addon_type === AddonType.EARLY_DISCOUNT
                           ? "(Solo en Web)"
                           : ""}
                       </td>
@@ -309,8 +307,7 @@ const Checkout: Component = () => {
           onclick={() => checkout(PaymentType.CULQI)}
           disabled={loading()}
         >
-          Pagar Ahora
-          {getMoneyDisplay(submissionData()?.order.currency, getWebPrice())}
+          Pagar Ahora {getMoneyDisplay(submissionData()?.order.currency, getWebPrice())}
         </button>
 
         <button
@@ -318,8 +315,7 @@ const Checkout: Component = () => {
           onclick={() => checkout(PaymentType.ON_SITE)}
           disabled={loading()}
         >
-          Pagar en Evento
-          {getMoneyDisplay(submissionData()?.order.currency, getOnSitePrice())}
+          Pagar en Evento {getMoneyDisplay(submissionData()?.order.currency, getOnSitePrice())}
         </button>
       </div>
     </PageLayout>
