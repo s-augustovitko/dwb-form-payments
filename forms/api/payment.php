@@ -127,7 +127,7 @@ try {
             $charge["user_message"] ??
             "Intente de nuevo o use otro metodo de pago";
 
-        $outcome_type = trim(strtolower($charge['outcome']['type'] ?? ''));
+        $outcome_type = strtolower($charge['outcome']['type'] ?? '');
         $success_codes = ['successful_charge', 'venta_exitosa'];
         $payment_status = in_array($outcome_type, $success_codes, true) ?
             'PAID' :
