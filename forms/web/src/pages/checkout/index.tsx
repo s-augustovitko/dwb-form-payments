@@ -215,7 +215,7 @@ const Checkout: Component = () => {
           <div class="bg-base-100 border-base-300 collapse shadow">
             <input type="checkbox" class="peer" />
             <div class="collapse-title peer-checked:bg-base-200">
-              Comidas ({MealTypeValueMap[submissionData()?.order.meal_type || MealType.REGULAR] || MealTypeValueMap[MealType.REGULAR]} - {getMealList()?.length})
+              Comidas ({getMealList()?.length} - {MealTypeValueMap[submissionData()?.order.meal_type || MealType.REGULAR] || MealTypeValueMap[MealType.REGULAR]})
             </div>
             <ul class="collapse-content list">
               <For each={getMealList()}>
