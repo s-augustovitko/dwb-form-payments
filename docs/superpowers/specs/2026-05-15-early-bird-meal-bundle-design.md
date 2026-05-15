@@ -79,7 +79,7 @@ New flow:
 
 `calculate_total`, `create_update_order`, and `_insert_order_items` (or whichever helper persists items) need no logic changes — they consume whatever is in `selected_addons`.
 
-The submission-input validators in `submit.php` / `form_submission.php` already validate `meal_type` against the enum. The NONE-rejection guard inside `_get_addons_for_order` is the authoritative defense; no additional validator layer needed.
+The NONE-rejection guard inside `_get_addons_for_order` is the authoritative defense. Implementation should verify input validators in `submit.php` / `form_submission.php` still accept `meal_type` values cleanly and not add a redundant layer.
 
 ## Frontend (Solid/TS) — `forms/web/src/`
 
@@ -130,7 +130,7 @@ No changes. Rationale: cross-field bundle conditions depend on the form's full a
 
 - **Form with `EARLY_DISCOUNT` but no `MEAL` addons:** bundle inactive (condition 5 fails). Early discount applies as today.
 - **User switches from PER_DAY-partial to ALL_SESSIONS:** bundle activates. If `meal_type` was `NONE`, the `createEffect` resets it to `REGULAR`. If user had selected specific meals, those are ignored — the bundle takes over.
-- **User switches back to partial sessions:** bundle deactivates. Meal multi-select reappears with previous selection (Solid state preserved); meal_type retains its value.
+- **User switches back to partial sessions:** bundle deactivates. Meal multi-select reappears; user's previous individual meal selection (if any) reappears as well, since the override only happens at submission via `getSelectedMeals()`, not by mutating the underlying form field. `meal_type` retains its value.
 - **Currency switch:** all meal/discount filtering is per-currency. Bundle re-evaluates on currency change.
 - **Bundle becomes inactive between form submit and checkout** (e.g., deadline passes after order creation but before payment): order is already created; user pays the web price as recorded. This matches today's early-bird behavior and is out of scope.
 - **`SPECIAL` form_type:** behavior is identical to `COURSE` (both use `fullEvents` schema and have meals). Bundle applies the same way.
