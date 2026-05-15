@@ -522,8 +522,8 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 
 							<Show when={getEarlyDiscount()}>
 								<tr class="text-xs">
-									<td>{getEarlyDiscount()?.title}</td>
-									<td class="text-success">- {getMoneyDisplay(getEarlyDiscount()?.currency, Number(getEarlyDiscount()?.price))}</td>
+									<td>{getEarlyDiscount()?.title}{isEarlyBundleActive() ? " (incluye comidas)" : ""}</td>
+									<td class="text-success">- {getMoneyDisplay(getEarlyDiscount()?.currency, getEarlyDiscountAmount())}</td>
 								</tr>
 							</Show>
 							<Show when={getAllSessionsDiscount()}>
