@@ -7,6 +7,8 @@ import {
   Currency,
   getDateList,
   getMoneyDisplay,
+  MealType,
+  MealTypeValueMap,
   PUBLIC_KEY,
   RETURN_URL,
   RSA_PUB_ID,
@@ -97,9 +99,8 @@ const Checkout: Component = () => {
   const openCulqi = async () => {
     const data = submissionData();
     const settings = {
-      title: `${data?.submission.first_name || ""} ${
-        submissionData()?.submission.last_name || ""
-      } Curso`,
+      title: `${data?.submission.first_name || ""} ${submissionData()?.submission.last_name || ""
+        } Curso`,
       currency: data?.order.currency || Currency.PEN,
       amount: getWebPrice() * 100,
       xculqirsaid: RSA_PUB_ID,
@@ -160,7 +161,7 @@ const Checkout: Component = () => {
       title="Resumen"
       actions={
         <A
-          class="btn btn-circle btn-ghost text-xl"
+          class="btn btn-circle btn-ghost text-3xl"
           href={`/?submission_id=${params.submission_id}`}
         >
           &#129168;
@@ -185,7 +186,7 @@ const Checkout: Component = () => {
         </div>
 
         <Show when={(getSessionList()?.length || 0) > 0}>
-          <div class="bg-base-100 border-base-300 collapse shadow">
+          <div class="bg-base-100 border-base-300 collapse collapse-plus shadow">
             <input type="checkbox" class="peer" />
             <div class="collapse-title peer-checked:bg-base-200">
               Sesiones ({getSessionList()?.length})
@@ -211,10 +212,10 @@ const Checkout: Component = () => {
         </Show>
 
         <Show when={(getMealList()?.length || 0) > 0}>
-          <div class="bg-base-100 border-base-300 collapse shadow">
+          <div class="bg-base-100 border-base-300 collapse collapse-plus shadow">
             <input type="checkbox" class="peer" />
             <div class="collapse-title peer-checked:bg-base-200">
-              Comidas ({getMealList()?.length})
+              Comidas ({getMealList()?.length} - {MealTypeValueMap[submissionData()?.order.meal_type || MealType.REGULAR] || MealTypeValueMap[MealType.REGULAR]})
             </div>
             <ul class="collapse-content list">
               <For each={getMealList()}>
@@ -251,8 +252,7 @@ const Checkout: Component = () => {
                   {(item) => (
                     <tr class="text-xs">
                       <td>
-                        {item.title}
-                        {item.addon_type === AddonType.EARLY_DISCOUNT
+                        {item.title} {item.addon_type === AddonType.EARLY_DISCOUNT
                           ? "(Solo en Web)"
                           : ""}
                       </td>
@@ -309,8 +309,7 @@ const Checkout: Component = () => {
           onclick={() => checkout(PaymentType.CULQI)}
           disabled={loading()}
         >
-          Pagar Ahora
-          {getMoneyDisplay(submissionData()?.order.currency, getWebPrice())}
+          Pagar Ahora {getMoneyDisplay(submissionData()?.order.currency, getWebPrice())}
         </button>
 
         <button
@@ -318,8 +317,7 @@ const Checkout: Component = () => {
           onclick={() => checkout(PaymentType.ON_SITE)}
           disabled={loading()}
         >
-          Pagar en Evento
-          {getMoneyDisplay(submissionData()?.order.currency, getOnSitePrice())}
+          Pagar en Evento {getMoneyDisplay(submissionData()?.order.currency, getOnSitePrice())}
         </button>
       </div>
     </PageLayout>

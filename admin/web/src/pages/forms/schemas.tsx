@@ -87,6 +87,22 @@ export const formSchema = v.pipe(
 
   v.forward(
     v.check(
+      ({ end_date = new Date(), discounts = [] }) => discounts.every(d => {
+        if (d.addon_type !== AddonType.EARLY_DISCOUNT) {
+          return true;
+        }
+
+        const dt = dayjs(d.date_time);
+        return dt.isBefore(end_date, 'd') || dt.isSame(end_date, 'd')
+      }
+      ),
+      "date_time should be before end date for Early Discounts"
+    ),
+    ["discounts"]
+  ),
+
+  v.forward(
+    v.check(
       (input) => dayjs(input.end_date).isAfter(input.start_date, 'd') || dayjs(input.end_date).isSame(input.start_date, 'd'),
       "end_date must be after start_date"
     ),

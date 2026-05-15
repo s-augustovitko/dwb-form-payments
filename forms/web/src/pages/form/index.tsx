@@ -1,4 +1,4 @@
-import { Component, createMemo, createResource, createSignal, Show } from "solid-js";
+import { Component, createEffect, createMemo, createResource, createSignal, Show } from "solid-js";
 import { Input, MultiSelect, notificationStore, PageLayout, Select, SelectInput } from "../../components";
 import { AddonType, Currency, EventType, FormType, getMoneyDisplay, IdType, MealType, normalizeDate } from "../../utils";
 import {
@@ -11,7 +11,7 @@ import {
 	transformSubmissionResponseToSchema,
 	transformSubmissionSchemaToRequest
 } from './transforms'
-import { createForm, getValue, reset, setValues, SubmitHandler, valiForm } from "@modular-forms/solid";
+import { createForm, getValue, reset, setValue, setValues, SubmitHandler, valiForm } from "@modular-forms/solid";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { getSchema, SubmissionSchema } from "./schema";
 import { getFormInfo, getFormSubmission, SubmissionRequest, submissionRequest } from "./requests";
@@ -52,8 +52,8 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 			id_type: IdType.DNI,
 			country_code: "+51",
 			emergency_contact_country_code: "+51",
-			event_type: EventType.ALL_SESSIONS,
-			meal_type: MealType.REGULAR,
+			meal_type: undefined,
+			event_type: undefined,
 			currency: Currency.PEN,
 			selected_meals: [],
 			selected_days: [],
@@ -104,10 +104,14 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 	const getSelectedMealType = (): MealType => getValue(formDataStore, 'meal_type') ||
 		MealType.REGULAR
 
-	const getSelectedMeals = (): string[] =>
-		getSelectedMealType() === MealType.NONE ?
-			[] :
-			getValue(formDataStore, 'selected_meals') || []
+	const getSelectedMeals = (): string[] => {
+		if (isEarlyBundleActive()) {
+			return addonsList().meals.map(m => m.value)
+		}
+		return getSelectedMealType() === MealType.NONE
+			? []
+			: getValue(formDataStore, 'selected_meals') || []
+	}
 
 	const getSelectedSessions = (): string[] => {
 		const selectedDays: string[] = getValue(formDataStore, 'selected_days') || []
@@ -159,16 +163,69 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 		return true
 	})
 
+	const isEarlyBundleActive = (): boolean =>
+		!!getEarlyDiscount() &&
+		addonsList().meals.length > 0 &&
+		getSelectedMealType() !== MealType.NONE
+
+	const getMealsTotal = (): number =>
+		(formInfo?.addons || [])
+			.filter(a => a.addon_type === AddonType.MEAL && a.currency === getCurrency())
+			.reduce((acc, a) => acc + Number(a.price), 0)
+
+	const getEarlyDiscountAmount = (): number => {
+		const earlyDiscount = getEarlyDiscount()
+		if (!earlyDiscount) return 0
+		return Number(earlyDiscount.price) + (isEarlyBundleActive() ? getMealsTotal() : 0)
+	}
+
+	// Predicate intentionally excludes getSelectedMealType(): the current selection
+	// must not gate which options are shown, or NONE would only hide after the user
+	// picks something else.
+	const availableMealTypes = createMemo(() => {
+		if (!!getEarlyDiscount() && addonsList().meals.length > 0) {
+			return mealTypesList.filter(item => item.value !== MealType.NONE)
+		}
+		return mealTypesList
+	})
+
+	// If the user picked NONE before bundle conditions held (e.g. partial sessions,
+	// then they switched to all sessions), the bundle rules supersede that choice:
+	// reset to REGULAR so the bundled meals get a meal-type. Also applies to stored
+	// submissions reloaded with a stale NONE.
+	createEffect(() => {
+		if (
+			!!getEarlyDiscount() &&
+			addonsList().meals.length > 0 &&
+			getSelectedMealType() === MealType.NONE
+		) {
+			setValue(formDataStore, 'meal_type', MealType.REGULAR)
+		}
+	})
+
+	// When the bundle is active, mirror all available meal IDs into the form field
+	// so schema validation (which requires selected_meals.length > 0 when meal_type
+	// is not NONE) passes. The multi-select UI is hidden in this state, so the user
+	// never sets selected_meals manually.
+	// Note: we intentionally do NOT clear selected_meals when the bundle deactivates;
+	// the reappearing multi-select will show all checked, which is a sensible default,
+	// and the user can freely deselect.
+	createEffect(() => {
+		if (isEarlyBundleActive()) {
+			const allMealIds = addonsList().meals.map(m => m.value)
+			const current = getValue(formDataStore, 'selected_meals') || []
+			if (current.length !== allMealIds.length) {
+				setValue(formDataStore, 'selected_meals', allMealIds)
+			}
+		}
+	})
+
 	const getDiscountTotal = (): number => {
 		const allSessionsDiscount = getAllSessionsDiscount()
-		const earlyDiscount = getEarlyDiscount()
 
-		let total = 0.0
+		let total = getEarlyDiscountAmount()
 		if (allSessionsDiscount) {
 			total += Number(allSessionsDiscount.price)
-		}
-		if (earlyDiscount) {
-			total += Number(earlyDiscount.price)
 		}
 
 		return total
@@ -389,7 +446,7 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 					{(field, props) => (
 						<Select
 							{...props}
-							value={field.value}
+							value={field.value || ""}
 							error={field.error}
 							required
 							disabled={loading()}
@@ -435,17 +492,23 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 					{(field, props) => (
 						<Select
 							{...props}
-							value={field.value}
+							value={field.value || ""}
 							error={field.error}
 							required
 							disabled={loading()}
-							items={mealTypesList}
+							items={availableMealTypes()}
 							label="Tipo de Comida"
 						/>
 					)}
 				</Field>
 
-				<Show when={addonsList().meals.length > 0 && getSelectedMealType() !== MealType.NONE}>
+				<Show when={isEarlyBundleActive()}>
+					<div role="alert" class="alert alert-success mt-4 font-bold">
+						<span>Todas las comidas estan incluidas con el descuento de Pre-Venta</span>
+					</div>
+				</Show>
+
+				<Show when={!isEarlyBundleActive() && addonsList().meals.length > 0 && getSelectedMealType() !== MealType.NONE}>
 					<Field name="selected_meals" type="string[]">
 						{(field, props) => (
 							<MultiSelect
@@ -476,8 +539,8 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 
 							<Show when={getEarlyDiscount()}>
 								<tr class="text-xs">
-									<td>{getEarlyDiscount()?.title}</td>
-									<td class="text-success">- {getMoneyDisplay(getEarlyDiscount()?.currency, Number(getEarlyDiscount()?.price))}</td>
+									<td>{getEarlyDiscount()?.title}{isEarlyBundleActive() ? " (incluye comidas)" : ""}</td>
+									<td class="text-success">- {getMoneyDisplay(getEarlyDiscount()?.currency, getEarlyDiscountAmount())}</td>
 								</tr>
 							</Show>
 							<Show when={getAllSessionsDiscount()}>

@@ -165,6 +165,7 @@ function _get_addons_for_order(
     $full_course_selected = false;
     $all_session_discount = [];
     $early_discount = [];
+    $available_meals = [];
 
     foreach ($addons as $addon) {
         // Skip anything that's not your selected currency
@@ -184,6 +185,10 @@ function _get_addons_for_order(
 
         if ($addon['addon_type'] === 'SESSION') {
             $session_count++;
+        }
+
+        if ($addon['addon_type'] === 'MEAL') {
+            $available_meals[] = $addon;
         }
 
         // Add all sessions and all_sessions_discount if event_type is 'ALL_SESSIONS'
@@ -234,21 +239,51 @@ function _get_addons_for_order(
         array_push($selected_addons, $all_session_discount);
     }
 
-    // Add early bird discount if applicable
-    if (
-        !empty($early_discount) &&
-        isset($early_discount['date_time'])
-    ) {
+    // Determine whether the early discount currently applies
+    $early_discount_applies = false;
+    if (!empty($early_discount) && isset($early_discount['date_time'])) {
         $discount_deadline = new DateTime(
             $early_discount['date_time'],
             new DateTimeZone('UTC'),
         );
         $now = new DateTime('now', new DateTimeZone('UTC'));
-
-        if ($discount_deadline > $now) {
-            array_push($selected_addons, $early_discount);
-        }
+        $early_discount_applies = $discount_deadline > $now;
     }
+
+    if (!$early_discount_applies) {
+        return $selected_addons;
+    }
+
+    // Bundle pre-conditions hold (early discount applies + meals exist on this form).
+    // meal_type=NONE is rejected here as the authoritative guard.
+    if (!empty($available_meals) && $meal_type === 'NONE') {
+        throw new Exception(
+            "Tipo de comida es requerido cuando hay descuento de pre-venta"
+        );
+    }
+
+    $bundle_active = !empty($available_meals) && $meal_type !== 'NONE';
+
+    if ($bundle_active) {
+        // Drop any user-picked meals already pushed into $selected_addons
+        $selected_addons = array_values(array_filter(
+            $selected_addons,
+            fn($a) => $a['addon_type'] !== 'MEAL'
+        ));
+
+        // Bundle all available meals at full price
+        $selected_addons = array_merge($selected_addons, $available_meals);
+
+        // Inflate the early discount to absorb the meal total
+        $meals_total = array_sum(array_map(
+            fn($m) => (float)$m['price'],
+            $available_meals
+        ));
+        $early_discount['price'] = (float)$early_discount['price'] + $meals_total;
+        $early_discount['title'] = $early_discount['title'] . ' (incluye comidas)';
+    }
+
+    array_push($selected_addons, $early_discount);
 
     return $selected_addons;
 }

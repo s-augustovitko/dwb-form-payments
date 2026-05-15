@@ -66,12 +66,12 @@ const baseInputs = {
 }
 
 const fullEvents = {
-  meal_type: v.picklist(Object.values(MealType), "Tipo de comida invalido"),
+  meal_type: v.picklist(Object.values(MealType), "Tipo de comida requerido"),
   selected_meals: v.optional(v.array(v.pipe(
     v.string(),
     v.uuid("comida seleccionada invalida"),
   )), []),
-  event_type: v.picklist(Object.values(EventType), "Tipo de evento invalido"),
+  event_type: v.picklist(Object.values(EventType), "Tipo de evento requerido"),
   selected_sessions: v.optional(v.array(v.pipe(
     v.string(),
     v.uuid("comida seleccionada invalida"),
