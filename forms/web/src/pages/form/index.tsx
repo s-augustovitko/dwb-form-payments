@@ -503,7 +503,7 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 				</Field>
 
 				<Show when={isEarlyBundleActive()}>
-					<div role="alert" class="alert alert-success">
+					<div role="alert" class="alert alert-success mt-4">
 						<span>Todas las comidas estan incluidas con el descuento de Pre-Venta</span>
 					</div>
 				</Show>
