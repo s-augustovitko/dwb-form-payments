@@ -203,6 +203,23 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 		}
 	})
 
+	// When the bundle is active, mirror all available meal IDs into the form field
+	// so schema validation (which requires selected_meals.length > 0 when meal_type
+	// is not NONE) passes. The multi-select UI is hidden in this state, so the user
+	// never sets selected_meals manually.
+	// Note: we intentionally do NOT clear selected_meals when the bundle deactivates;
+	// the reappearing multi-select will show all checked, which is a sensible default,
+	// and the user can freely deselect.
+	createEffect(() => {
+		if (isEarlyBundleActive()) {
+			const allMealIds = addonsList().meals.map(m => m.value)
+			const current = getValue(formDataStore, 'selected_meals') || []
+			if (current.length !== allMealIds.length) {
+				setValue(formDataStore, 'selected_meals', allMealIds)
+			}
+		}
+	})
+
 	const getDiscountTotal = (): number => {
 		const allSessionsDiscount = getAllSessionsDiscount()
 
