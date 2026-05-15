@@ -179,6 +179,13 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 		return Number(earlyDiscount.price) + (isEarlyBundleActive() ? getMealsTotal() : 0)
 	}
 
+	const availableMealTypes = createMemo(() => {
+		if (!!getEarlyDiscount() && addonsList().meals.length > 0) {
+			return mealTypesList.filter(item => item.value !== MealType.NONE)
+		}
+		return mealTypesList
+	})
+
 	const getDiscountTotal = (): number => {
 		const allSessionsDiscount = getAllSessionsDiscount()
 
@@ -455,7 +462,7 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 							error={field.error}
 							required
 							disabled={loading()}
-							items={mealTypesList}
+							items={availableMealTypes()}
 							label="Tipo de Comida"
 						/>
 					)}
