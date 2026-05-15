@@ -485,7 +485,13 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 					)}
 				</Field>
 
-				<Show when={addonsList().meals.length > 0 && getSelectedMealType() !== MealType.NONE}>
+				<Show when={isEarlyBundleActive()}>
+					<div role="alert" class="alert alert-success">
+						<span>Todas las comidas estan incluidas con el descuento de Pre-Venta</span>
+					</div>
+				</Show>
+
+				<Show when={!isEarlyBundleActive() && addonsList().meals.length > 0 && getSelectedMealType() !== MealType.NONE}>
 					<Field name="selected_meals" type="string[]">
 						{(field, props) => (
 							<MultiSelect
