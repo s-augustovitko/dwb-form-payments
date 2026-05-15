@@ -104,10 +104,14 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 	const getSelectedMealType = (): MealType => getValue(formDataStore, 'meal_type') ||
 		MealType.REGULAR
 
-	const getSelectedMeals = (): string[] =>
-		getSelectedMealType() === MealType.NONE ?
-			[] :
-			getValue(formDataStore, 'selected_meals') || []
+	const getSelectedMeals = (): string[] => {
+		if (isEarlyBundleActive()) {
+			return addonsList().meals.map(m => m.value)
+		}
+		return getSelectedMealType() === MealType.NONE
+			? []
+			: getValue(formDataStore, 'selected_meals') || []
+	}
 
 	const getSelectedSessions = (): string[] => {
 		const selectedDays: string[] = getValue(formDataStore, 'selected_days') || []
@@ -177,14 +181,10 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 
 	const getDiscountTotal = (): number => {
 		const allSessionsDiscount = getAllSessionsDiscount()
-		const earlyDiscount = getEarlyDiscount()
 
-		let total = 0.0
+		let total = getEarlyDiscountAmount()
 		if (allSessionsDiscount) {
 			total += Number(allSessionsDiscount.price)
-		}
-		if (earlyDiscount) {
-			total += Number(earlyDiscount.price)
 		}
 
 		return total
