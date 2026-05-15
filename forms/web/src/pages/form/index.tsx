@@ -1,4 +1,4 @@
-import { Component, createMemo, createResource, createSignal, Show } from "solid-js";
+import { Component, createEffect, createMemo, createResource, createSignal, Show } from "solid-js";
 import { Input, MultiSelect, notificationStore, PageLayout, Select, SelectInput } from "../../components";
 import { AddonType, Currency, EventType, FormType, getMoneyDisplay, IdType, MealType, normalizeDate } from "../../utils";
 import {
@@ -11,7 +11,7 @@ import {
 	transformSubmissionResponseToSchema,
 	transformSubmissionSchemaToRequest
 } from './transforms'
-import { createForm, getValue, reset, setValues, SubmitHandler, valiForm } from "@modular-forms/solid";
+import { createForm, getValue, reset, setValue, setValues, SubmitHandler, valiForm } from "@modular-forms/solid";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { getSchema, SubmissionSchema } from "./schema";
 import { getFormInfo, getFormSubmission, SubmissionRequest, submissionRequest } from "./requests";
@@ -187,6 +187,16 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 			return mealTypesList.filter(item => item.value !== MealType.NONE)
 		}
 		return mealTypesList
+	})
+
+	createEffect(() => {
+		if (
+			!!getEarlyDiscount() &&
+			addonsList().meals.length > 0 &&
+			getSelectedMealType() === MealType.NONE
+		) {
+			setValue(formDataStore, 'meal_type', MealType.REGULAR)
+		}
 	})
 
 	const getDiscountTotal = (): number => {
