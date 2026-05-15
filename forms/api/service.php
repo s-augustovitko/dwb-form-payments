@@ -165,6 +165,7 @@ function _get_addons_for_order(
     $full_course_selected = false;
     $all_session_discount = [];
     $early_discount = [];
+    $available_meals = [];
 
     foreach ($addons as $addon) {
         // Skip anything that's not your selected currency
@@ -184,6 +185,10 @@ function _get_addons_for_order(
 
         if ($addon['addon_type'] === 'SESSION') {
             $session_count++;
+        }
+
+        if ($addon['addon_type'] === 'MEAL') {
+            $available_meals[] = $addon;
         }
 
         // Add all sessions and all_sessions_discount if event_type is 'ALL_SESSIONS'
