@@ -189,6 +189,10 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 		return mealTypesList
 	})
 
+	// If the user picked NONE before bundle conditions held (e.g. partial sessions,
+	// then they switched to all sessions), the bundle rules supersede that choice:
+	// reset to REGULAR so the bundled meals get a meal-type. Also applies to stored
+	// submissions reloaded with a stale NONE.
 	createEffect(() => {
 		if (
 			!!getEarlyDiscount() &&
