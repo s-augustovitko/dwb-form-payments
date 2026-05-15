@@ -179,6 +179,9 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 		return Number(earlyDiscount.price) + (isEarlyBundleActive() ? getMealsTotal() : 0)
 	}
 
+	// Predicate intentionally excludes getSelectedMealType(): the current selection
+	// must not gate which options are shown, or NONE would only hide after the user
+	// picks something else.
 	const availableMealTypes = createMemo(() => {
 		if (!!getEarlyDiscount() && addonsList().meals.length > 0) {
 			return mealTypesList.filter(item => item.value !== MealType.NONE)
