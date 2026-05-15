@@ -159,6 +159,22 @@ const FormContent: Component<Props> = ({ formInfo }) => {
 		return true
 	})
 
+	const isEarlyBundleActive = (): boolean =>
+		!!getEarlyDiscount() &&
+		addonsList().meals.length > 0 &&
+		getSelectedMealType() !== MealType.NONE
+
+	const getMealsTotal = (): number =>
+		(formInfo?.addons || [])
+			.filter(a => a.addon_type === AddonType.MEAL && a.currency === getCurrency())
+			.reduce((acc, a) => acc + Number(a.price), 0)
+
+	const getEarlyDiscountAmount = (): number => {
+		const earlyDiscount = getEarlyDiscount()
+		if (!earlyDiscount) return 0
+		return Number(earlyDiscount.price) + (isEarlyBundleActive() ? getMealsTotal() : 0)
+	}
+
 	const getDiscountTotal = (): number => {
 		const allSessionsDiscount = getAllSessionsDiscount()
 		const earlyDiscount = getEarlyDiscount()
