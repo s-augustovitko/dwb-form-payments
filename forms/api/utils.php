@@ -4,36 +4,51 @@ declare(strict_types=1);
 
 class EnumConstants
 {
+    /**
+     * @return array<int,string>
+     */
     public static function getPaymentStatuses(): array
     {
         return ["PENDING", "PAID", "FAILED", "EXEMPT", "REFUNDED"];
     }
-
+    /**
+     * @return array<int,string>
+     */
     public static function getCurrencies(): array
     {
         return ["PEN", "USD"];
     }
-
+    /**
+     * @return array<int,string>
+     */
     public static function getPaymentTypes(): array
     {
         return ["CULQI", "ON_SITE"];
     }
-
+    /**
+     * @return array<int,string>
+     */
     public static function getAddonTypes(): array
     {
         return ["SESSION", "MEAL", "ALL_SESSIONS_DISCOUNT", "EARLY_DISCOUNT"];
     }
-
+    /**
+     * @return array<int,string>
+     */
     public static function getOrderStatuses(): array
     {
         return ["DRAFT", "CONFIRMED", "CANCELLED", "ON_SITE"];
     }
-
+    /**
+     * @return array<int,string>
+     */
     public static function getEventTypes(): array
     {
         return ["ALL_SESSIONS", "PER_SESSION", "PER_DAY"];
     }
-
+    /**
+     * @return array<int,string>
+     */
     public static function getMealTypes(): array
     {
         return ["NONE", "REGULAR", "VEGETARIAN"];
@@ -322,6 +337,7 @@ function createCulqiCharge(array $data)
 function send_email(string $to, string $subject, string $body): bool
 {
     $from_email = getenv("EMAIL_FROM");
+    $reply_email = getenv("EMAIL_REPLY");
 
     if (!$from_email) {
         error_log("Email configuration missing: EMAIL_FROM");
@@ -329,11 +345,14 @@ function send_email(string $to, string $subject, string $body): bool
     }
 
     $headers = [
-        "From: $from_email",
+        "From: Camino del Diamante <{$from_email}>",
         "MIME-Version: 1.0",
         "Content-type: text/html; charset=UTF-8",
         "Content-Transfer-Encoding: text/plain; charset=UTF-8",
     ];
+    if (!empty($reply_email)) {
+        array_push($headers, "Reply-To: $reply_email");
+    }
 
     return mail($to, $subject, $body, implode("\r\n", $headers));
 }
