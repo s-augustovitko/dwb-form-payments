@@ -6,37 +6,37 @@ class EnumConstants
 {
     public static function getPaymentStatuses(): array
     {
-        return ['PENDING', 'PAID', 'FAILED', 'EXEMPT', 'REFUNDED'];
+        return ["PENDING", "PAID", "FAILED", "EXEMPT", "REFUNDED"];
     }
 
     public static function getCurrencies(): array
     {
-        return ['PEN', 'USD'];
+        return ["PEN", "USD"];
     }
 
     public static function getPaymentTypes(): array
     {
-        return ['CULQI', 'ON_SITE'];
+        return ["CULQI", "ON_SITE"];
     }
 
     public static function getAddonTypes(): array
     {
-        return ['SESSION', 'MEAL', 'ALL_SESSIONS_DISCOUNT', 'EARLY_DISCOUNT'];
+        return ["SESSION", "MEAL", "ALL_SESSIONS_DISCOUNT", "EARLY_DISCOUNT"];
     }
 
     public static function getOrderStatuses(): array
     {
-        return ['DRAFT', 'CONFIRMED', 'CANCELLED', 'ON_SITE'];
+        return ["DRAFT", "CONFIRMED", "CANCELLED", "ON_SITE"];
     }
 
     public static function getEventTypes(): array
     {
-        return ['ALL_SESSIONS', 'PER_SESSION', 'PER_DAY'];
+        return ["ALL_SESSIONS", "PER_SESSION", "PER_DAY"];
     }
 
     public static function getMealTypes(): array
     {
-        return ['NONE', 'REGULAR', 'VEGETARIAN'];
+        return ["NONE", "REGULAR", "VEGETARIAN"];
     }
 }
 
@@ -45,11 +45,11 @@ class EnumConstants
 ------------------------------*/
 function set_secure_headers(): void
 {
-    header('Content-Type: application/json; charset=utf-8');
-    header('X-Content-Type-Options: nosniff');
-    header('X-Frame-Options: DENY');
-    header('Referrer-Policy: no-referrer');
-    header('Permissions-Policy: geolocation=()');
+    header("Content-Type: application/json; charset=utf-8");
+    header("X-Content-Type-Options: nosniff");
+    header("X-Frame-Options: DENY");
+    header("Referrer-Policy: no-referrer");
+    header("Permissions-Policy: geolocation=()");
 }
 
 /* -----------------------------
@@ -57,22 +57,26 @@ function set_secure_headers(): void
 ------------------------------*/
 function handle_cors(): void
 {
-    $allowOrigins = array_values(array_filter(array_map(
-        'trim',
-        explode(',', (string) getenv('ALLOW_ORIGINS'))
-    )));
+    $allowOrigins = array_values(
+        array_filter(
+            array_map("trim", explode(",", (string) getenv("ALLOW_ORIGINS"))),
+        ),
+    );
 
-    if (!empty($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowOrigins, true)) {
-        header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+    if (
+        !empty($_SERVER["HTTP_ORIGIN"]) &&
+        in_array($_SERVER["HTTP_ORIGIN"], $allowOrigins, true)
+    ) {
+        header("Access-Control-Allow-Origin: " . $_SERVER["HTTP_ORIGIN"]);
     }
 
-    header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
-    header('Access-Control-Max-Age: 600');
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type");
+    header("Access-Control-Max-Age: 600");
 
-    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
         http_response_code(204);
-        exit;
+        exit();
     }
 }
 
@@ -81,15 +85,24 @@ function handle_cors(): void
 ------------------------------*/
 function load_env(string $path): void
 {
-    if (!file_exists($path)) return;
+    if (!file_exists($path)) {
+        return;
+    }
 
-    foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+    foreach (
+        file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)
+        as $line
+    ) {
         $line = trim($line);
-        if ($line === '' || str_starts_with($line, '#')) continue;
+        if ($line === "" || str_starts_with($line, "#")) {
+            continue;
+        }
 
-        $parts = explode('=', $line, 2);
-        if (count($parts) !== 2) continue;
-        [$key, $value] = array_map('trim', $parts);
+        $parts = explode("=", $line, 2);
+        if (count($parts) !== 2) {
+            continue;
+        }
+        [$key, $value] = array_map("trim", $parts);
         $value = trim($value, "\"'");
 
         if (!getenv($key)) {
@@ -99,7 +112,6 @@ function load_env(string $path): void
     }
 }
 
-
 /* -----------------------------
    Env validation
 ------------------------------*/
@@ -108,7 +120,7 @@ function require_env(array $keys): void
     foreach ($keys as $key) {
         if (!getenv($key)) {
             error_log("Missing env var: $key");
-            respond_error('Server misconfiguration', 500);
+            respond_error("Server misconfiguration", 500);
         }
     }
 }
@@ -123,17 +135,17 @@ function db(): PDO
     if ($pdo === null) {
         $pdo = new PDO(
             sprintf(
-                'mysql:host=%s;dbname=%s;charset=utf8mb4',
-                getenv('DB_HOST'),
-                getenv('DB_NAME')
+                "mysql:host=%s;dbname=%s;charset=utf8mb4",
+                getenv("DB_HOST"),
+                getenv("DB_NAME"),
             ),
-            getenv('DB_USER'),
-            getenv('DB_PASS'),
+            getenv("DB_USER"),
+            getenv("DB_PASS"),
             [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-            ]
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ],
         );
     }
 
@@ -145,9 +157,9 @@ function db(): PDO
 ------------------------------*/
 function json_input(): array
 {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents("php://input"), true);
     if (!is_array($data)) {
-        respond_error('llamada invalida', 400);
+        respond_error("llamada invalida", 400);
     }
     return $data;
 }
@@ -155,15 +167,21 @@ function json_input(): array
 function respond(array $data, int $status = 200): void
 {
     http_response_code($status);
-    echo json_encode(['success' => true, 'data' => $data], JSON_UNESCAPED_UNICODE);
-    exit;
+    echo json_encode(
+        ["success" => true, "data" => $data],
+        JSON_UNESCAPED_UNICODE,
+    );
+    exit();
 }
 
 function respond_error(string $message, int $status = 400): void
 {
     http_response_code($status);
-    echo json_encode(['success' => false, 'message' => $message], JSON_UNESCAPED_UNICODE);
-    exit;
+    echo json_encode(
+        ["success" => false, "message" => $message],
+        JSON_UNESCAPED_UNICODE,
+    );
+    exit();
 }
 
 /* -----------------------------
@@ -174,7 +192,7 @@ function rate_limit(int $maxRequests, int $seconds): void
     try {
         $pdo = db();
 
-        $ip  = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $ip = $_SERVER["REMOTE_ADDR"] ?? "unknown";
         $now = time();
 
         $stmt = $pdo->prepare(
@@ -182,42 +200,40 @@ function rate_limit(int $maxRequests, int $seconds): void
      VALUES (:ip, :now1, 1)
      ON DUPLICATE KEY UPDATE
         count = IF(:now2 - window_start > :window1, 1, count + 1),
-        window_start = IF(:now3 - window_start > :window2, :now4, window_start)'
+        window_start = IF(:now3 - window_start > :window2, :now4, window_start)',
         );
 
         $stmt->execute([
-            ':ip'      => $ip,
-            ':now1'    => $now,
-            ':now2'    => $now,
-            ':now3'    => $now,
-            ':now4'    => $now,
-            ':window1' => $seconds,
-            ':window2' => $seconds,
+            ":ip" => $ip,
+            ":now1" => $now,
+            ":now2" => $now,
+            ":now3" => $now,
+            ":now4" => $now,
+            ":window1" => $seconds,
+            ":window2" => $seconds,
         ]);
 
-        $stmt = $pdo->prepare(
-            'SELECT count FROM rate_limits WHERE ip = :ip'
-        );
-        $stmt->execute([':ip' => $ip]);
+        $stmt = $pdo->prepare("SELECT count FROM rate_limits WHERE ip = :ip");
+        $stmt->execute([":ip" => $ip]);
 
-        $count = (int)$stmt->fetchColumn();
+        $count = (int) $stmt->fetchColumn();
 
         if ($count > $maxRequests) {
-            respond_error('Too many requests', 429);
+            respond_error("Too many requests", 429);
         }
 
         if (random_int(1, 200) === 1) {
             $stmt = $pdo->prepare(
                 'DELETE FROM rate_limits
-                 WHERE window_start < :cutoff'
+                 WHERE window_start < :cutoff',
             );
             $stmt->execute([
-                ':cutoff' => $now - ($seconds * 2)
+                ":cutoff" => $now - $seconds * 2,
             ]);
         }
     } catch (Throwable $e) {
-        error_log('Rate limiter failure: ' . $e->getMessage());
-        respond_error('Service temporarily unavailable', 503);
+        error_log("Rate limiter failure: " . $e->getMessage());
+        respond_error("Service temporarily unavailable", 503);
     }
 }
 
@@ -241,12 +257,12 @@ function guidv4($data = null)
     assert(strlen($data) == 16);
 
     // Set version to 0100
-    $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+    $data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
     // Set bits 6-7 to 10
-    $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+    $data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
 
     // Output the 36 character UUID.
-    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    return vsprintf("%s%s-%s-%s-%s-%s%s%s", str_split(bin2hex($data), 4));
 }
 
 /* -----------------------------
@@ -254,7 +270,7 @@ function guidv4($data = null)
 ------------------------------*/
 function createCulqiCharge(array $data)
 {
-    $apiKey = getenv('CULQI_PRIV_KEY');
+    $apiKey = getenv("CULQI_PRIV_KEY");
     $ch = curl_init("https://api.culqi.com/v2/charges");
 
     curl_setopt_array($ch, [
@@ -262,7 +278,7 @@ function createCulqiCharge(array $data)
         CURLOPT_POST => true,
         CURLOPT_HTTPHEADER => [
             "Authorization: Bearer {$apiKey}",
-            "Content-Type: application/json"
+            "Content-Type: application/json",
         ],
         CURLOPT_POSTFIELDS => json_encode($data),
         CURLOPT_TIMEOUT => 15,
@@ -285,16 +301,39 @@ function createCulqiCharge(array $data)
 
     // Handle Culqi errors
     if ($statusCode < 200 || $statusCode >= 300) {
-        $message = $decoded['user_message']
-            ?? $decoded['merchant_message']
-            ?? "Error a la hora de realizar cargo";
+        $message =
+            $decoded["user_message"] ??
+            ($decoded["merchant_message"] ??
+                "Error a la hora de realizar cargo");
 
         throw new Exception($message, $statusCode);
     }
 
-    if (empty($decoded['id'])) {
+    if (empty($decoded["id"])) {
         throw new Exception("Missing charge ID in response");
     }
 
     return $decoded;
+}
+
+/* -----------------------------
+   Email Utility
+------------------------------*/
+function send_email(string $to, string $subject, string $body): bool
+{
+    $from_email = getenv("EMAIL_FROM");
+
+    if (!$from_email) {
+        error_log("Email configuration missing: EMAIL_FROM");
+        return false;
+    }
+
+    $headers = [
+        "From: $from_email",
+        "MIME-Version: 1.0",
+        "Content-type: text/html; charset=UTF-8",
+        "Content-Transfer-Encoding: text/plain; charset=UTF-8",
+    ];
+
+    return mail($to, $subject, $body, implode("\r\n", $headers));
 }
