@@ -163,16 +163,6 @@ const specialSchema = v.pipe(
 
   v.forward(
     v.check((input) => {
-      if (input.meal_type !== MealType.NONE) {
-        return input.selected_meals.length > 0
-      }
-      return true
-    }, (_) => "Debe seleccionar al menos una comida"),
-    ['selected_meals']
-  ),
-
-  v.forward(
-    v.check((input) => {
       if (!input.arrival_date || !input.departure_date) {
         return true
       }
@@ -189,7 +179,7 @@ const specialSchema = v.pipe(
       }
       return true
     }, (_) => "Debe seleccionar al menos un dia"),
-    ['selected_days']
+    ['event_type']
   ),
 
   v.forward(
@@ -199,7 +189,7 @@ const specialSchema = v.pipe(
       }
       return true
     }, (_) => "Debe seleccionar al menos una sesion"),
-    ['selected_sessions']
+    ['event_type']
   )
 );
 
@@ -221,22 +211,12 @@ const courseSchema = v.pipe(
 
   v.forward(
     v.check((input) => {
-      if (input.meal_type !== MealType.NONE) {
-        return input.selected_meals.length > 0
-      }
-      return true
-    }, (_) => "Debe seleccionar al menos una comida"),
-    ['selected_meals']
-  ),
-
-  v.forward(
-    v.check((input) => {
       if (input.event_type === EventType.PER_DAY) {
         return input.selected_days.length > 0
       }
       return true
     }, (_) => "Debe seleccionar al menos un dia"),
-    ['selected_days']
+    ['event_type']
   ),
 
   v.forward(
@@ -246,7 +226,7 @@ const courseSchema = v.pipe(
       }
       return true
     }, (_) => "Debe seleccionar al menos una sesion"),
-    ['selected_sessions']
+    ['event_type']
   )
 );
 
