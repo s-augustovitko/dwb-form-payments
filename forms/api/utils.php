@@ -346,6 +346,7 @@ function send_email(string $to, string $subject, string $body): bool
 
     $headers = [
         "From: Camino del Diamante <{$from_email}>",
+        "CC: $reply_email",
         "MIME-Version: 1.0",
         "Content-type: text/html; charset=UTF-8",
         "Content-Transfer-Encoding: text/plain; charset=UTF-8",

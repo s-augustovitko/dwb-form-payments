@@ -39,12 +39,13 @@ function render_payment_email(
     if ($bank_name && $bank_account && $cci) {
         $bank_section = "
         <p><strong>Información para transferencias bancarias:</strong><br>
-        En caso de que desees realizar pagos futuros o transferencias, utiliza los siguientes datos:<br>
+        En caso de que desees realizar pagos futuros o transferencias, utiliza los siguientes datos:<br><br>
         Banco: {$bank_name}<br>
         Cuenta: {$bank_account}<br>
         CCI: {$cci}</p>";
 
         if ($reply_email) {
+            $bank_section .= "<p>Recuerda que si te inscribiste durante la preventa, deberás realizar el pago antes de la fecha límite para mantener el precio con descuento.</p>";
             $bank_section .= "<p>Una vez realizado el pago, por favor envía el comprobante a: <a href='mailto:{$reply_email}'>{$reply_email}</a></p>";
         }
     }

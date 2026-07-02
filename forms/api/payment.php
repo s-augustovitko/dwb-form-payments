@@ -115,8 +115,7 @@ try {
                 "first_name" => $submission["first_name"],
                 "last_name" => $submission["last_name"],
                 "email" => $submission["email"],
-                "phone_number" =>
-                    ($submission["country_code"] ?? "+51") .
+                "phone_number" => ($submission["country_code"] ?? "+51") .
                     $submission["phone"],
             ],
         ];
@@ -138,7 +137,7 @@ try {
         $user_message =
             $user_message ?:
             $charge["user_message"] ??
-                "Intente de nuevo o use otro metodo de pago";
+            "Intente de nuevo o use otro metodo de pago";
 
         $outcome_type = strtolower($charge["outcome"]["type"] ?? "");
         $success_codes = ["successful_charge", "venta_exitosa"];
